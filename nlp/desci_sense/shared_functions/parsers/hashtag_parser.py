@@ -10,7 +10,10 @@ from ..configs import (
 )
 from ..schema.post import RefPost
 from ..postprocessing import ParserChainOutput
-from ..postprocessing.output_processors import extract_unique_keywords
+from ..postprocessing.output_processors import (
+    extract_unique_keywords,
+    normalize_keywords,
+)
 from ..web_extractors.metadata_extractors import (
     RefMetadata,
 )
@@ -37,6 +40,7 @@ def extract_unique_hashtags_capped(dict):
 
 def _extract_unique_hashtags_capped(input_text: str, max_hashtags: int):
     all_hashtags = extract_unique_keywords(input_text)
+    all_hashtags = normalize_keywords(all_hashtags)
     return all_hashtags[:max_hashtags]
 
 

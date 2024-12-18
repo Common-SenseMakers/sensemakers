@@ -390,8 +390,20 @@ export class BlueskyService
         content: cleanBlueskyContent(post.record),
       };
 
-      if (post.embed && post.embed.$type === 'app.bsky.embed.record#view') {
-        const quotedPost = post.embed.record as QuotedBlueskyPost;
+      try {
+      if (
+        post.embed &&
+        (post.embed.$type === 'app.bsky.embed.record#view' ||
+          post.embed.$type === 'app.bsky.embed.recordWithMedia#view')
+      ) {
+        const quotedPost = (() => {
+          if (post.embed.$type === 'app.bsky.embed.record#view') {
+            return post.embed.record as QuotedBlueskyPost;
+          }
+          return post.embed.record.record as QuotedBlueskyPost;
+        })();
+
+        post.embed.record as QuotedBlueskyPost;
         if (quotedPost.$type === 'app.bsky.embed.record#viewRecord') {
           genericPost.quotedThread = {
             author: {
@@ -408,6 +420,13 @@ export class BlueskyService
             ],
           };
         }
+        }
+      } catch (e) {
+        logger.warn(
+          `Error parsing quoted post in post ${post.id}. Excluding from generic post`,
+          { postId: post.id, error: e },
+          DEBUG_PREFIX
+        );
       }
 
       return genericPost;

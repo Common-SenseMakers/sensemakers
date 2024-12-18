@@ -14,7 +14,7 @@ import {
 } from '../@shared/utils/profiles.utils';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
-import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks';
+import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks.config';
 import { chunkNumber, enqueueTask } from '../tasksUtils/tasks.support';
 
 const DEBUG = false;

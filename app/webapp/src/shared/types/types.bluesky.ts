@@ -76,10 +76,15 @@ export interface QuotedBlueskyPost {
 
 export type BlueskyPost = AppBskyFeedDefs.PostView & {
   record: AppBskyFeedPost.Record;
-  embed?: {
-    $type: string;
-    record: QuotedBlueskyPost;
-  };
+  embed?:
+    | {
+        $type: 'app.bsky.embed.record#view';
+        record: QuotedBlueskyPost;
+      }
+    | {
+        $type: 'app.bsky.embed.recordWithMedia#view';
+        record: { record: QuotedBlueskyPost };
+      };
 };
 
 export interface AccessJwtPayload {

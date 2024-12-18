@@ -40,7 +40,7 @@ export const KeywordOverlay = (props: { keyword: string }) => {
             flexShrink: 0,
             border: '1.6px solid var(--Neutral-300, #D1D5DB)',
           }}>
-          <AppHeading level="2">{`#${keyword}`}</AppHeading>
+          <AppHeading level="2">{`${keyword}`}</AppHeading>
         </Box>
         <PostsFetcherComponent
           showHeader={false}

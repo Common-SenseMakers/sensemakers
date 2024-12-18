@@ -48,6 +48,7 @@ export const AppLabel = (
             fontStyle: 'normal',
             fontWeight: '500',
             lineHeight: '16px',
+            userSelect: 'none',
           }}
           size="small">
           {props.children}

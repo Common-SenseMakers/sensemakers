@@ -1,6 +1,8 @@
 import { Box } from 'grommet';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { PostEditKeys } from '../../../i18n/i18n.edit.post';
 import { ParserOntology } from '../../../shared/types/types.parser';
 import { OEmbed, RefLabel } from '../../../shared/types/types.references';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
@@ -22,6 +24,7 @@ export const RefWithLabels = (props: {
   editable?: boolean;
   ontology?: ParserOntology;
 }) => {
+  const { t } = useTranslation();
   const labelsOntology = props.ontology?.semantic_predicates;
 
   /** display names for selected labels */
@@ -126,7 +129,10 @@ export const RefWithLabels = (props: {
             labels={labelsDisplayNames}
             options={optionDisplayNames}
             removeLabel={(label) => removeLabel(label)}
-            addLabel={(label) => addLabel(label)}></AppLabelsEditor>
+            addLabel={(label) => addLabel(label)}
+            placeholder={
+              props.editable ? t(PostEditKeys.labelsPlaceholder) : ''
+            }></AppLabelsEditor>
         )}
       </Box>
     </>

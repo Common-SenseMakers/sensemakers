@@ -2,14 +2,17 @@ import { AppBskyFeedGetAuthorFeed } from '@atproto/api';
 import { expect } from 'chai';
 import fs from 'fs';
 
-import { BlueskyPost } from '../../src/@shared/types/types.bluesky';
+import {
+  BlueskyPost,
+  QuotedBlueskyPost,
+} from '../../src/@shared/types/types.bluesky';
 import { parseBlueskyURI } from '../../src/@shared/utils/bluesky.utils';
 import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
 } from '../../src/platforms/bluesky/bluesky.utils';
 
-describe.skip('bluesky utility functions', () => {
+describe('bluesky utility functions', () => {
   it('converts bluesky posts to threads', async () => {
     const did = process.env.BLUESKY_USER_ID;
     if (!did) {
@@ -118,7 +121,9 @@ describe.skip('bluesky utility functions', () => {
     const cleanedContent = cleanBlueskyContent(post.record);
     expect(cleanedContent).to.equal('Quoting an interesting post');
 
-    const quotedContent = cleanBlueskyContent(post.embed!.record.value);
+    const quotedContent = cleanBlueskyContent(
+      (post.embed!.record as QuotedBlueskyPost).value
+    );
     expect(quotedContent).to.equal(
       'Original post with a link: https://example.com/full-link'
     );

@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import { MastodonAccessTokenSignupData } from '../../src/@shared/types/types.mastodon';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
+import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.utils';
 import { logger } from '../../src/instances/logger';
 import '../../src/platforms/twitter/mock/twitter.service.mock';
 import { resetDB } from '../utils/db';
@@ -47,7 +48,9 @@ describe('010-signups', () => {
               PLATFORM.Mastodon,
               {
                 accessToken: mastodonCredentials.accessToken,
-                mastodonServer: mastodonCredentials.mastodonServer,
+                mastodonServer: parseMastodonGlobalUsername(
+                  mastodonCredentials.username
+                ).server,
                 type: 'read',
               },
               manager,

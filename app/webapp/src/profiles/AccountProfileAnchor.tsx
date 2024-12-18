@@ -1,6 +1,6 @@
-import { Anchor, Box } from 'grommet';
+import { Anchor } from 'grommet';
+import React from 'react';
 
-import { OpenLinkIcon } from '../app/icons/OpenLinkIcon';
 import { getAccountDetails } from '../post/platform-specific.details';
 import { AccountProfileRead } from '../shared/types/types.profiles';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -13,7 +13,9 @@ export const AccountProfileAnchor = (props: {
 
   if (!account) return <></>;
 
-  const { url, label, username } = getAccountDetails(account);
+  const { url, icon } = getAccountDetails(account);
+
+  console.log({ icon });
 
   return (
     <Anchor
@@ -27,21 +29,7 @@ export const AccountProfileAnchor = (props: {
       target="_blank"
       href={url}
       size="medium">
-      <span style={{ color: constants.colors.textLight2 }}>{label}</span>
-      <span style={{ margin: '0px 4px' }}> · </span>
-      <span style={{ color: constants.colors.textLight2 }}>{username}</span>
-
-      <Box
-        direction="row"
-        align="center"
-        wrap
-        style={{
-          gap: '8px',
-          display: 'inline-flex',
-          flexWrap: 'wrap',
-        }}>
-        <OpenLinkIcon size={12} />
-      </Box>
+      {icon && React.cloneElement(icon, { color: constants.colors.textLight2 })}
     </Anchor>
   );
 };

@@ -1,24 +1,21 @@
-import { Box, BoxExtendedProps, Text } from 'grommet';
+import { BoxExtendedProps } from 'grommet';
 import { useMemo } from 'react';
 
-import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { ALL_IDENTITY_PLATFORMS } from '../shared/types/types.platforms';
 import { AccountProfileRead } from '../shared/types/types.profiles';
 import { AppUserPublicRead } from '../shared/types/types.user';
-import { useThemeContext } from '../ui-components/ThemedApp';
-import { AccountProfileAnchor } from './AccountProfileAnchor';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
+import { AccountProfileHeader } from './AccountProfileHeader';
 
 export const UserProfileHeader = (props: {
   user?: AppUserPublicRead;
   boxProps?: BoxExtendedProps;
 }) => {
-  const { constants } = useThemeContext();
+  const { user } = props;
 
-  const { user, boxProps } = props;
-
-  const profiles = useMemo(() => {
+  const accounts = useMemo(() => {
     if (!user) {
-      return [];
+      return undefined;
     }
 
     let _profiles: AccountProfileRead[] = [];
@@ -31,46 +28,9 @@ export const UserProfileHeader = (props: {
     return _profiles;
   }, [user]);
 
-  const { avatar, displayName } = useMemo(() => {
-    if (profiles && profiles.length > 0) {
-      const profile = profiles.find((p) => p.profile !== undefined);
+  if (!accounts) {
+    return <LoadingDiv width="100%" height={'32px'}></LoadingDiv>;
+  }
 
-      if (profile && profile.profile) {
-        return {
-          avatar: profile.profile.avatar,
-          displayName: profile.profile.displayName,
-        };
-      }
-    }
-
-    return { avatar: '', displayName: '' };
-  }, [profiles]);
-
-  return (
-    <Box direction="row" align="center" gap="8px" {...boxProps}>
-      <PlatformAvatar size={48} imageUrl={avatar}></PlatformAvatar>
-      <Box gap="4px">
-        <Text
-          color={constants.colors.primary}
-          style={{
-            fontSize: '16px',
-            fontStyle: 'normal',
-            fontWeight: '600',
-            lineHeight: '18px',
-            textDecoration: 'none',
-          }}>
-          {displayName}
-        </Text>
-        <Box gap="4px">
-          {profiles.map((profile, ix) => {
-            return (
-              <AccountProfileAnchor
-                key={ix}
-                account={profile}></AccountProfileAnchor>
-            );
-          })}
-        </Box>
-      </Box>
-    </Box>
-  );
+  return <AccountProfileHeader accounts={accounts}></AccountProfileHeader>;
 };

@@ -1,3 +1,12 @@
+/**
+ * This is a script for adding non-user accounts to whichever firebase project you want to add them to
+ * You will need the following environment variables:
+ * - FUNCTIONS_URL: the URL of the function that will add the accounts. I.e. https://us-central1-{firebase-project}.cloudfunctions.net
+ * - ADMIN_API_KEY: the admin API key for the admin functions
+ * - ACCOUNTS_FILE_PATH: the path to the JSON file containing the profile urls of the accounts you want to add.
+ * - It should be structured as an array of strings.
+ * - e.g. ["https://bsky.app/profile/wesleyfinck.org", "https://x.com/rtk254", ...]
+ */
 import axios from 'axios';
 import dotenv from 'dotenv';
 import fs from 'fs';
