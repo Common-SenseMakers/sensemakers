@@ -163,7 +163,6 @@ export const PostCard = (props: {
             <PostCardHeader
               onBlankClick={() => onPostClick()}
               post={post}></PostCardHeader>
-            ;
           </Box>
           {!hideSemantics && (
             <Box id={KEYWORDS_SEMANTICS_ID}>
