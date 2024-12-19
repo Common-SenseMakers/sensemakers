@@ -72,9 +72,10 @@ export const processSemantics = (
   const sortedRefs: RefsMap = new Map();
   for (const [ref, value] of refsArray) {
     const normalizedRef = normalizeUrl(ref);
-
+    const existingValue = sortedRefs.get(normalizedRef);
+    const labelsUris = value ? value.labelsUris : [];
     sortedRefs.set(normalizedRef, {
-      labelsUris: value ? value.labelsUris : [],
+      labelsUris: [...(existingValue?.labelsUris ?? []), ...labelsUris],
     });
   }
 
