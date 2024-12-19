@@ -1,8 +1,8 @@
 import { Store } from 'n3';
 
-import { AppPost, AppPostRead } from '../types/types.posts';
+import { AppPost } from '../types/types.posts';
 import { handleQuotePostReference, normalizeUrl } from './links.utils';
-import { forEachStore, mapStoreElements } from './n3.utils';
+import { forEachStore } from './n3.utils';
 
 export const THIS_POST_NAME_URI = 'https://sense-nets.xyz/mySemanticPost';
 export const THIS_POST_NAME_URI_PLACEHOLDER =
