@@ -10,3 +10,4 @@ export const HAS_ZOTERO_REFERENCE_TYPE_URI =
   'https://sense-nets.xyz/hasZoteroItemType';
 export const HAS_RDF_SYNTAX_TYPE_URI =
   'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
+export const LINKS_TO_URI = 'http://purl.org/spar/cito/linksTo';
