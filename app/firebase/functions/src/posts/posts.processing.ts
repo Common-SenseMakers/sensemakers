@@ -19,7 +19,7 @@ import {
 } from '../@shared/types/types.posts';
 import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
-import { parseRDF } from '../@shared/utils/n3.utils';
+import { parseRDF, writeRDF } from '../@shared/utils/n3.utils';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
   LINKS_TO_URI,
@@ -177,6 +177,9 @@ export class PostsProcessing {
       }
     });
 
+    /** get updated semantics */
+    const newSemantics = await writeRDF(store);
+
     /**
      * for each ref, read and update its metadata from the links service,
      * also prepare the refsMeta object with the metadata of each url
@@ -213,7 +216,11 @@ export class PostsProcessing {
       })
     );
 
-    await this.posts.update(postId, { structuredSemantics }, manager);
+    await this.posts.update(
+      postId,
+      { structuredSemantics, semantics: newSemantics },
+      manager
+    );
   }
 
   async syncRefPost(
