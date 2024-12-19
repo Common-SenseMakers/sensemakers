@@ -1,3 +1,5 @@
+import { DataFactory } from 'n3';
+
 import { ParsePostResult, RefMeta } from '../@shared/types/types.parser';
 import {
   PlatformPost,
@@ -17,19 +19,14 @@ import {
 } from '../@shared/types/types.posts';
 import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
-import {
-  handleQuotePostReference,
-  normalizeUrl,
-} from '../@shared/utils/links.utils';
-import { mapStoreElements, parseRDF } from '../@shared/utils/n3.utils';
+import { parseRDF } from '../@shared/utils/n3.utils';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
-  HAS_KEYWORD_URI,
-  HAS_RDF_SYNTAX_TYPE_URI,
-  HAS_TOPIC_URI,
-  HAS_ZOTERO_REFERENCE_TYPE_URI,
+  LINKS_TO_URI,
   THIS_POST_NAME_URI,
-  THIS_POST_NAME_URI_PLACEHOLDER,
+  getKeywords,
+  getReferenceLabels,
+  getTopic,
 } from '../@shared/utils/semantics.helper';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -160,42 +157,23 @@ export class PostsProcessing {
     const post = await this.posts.get(postId, manager, true);
     const store = await parseRDF(semantics);
 
-    const labels: Set<string> = new Set();
-    const keywords: Set<string> = new Set();
-    const refsLabels: Record<string, string[]> = {};
-    let topic: string | undefined = undefined;
+    const { labels, refsLabels } = getReferenceLabels(store, post);
+    const keywords = getKeywords(store);
+    const topic = getTopic(store);
 
-    mapStoreElements(store, (q) => {
-      if (q.predicate.value === HAS_KEYWORD_URI) {
-        keywords.add(q.object.value);
-      } else {
-        if (q.predicate.value === HAS_TOPIC_URI) {
-          topic = q.object.value;
-        } else {
-          // non kewyords or is-a, are marked as ref labels
-          const subject = q.subject.value;
-          const reference = q.object.value;
-          const label = q.predicate.value;
-          if (
-            (subject === THIS_POST_NAME_URI ||
-              subject === THIS_POST_NAME_URI_PLACEHOLDER) &&
-            label !== HAS_ZOTERO_REFERENCE_TYPE_URI &&
-            label !== HAS_RDF_SYNTAX_TYPE_URI
-          ) {
-            /** normalize URL when they are feed  */
-            const _normalizedReference = normalizeUrl(reference);
-            /** temporary hotfit until the parser handles the quote post edge cases */
-            const normalizedReference = handleQuotePostReference(
-              _normalizedReference,
-              post
-            );
-            labels.add(label);
-            refsLabels[normalizedReference] = [
-              ...(refsLabels[normalizedReference] || []),
-              label,
-            ];
-          }
-        }
+    /**
+     * for each ref, enforce the linksTo triple
+     */
+    Array.from(Object.keys(refsLabels)).map(async (url) => {
+      const _labels = refsLabels[url];
+      if (!_labels.includes(LINKS_TO_URI)) {
+        store.addQuad(
+          DataFactory.quad(
+            DataFactory.namedNode(THIS_POST_NAME_URI),
+            DataFactory.namedNode(LINKS_TO_URI),
+            DataFactory.namedNode(url)
+          )
+        );
       }
     });
 
