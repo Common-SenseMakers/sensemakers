@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { PostEditKeys } from '../../../i18n/i18n.edit.post';
 import { ParserOntology } from '../../../shared/types/types.parser';
 import { OEmbed, RefLabel } from '../../../shared/types/types.references';
+import { LINKS_TO_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { RefCard } from '../common/RefCard';
@@ -30,16 +31,18 @@ export const RefWithLabels = (props: {
   /** display names for selected labels */
   let labelsDisplayNames = useMemo(
     () =>
-      props.authorLabels.map((labelUri) => {
-        const label_ontology = labelsOntology
-          ? labelsOntology.find((item) => item.uri === labelUri)
-          : undefined;
+      props.authorLabels
+        .filter((labelUri) => labelUri !== LINKS_TO_URI)
+        .map((labelUri) => {
+          const label_ontology = labelsOntology
+            ? labelsOntology.find((item) => item.uri === labelUri)
+            : undefined;
 
-        if (!label_ontology)
-          throw new Error(`Unexpected ontology not found for ${labelUri}`);
+          if (!label_ontology)
+            throw new Error(`Unexpected ontology not found for ${labelUri}`);
 
-        return label_ontology.display_name;
-      }),
+          return label_ontology.display_name;
+        }),
     [labelsOntology, props.authorLabels]
   );
 
@@ -110,7 +113,9 @@ export const RefWithLabels = (props: {
       props.aggregatedLabels.length > 0 ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
-            refLabels={props.aggregatedLabels}
+            refLabels={props.aggregatedLabels.filter(
+              (refLabel) => refLabel.label !== LINKS_TO_URI
+            )}
             ontology={props.ontology}></AggregatedRefLabels>
         </Box>
       ) : (
