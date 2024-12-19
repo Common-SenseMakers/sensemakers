@@ -149,7 +149,7 @@ export const UserSettingsPage = () => {
             mastodonProfile ? (
               <PlatformAvatar imageUrl={mastodonProfile?.avatar} />
             ) : (
-              <MastodonIcon inverse size={40} color="white"></MastodonIcon>
+              <MastodonIcon inverse size={40}></MastodonIcon>
             )
           }
           platformName={'Mastodon'}
