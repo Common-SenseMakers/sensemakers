@@ -20,7 +20,7 @@ export const PostHeader = (props: {
   const overlay = useOverlay();
 
   const post = updated.postMerged;
-  const isAutoIndexed = post?.authorUserId === undefined;
+  const isAutoIndexed = post?.authorUserId === null;
 
   const { boxProps } = props;
 

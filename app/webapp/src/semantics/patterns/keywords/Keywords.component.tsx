@@ -1,7 +1,9 @@
 import { Box } from 'grommet';
 import { DataFactory } from 'n3';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { PostEditKeys } from '../../../i18n/i18n.edit.post';
 import { useOverlay } from '../../../overlays/OverlayContext';
 import {
   filterStore,
@@ -15,6 +17,7 @@ import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps, PostClickTarget } from '../patterns';
 
 export const KeywordsComponent = (props: PatternProps) => {
+  const { t } = useTranslation();
   /** actual semantics */
   const { store } = useSemanticsStore(props.semantics, props.originalParsed);
 
@@ -102,6 +105,9 @@ export const KeywordsComponent = (props: PatternProps) => {
         direction="row">
         <AppLabelsEditor
           maxLabels={props.size === 'compact' ? 2 : undefined}
+          placeholder={
+            props.editable ? t(PostEditKeys.keywordsPlaceholder) : ''
+          }
           editable={props.editable}
           colors={{ font: '#FFFFFF', background: '#498283', border: '#6C9C9D' }}
           labels={keywords}
@@ -111,7 +117,13 @@ export const KeywordsComponent = (props: PatternProps) => {
           }}
           removeLabel={(newLabel) => {
             removeKeyword(newLabel).catch(console.error);
-          }}></AppLabelsEditor>
+          }}
+          onMoreClicked={() =>
+            props.onNonSemanticsClick && props.onNonSemanticsClick()
+          }
+          onNonLabelClick={() =>
+            props.onNonSemanticsClick && props.onNonSemanticsClick()
+          }></AppLabelsEditor>
       </Box>
     </Box>
   );

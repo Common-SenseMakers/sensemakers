@@ -6,10 +6,9 @@ import {
   OrcidSignupContext,
   OrcidSignupData,
 } from '../../@shared/types/types.orcid';
-import { PLATFORM } from '../../@shared/types/types.platforms';
 import {
   AccountProfileBase,
-  AccountProfileCreate,
+  PlatformAccountProfile,
 } from '../../@shared/types/types.profiles';
 import {
   ORCID_API_URL,
@@ -115,8 +114,7 @@ export class OrcidService
       );
     }
 
-    const profile: AccountProfileCreate<OrcidProfile> = {
-      platformId: PLATFORM.Orcid,
+    const profile: PlatformAccountProfile<OrcidProfile> = {
       user_id: orcid.user_id,
       profile: orcidProfile,
     };
@@ -127,8 +125,8 @@ export class OrcidService
   async getProfile(
     user_id: string,
     credentials?: any
-  ): Promise<AccountProfileBase | undefined> {
-    return { user_id };
+  ): Promise<PlatformAccountProfile | undefined> {
+    return { user_id, profile: { id: user_id, username: user_id } };
   }
 
   async getProfileByUsername(

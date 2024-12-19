@@ -39,6 +39,7 @@ export interface PatternProps {
   semanticsUpdated?: (semantics: AppPostSemantics) => void;
   post?: AppPostFull;
   structuredSemantics?: StructuredSemantics;
+  onNonSemanticsClick?: () => void; // handle clicks that should be interpreted as outside of the patter component
 }
 
 export const patternsLib: Record<

@@ -5,11 +5,7 @@ import {
   UsersV2Params,
 } from 'twitter-api-v2';
 
-import { PLATFORM } from '../../@shared/types/types.platforms';
-import {
-  AccountProfileCreate,
-  PlatformProfile,
-} from '../../@shared/types/types.profiles';
+import { PlatformAccountProfile } from '../../@shared/types/types.profiles';
 import {
   TwitterAccountDetails,
   TwitterCredentials,
@@ -240,8 +236,7 @@ export class TwitterServiceClient {
         read: credentials,
       },
     };
-    const twitterProfile: AccountProfileCreate<PlatformProfile> = {
-      platformId: PLATFORM.Twitter,
+    const twitterProfile: PlatformAccountProfile = {
       user_id: user.id,
       profile: {
         id: user.id,

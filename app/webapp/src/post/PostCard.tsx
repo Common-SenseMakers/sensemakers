@@ -21,10 +21,14 @@ const POST_AUTHOR_ID = 'post-author';
 
 export const CARD_BORDER = '1px solid var(--Neutral-300, #D1D5DB)';
 
-const PostCardHeader = (props: { post: AppPostFull }) => {
+const PostCardHeader = (props: {
+  post: AppPostFull;
+  onBlankClick?: () => void;
+}) => {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
-  const isAutoIndexed = props.post.authorUserId === undefined;
+  const onBlankClick = props.onBlankClick;
+  const isAutoIndexed = props.post.authorUserId === null;
 
   const overlay = useOverlay();
 
@@ -49,12 +53,13 @@ const PostCardHeader = (props: { post: AppPostFull }) => {
   };
 
   return (
-    <Box direction="row" align="center" justify="between" width="100%">
+    <Box direction="row" align="center" width="100%">
       <Box
         direction="row"
         align="center"
         gap="4px"
-        onClick={() => onUserClicked()}>
+        onClick={() => onUserClicked()}
+        style={{ flexShrink: 0 }}>
         <PlatformAvatar
           size={24}
           imageUrl={details?.authorAvatarUrl}></PlatformAvatar>
@@ -73,7 +78,8 @@ const PostCardHeader = (props: { post: AppPostFull }) => {
           {isAutoIndexed && <Autoindexed></Autoindexed>}
         </Box>
       </Box>
-      <Box>
+      <Box fill onClick={() => onBlankClick && onBlankClick()}></Box>
+      <Box style={{ flexShrink: 0 }}>
         <PlatformPostAnchor details={details}></PlatformPostAnchor>
       </Box>
     </Box>
@@ -100,6 +106,11 @@ export const PostCard = (props: {
     return <></>;
   }
 
+  const onPostClick = () => {
+    overlay &&
+      overlay.onPostClick({ target: PostClickTarget.POST, payload: post });
+  };
+
   const handleClick: MouseEventHandler = (event) => {
     let target = event.target as HTMLElement;
 
@@ -116,8 +127,7 @@ export const PostCard = (props: {
       target = target.parentNode as HTMLElement;
     }
 
-    overlay &&
-      overlay.onPostClick({ target: PostClickTarget.POST, payload: post });
+    onPostClick();
   };
 
   const postText = concatenateThread(post.generic);
@@ -130,8 +140,6 @@ export const PostCard = (props: {
 
   const hideSemantics = false;
 
-  const header = <PostCardHeader post={post}></PostCardHeader>;
-
   return (
     <Box
       style={{
@@ -141,7 +149,7 @@ export const PostCard = (props: {
         borderLeft: CARD_BORDER,
         borderTop: 'none',
       }}>
-      <PublishButtons margin={{ bottom: '16px' }}></PublishButtons>
+      <PublishButtons></PublishButtons>
 
       <Box pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}>
         <Box
@@ -152,7 +160,9 @@ export const PostCard = (props: {
             direction="row"
             justify="between"
             margin={{ bottom: '16px' }}>
-            {header}
+            <PostCardHeader
+              onBlankClick={() => onPostClick()}
+              post={post}></PostCardHeader>
           </Box>
           {!hideSemantics && (
             <Box id={KEYWORDS_SEMANTICS_ID}>
@@ -168,6 +178,7 @@ export const PostCard = (props: {
                   semantics: post?.semantics,
                   originalParsed: post?.originalParsed,
                   structuredSemantics: post?.structuredSemantics,
+                  onNonSemanticsClick: () => onPostClick(),
                 }}></SemanticsEditor>
             </Box>
           )}

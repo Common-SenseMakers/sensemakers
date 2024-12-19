@@ -1,14 +1,11 @@
-import AtpAgent, { AtpSessionData } from '@atproto/api';
 import { logger } from 'firebase-functions';
 import { Request } from 'firebase-functions/v2/tasks';
 
-import { firestore } from '..';
 import { FetchParams } from '../@shared/types/types.fetch';
 import { PLATFORM } from '../@shared/types/types.platforms';
 import { AccountCredentials } from '../@shared/types/types.user';
 import { Services } from '../instances/services';
-import { getConfig } from '../services.config';
-import { removeUndefinedFields } from './bluesky/bluesky.utils';
+import { useBlueskyAdminCredentials } from './bluesky/bluesky.utils';
 
 export const DEBUG = true;
 
@@ -47,57 +44,7 @@ export const fetchPlatformAccountTask = async (
   let credentials: AccountCredentials | undefined = undefined;
 
   if (platformId === PLATFORM.Bluesky) {
-    const blueskyDoc = await firestore
-      .collection('adminCredentials')
-      .doc(platformId)
-      .get();
-    const { BLUESKY_APP_PASSWORD, BLUESKY_SERVICE_URL, BLUESKY_USERNAME } =
-      getConfig().bluesky;
-    const agent = new AtpAgent({ service: BLUESKY_SERVICE_URL });
-    const blueskySession = await (async () => {
-      if (!blueskyDoc.exists || !blueskyDoc.data()?.session) {
-        await agent.login({
-          identifier: BLUESKY_USERNAME,
-          password: BLUESKY_APP_PASSWORD,
-        });
-        if (!agent.session) {
-          throw new Error('Failed to login to Bluesky with admin credentials');
-        }
-        await firestore
-          .collection('adminCredentials')
-          .doc(platformId)
-          .set({
-            session: removeUndefinedFields(agent.session),
-          });
-        return agent.session;
-      }
-      return blueskyDoc.data()?.session as AtpSessionData;
-    })();
-
-    try {
-      await agent.resumeSession(blueskySession);
-    } catch (e) {
-      await agent.login({
-        identifier: BLUESKY_USERNAME,
-        password: BLUESKY_APP_PASSWORD,
-      });
-    }
-
-    if (!agent.session) {
-      throw new Error(
-        'Failed to resume Bluesky session with admin credentials'
-      );
-    }
-
-    if (blueskySession.accessJwt !== agent.session.accessJwt) {
-      await firestore
-        .collection('adminCredentials')
-        .doc(platformId)
-        .set({
-          session: removeUndefinedFields(agent.session),
-        });
-    }
-    credentials = { read: agent.session, write: agent.session };
+    credentials = await useBlueskyAdminCredentials(services.db.firestore);
   }
 
   await services.db.run(async (manager) => {

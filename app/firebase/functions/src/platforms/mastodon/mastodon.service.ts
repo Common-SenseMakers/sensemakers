@@ -27,7 +27,7 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import {
-  AccountProfileBase,
+  PlatformAccountProfile,
   PlatformProfile,
 } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
@@ -193,7 +193,7 @@ export class MastodonService
       description: account.note,
     };
 
-    const profile: AccountProfileBase<PlatformProfile> = {
+    const profile: PlatformAccountProfile = {
       user_id: parseMastodonAccountURI(account.url).globalUsername,
       profile: mdProfile,
     };
@@ -485,7 +485,7 @@ export class MastodonService
   public async getProfileByUsername(
     username: string,
     credentials?: MastodonAccountCredentials
-  ): Promise<AccountProfileBase<PlatformProfile>> {
+  ): Promise<PlatformAccountProfile> {
     try {
       const { server } = parseMastodonGlobalUsername(username);
       const client = this.getClient(server, credentials);
@@ -494,7 +494,7 @@ export class MastodonService
         acct: username,
       });
 
-      const profile: AccountProfileBase<PlatformProfile> = {
+      const profile: PlatformAccountProfile = {
         user_id: parseMastodonAccountURI(mdProfile.url).globalUsername,
         profile: {
           id: mdProfile.id,
@@ -513,7 +513,7 @@ export class MastodonService
   public async getProfile(
     user_id: string,
     credentials?: MastodonAccountCredentials
-  ): Promise<AccountProfileBase<PlatformProfile>> {
+  ): Promise<PlatformAccountProfile> {
     const { server, localUsername } = parseMastodonGlobalUsername(user_id);
     const client = this.getClient(server, credentials);
 
@@ -521,7 +521,7 @@ export class MastodonService
       acct: localUsername,
     });
 
-    const profile: AccountProfileBase<PlatformProfile> = {
+    const profile: PlatformAccountProfile = {
       user_id,
       profile: {
         id: mdProfile.id,

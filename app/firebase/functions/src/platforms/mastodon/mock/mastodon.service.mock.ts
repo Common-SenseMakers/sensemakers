@@ -9,7 +9,7 @@ import {
 } from '../../../@shared/types/types.mastodon';
 import { PlatformPostPublish } from '../../../@shared/types/types.platform.posts';
 import { PLATFORM } from '../../../@shared/types/types.platforms';
-import { AccountProfileCreate } from '../../../@shared/types/types.profiles';
+import { PlatformAccountProfile } from '../../../@shared/types/types.profiles';
 import {
   AccountDetailsBase,
   TestUserCredentials,
@@ -1410,8 +1410,7 @@ export const getMastodonMock = (
             },
           },
         };
-        const profile: AccountProfileCreate = {
-          platformId: PLATFORM.Mastodon,
+        const profile: PlatformAccountProfile = {
           user_id: currentMastodonCredentials.id,
           profile: {
             id: currentMastodonCredentials.id,

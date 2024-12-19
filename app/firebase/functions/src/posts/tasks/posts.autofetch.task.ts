@@ -1,6 +1,5 @@
 import { Request } from 'firebase-functions/v2/tasks';
 
-import { firestore } from '../..';
 import {
   ALL_SOURCE_PLATFORMS,
   IDENTITY_PLATFORM,
@@ -26,6 +25,12 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
   const { users, db } = services;
 
   ALL_SOURCE_PLATFORMS.forEach(async (platformId) => {
+    if (DEBUG)
+      logger.debug(
+        `Starting non-user autofetch for ${platformId}`,
+        DEBUG_PREFIX
+      );
+
     const profilesIds = await users.profiles.getMany({
       autofetch: true,
       platformId: platformId as IDENTITY_PLATFORM,
@@ -37,13 +42,16 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
 
     const jobLastRun = await (async () => {
       const docId = `${platformId}-autofetchNonUserPosts`;
-      const jobMetaDoc = await firestore.collection('jobMeta').doc(docId).get();
+      const jobMetaDoc = await services.db.firestore
+        .collection('jobMeta')
+        .doc(docId)
+        .get();
       const existingTimestamp = jobMetaDoc.data()?.jobLastRunMs as
         | AutofetchNonUserPostsJobMeta['jobLastRunMs']
         | undefined;
       if (!existingTimestamp) {
         const jobLastRunMs = Date.now();
-        await firestore
+        await services.db.firestore
           .collection('jobMeta')
           .doc(docId)
           .set({ jobLastRunMs } as AutofetchNonUserPostsJobMeta);
@@ -52,17 +60,20 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       return existingTimestamp as number;
     })();
 
-    if (Date.now() - jobLastRun > fetchPlatformMinPeriod) {
+    const now = services.time.now();
+
+    if (now - jobLastRun > fetchPlatformMinPeriod) {
       if (DEBUG)
         logger.debug(
           `Triggering non-user autofetch for ${platformId}`,
+          { now, profilesIds },
           DEBUG_PREFIX
         );
 
-      await firestore
+      await services.db.firestore
         .collection('jobMeta')
         .doc(`${platformId}-autofetchNonUserPosts`)
-        .set({ jobLastRunMs: Date.now() } as AutofetchNonUserPostsJobMeta);
+        .set({ jobLastRunMs: now } as AutofetchNonUserPostsJobMeta);
 
       for (const profileId of profilesIds) {
         // Skip profiles that belong to registered users
@@ -91,6 +102,13 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
           );
         await enqueueTask(taskName, taskData);
       }
+    } else {
+      if (DEBUG)
+        logger.debug(
+          `Skipping non-user autofetch for ${platformId}`,
+          { now, jobLastRun, fetchPlatformMinPeriod },
+          DEBUG_PREFIX
+        );
     }
   });
 };

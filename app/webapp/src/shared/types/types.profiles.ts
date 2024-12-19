@@ -22,7 +22,7 @@ export interface AccountProfile<P extends PlatformProfile = PlatformProfile> {
   id: string;
   platformId: IDENTITY_PLATFORM;
   user_id: string;
-  userId?: string;
+  userId: string | null;
   profile?: P;
   fetched?: FetchedDetails;
   autofetch?: boolean;
@@ -44,8 +44,14 @@ export interface PlatformProfile {
 
 export type AccountProfileCreate<P extends PlatformProfile = PlatformProfile> =
   Omit<AccountProfile<P>, 'id'>;
+
 export type AccountProfileBase<P extends PlatformProfile = PlatformProfile> =
   Omit<AccountProfile<P>, 'id' | 'platformId'>;
+
+/** the profile data that platform services should return when asked for a profile */
+export type PlatformAccountProfile<
+  P extends PlatformProfile = PlatformProfile,
+> = Pick<AccountProfile<P>, 'user_id' | 'profile'>;
 
 export type ProfilesQueryParams = Partial<
   Pick<AccountProfile, 'platformId' | 'userId' | 'autofetch'>

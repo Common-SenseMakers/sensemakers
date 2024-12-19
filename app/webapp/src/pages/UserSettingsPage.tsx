@@ -125,7 +125,7 @@ export const UserSettingsPage = () => {
             twitterProfile ? (
               <PlatformAvatar imageUrl={twitterProfile?.avatar} />
             ) : (
-              <TwitterIcon size={40} color="black"></TwitterIcon>
+              <TwitterIcon inverse size={40} color="black"></TwitterIcon>
             )
           }
           platformName={t(PlatformsKeys.XTwitter)}
@@ -149,7 +149,7 @@ export const UserSettingsPage = () => {
             mastodonProfile ? (
               <PlatformAvatar imageUrl={mastodonProfile?.avatar} />
             ) : (
-              <MastodonIcon size={40} color="white"></MastodonIcon>
+              <MastodonIcon inverse size={40} color="white"></MastodonIcon>
             )
           }
           platformName={'Mastodon'}
@@ -171,7 +171,7 @@ export const UserSettingsPage = () => {
             blueskyProfile ? (
               <PlatformAvatar imageUrl={blueskyProfile?.avatar} />
             ) : (
-              <BlueskyIcon size={40} color="white"></BlueskyIcon>
+              <BlueskyIcon inverse size={40} color="white"></BlueskyIcon>
             )
           }
           platformName={'Bluesky'}
