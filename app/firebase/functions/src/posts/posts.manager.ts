@@ -385,7 +385,7 @@ export class PostsManager {
     } catch (err: any) {
       logger.error(
         `Error fetching posts for user_id ${user_id} on platform ${platformId}`,
-        err
+        { err }
       );
 
       return undefined;

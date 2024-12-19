@@ -25,7 +25,6 @@ export const BasePlatformIcon = (
 
   const { inverseSvg, svg } = useMemo(() => {
     if (platform === PLATFORM.Twitter) {
-      console.log('returning twitter icon');
       return {
         svg: (
           <svg
@@ -58,7 +57,6 @@ export const BasePlatformIcon = (
     }
 
     if (platform === PLATFORM.Mastodon) {
-      console.log('returning Mastodon icon');
       return {
         svg: (
           <svg
@@ -90,8 +88,6 @@ export const BasePlatformIcon = (
     }
 
     if (platform === PLATFORM.Bluesky) {
-      console.log('returning Bluesky icon');
-
       return {
         svg: (
           <svg
