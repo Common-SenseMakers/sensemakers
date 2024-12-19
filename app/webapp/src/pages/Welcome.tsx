@@ -1,6 +1,5 @@
 import { Box, Image } from 'grommet';
 import { t } from 'i18next';
-import { usePostHog } from 'posthog-js/react';
 import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,10 +48,8 @@ export const WelcomeBullet = ({
 
 export const Welcome = () => {
   const navigate = useNavigate();
-  const posthog = usePostHog();
 
   const setLoginCase = (loginCase: LoginCase) => {
-    posthog?.capture('clicked_get_started');
     navigate(AbsoluteRoutes.Start);
   };
 
