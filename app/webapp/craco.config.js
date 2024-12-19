@@ -19,7 +19,7 @@ module.exports = {
               PROJECT_TWITTER_ACCOUNT: '"CSensemakers"',
               APP_URL: '"http://localhost:3000"',
               IFRAMELY_API_URL: '"https://iframe.ly/api"',
-              IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"'
+              IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
             },
           },
         }),

@@ -219,7 +219,7 @@ export class PostsManager {
       );
     } catch (err: any) {
       logger.error(
-        `Error fetching posts for user_id ${user_id} on platform ${platformId}`,
+        `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}`,
         { err }
       );
 
@@ -384,8 +384,8 @@ export class PostsManager {
       return platformPostsCreated;
     } catch (err: any) {
       logger.error(
-        `Error fetching posts for user_id ${user_id} on platform ${platformId}`,
-        err
+        `Error at fetchAccount for user_id ${user_id} on platform ${platformId}`,
+        { err }
       );
 
       return undefined;

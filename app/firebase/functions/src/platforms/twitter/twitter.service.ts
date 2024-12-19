@@ -32,8 +32,8 @@ import {
   PostAndAuthor,
 } from '../../@shared/types/types.posts';
 import {
-  AccountProfileBase,
   FetchedDetails,
+  PlatformAccountProfile,
   PlatformProfile,
 } from '../../@shared/types/types.profiles';
 import {
@@ -512,7 +512,7 @@ export class TwitterService
   public async getProfile(
     user_id: string,
     credentials: TwitterCredentials
-  ): Promise<AccountProfileBase<PlatformProfile>> {
+  ): Promise<PlatformAccountProfile> {
     const { client } = await this.getClient(credentials, 'read');
 
     const profileParams: Partial<UsersV2Params> = {
@@ -520,7 +520,7 @@ export class TwitterService
     };
 
     const twitterProfile = await client.v2.user(user_id, profileParams);
-    const profile: PlatformProfile = {
+    const platformProfile: PlatformProfile = {
       id: twitterProfile.data.id,
       displayName: twitterProfile.data.name,
       username: twitterProfile.data.username,
@@ -528,7 +528,12 @@ export class TwitterService
       description: twitterProfile.data.description,
     };
 
-    return { user_id, profile };
+    const profile: PlatformAccountProfile = {
+      user_id,
+      profile: platformProfile,
+    };
+
+    return profile;
   }
 
   /** user_id must be from the authenticated userId */
@@ -630,7 +635,7 @@ export class TwitterService
   async getProfileByUsername(
     username: string,
     credentials?: TwitterCredentials
-  ): Promise<AccountProfileBase<PlatformProfile> | undefined> {
+  ): Promise<PlatformAccountProfile | undefined> {
     try {
       const { client } = await this.getClient(credentials, 'read');
 

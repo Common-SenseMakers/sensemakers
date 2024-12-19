@@ -28,7 +28,7 @@ const PostCardHeader = (props: {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
   const onBlankClick = props.onBlankClick;
-  const isAutoIndexed = props.post.authorUserId === undefined;
+  const isAutoIndexed = props.post.authorUserId === null;
 
   const overlay = useOverlay();
 
@@ -53,7 +53,11 @@ const PostCardHeader = (props: {
   };
 
   return (
-    <Box direction="row" align="center" width="100%">
+    <Box
+      direction="row"
+      align="center"
+      width="100%"
+      style={{ overflow: 'hidden' }}>
       <Box
         direction="row"
         align="center"
@@ -78,8 +82,10 @@ const PostCardHeader = (props: {
           {isAutoIndexed && <Autoindexed></Autoindexed>}
         </Box>
       </Box>
-      <Box fill onClick={() => onBlankClick && onBlankClick()}></Box>
-      <Box style={{ flexShrink: 0 }}>
+      <Box
+        style={{ flexGrow: 1, height: '100%' }}
+        onClick={() => onBlankClick && onBlankClick()}></Box>
+      <Box>
         <PlatformPostAnchor details={details}></PlatformPostAnchor>
       </Box>
     </Box>
@@ -163,7 +169,6 @@ export const PostCard = (props: {
             <PostCardHeader
               onBlankClick={() => onPostClick()}
               post={post}></PostCardHeader>
-            ;
           </Box>
           {!hideSemantics && (
             <Box id={KEYWORDS_SEMANTICS_ID}>

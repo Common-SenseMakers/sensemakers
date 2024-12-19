@@ -35,7 +35,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./scripts/020-build.app.intro.ts"
+        "./scripts/080-trigger-autofetch.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

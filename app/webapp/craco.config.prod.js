@@ -37,7 +37,9 @@ if (process.env.FB_PROJECT === 'dev') {
           FB_APPID: '"1:943634188972:web:7c68eb87a4e517af63ad09"',
           APP_URL: '"https://development--sensemakers.netlify.app/"',
           IFRAMELY_API_URL: '"https://iframe.ly/api"',
-          IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"'
+          IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
+          PUBLIC_POSTHOG_KEY: '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
+          PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"'
         },
       },
     }),
@@ -118,7 +120,9 @@ if (process.env.FB_PROJECT === 'production') {
           FB_APPID: '"1:764998496280:web:0f3d0515674eb53ca7936d"',
           APP_URL: '"https://app.sense-nets.xyz/"',
           IFRAMELY_API_URL: '"https://iframe.ly/api"',
-          IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"'
+          IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
+          PUBLIC_POSTHOG_KEY: '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
+          PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"'
         },
       },
     }),

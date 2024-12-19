@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 import { Refresh } from 'grommet-icons';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -195,6 +195,12 @@ export const PostView = (props: {
           )}
 
           {action}
+
+          <Box margin={{ top: '32px' }} direction="row" justify="end">
+            <Text size="6px" color="white">
+              {fetched.post?.id}
+            </Text>
+          </Box>
         </Box>
       </>
     );
