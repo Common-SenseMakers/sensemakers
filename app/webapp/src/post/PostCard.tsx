@@ -28,7 +28,7 @@ const PostCardHeader = (props: {
   const { constants } = useThemeContext();
   const details = getPostDetails(props.post);
   const onBlankClick = props.onBlankClick;
-  const isAutoIndexed = props.post.authorUserId === undefined;
+  const isAutoIndexed = props.post.authorUserId === null;
 
   const overlay = useOverlay();
 
