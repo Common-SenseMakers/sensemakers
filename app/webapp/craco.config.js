@@ -20,8 +20,6 @@ module.exports = {
               APP_URL: '"http://localhost:3000"',
               IFRAMELY_API_URL: '"https://iframe.ly/api"',
               IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
-              PUBLIC_POSTHOG_KEY: '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
-              PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"'
             },
           },
         }),
