@@ -15,6 +15,9 @@ import { services } from './scripts.services';
       true,
       manager
     );
-    logger.info(`Post found: ${post.id}`, { post });
+    logger.info(`Post found: ${post.id}`, {
+      semantics: post.semantics,
+      original: post.originalParsed?.semantics,
+    });
   });
 })();

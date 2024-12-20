@@ -43,11 +43,23 @@ export const getTopic = (store: Store) => {
   return topic;
 };
 
+export const isKeyword = (quad: Quad) => {
+  return quad.predicate.value === HAS_KEYWORD_URI;
+};
+
+export const isTopic = (quad: Quad) => {
+  return quad.predicate.value === HAS_TOPIC_URI;
+};
+
+export const isZoteroType = (quad: Quad) => {
+  return quad.predicate.value === HAS_ZOTERO_REFERENCE_TYPE_URI;
+};
+
 export const isReferenceLabel = (quad: Quad) => {
   if (
-    quad.predicate.value === HAS_KEYWORD_URI ||
-    quad.predicate.value === HAS_TOPIC_URI ||
-    quad.predicate.value === HAS_ZOTERO_REFERENCE_TYPE_URI ||
+    isKeyword(quad) ||
+    isTopic(quad) ||
+    isZoteroType(quad) ||
     quad.predicate.value === HAS_RDF_SYNTAX_TYPE_URI
   ) {
     return false;

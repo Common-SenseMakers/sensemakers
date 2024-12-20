@@ -50,6 +50,7 @@ import {
   SCIENCE_TOPIC_URI,
   THIS_POST_NAME_URI,
   isReferenceLabel,
+  isZoteroType,
 } from '../@shared/utils/semantics.helper';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
@@ -717,7 +718,7 @@ export class PostsManager {
   }
 
   /** single place where we enforce rules over semantics before feeding our system */
-  private async sanitizeParserResult(
+  public async sanitizeParserResult(
     post: AppPost,
     parserResult: ParsePostResult
   ): Promise<ParsePostResult> {
@@ -742,7 +743,7 @@ export class PostsManager {
       )
     );
 
-    forEachStore(newStore, (quad) => {
+    forEachStore(originalStore, (quad) => {
       if (isReferenceLabel(quad)) {
         const originalReference = quad.object.value;
         /** PATCH #2: References must use normalized urls */
@@ -792,6 +793,24 @@ export class PostsManager {
           /** add it as normalized */
           originalRefMeta[normalizedReference] = refMeta;
         }
+
+        /** PATCH #5: Reference Zotero type must use the normalized version too */
+        forEachStore(originalStore, (quadForType) => {
+          if (isZoteroType(quadForType)) {
+            if (quadForType.object.value !== originalReference) {
+              const newTypeQuad = DataFactory.quad(
+                DataFactory.namedNode(normalizedReference),
+                quadForType.predicate,
+                quadForType.object
+              );
+
+              newStore.removeQuad(quadForType);
+              newStore.addQuad(newTypeQuad);
+            }
+
+            newStore.removeQuad(quadForType);
+          }
+        });
       }
     });
 
