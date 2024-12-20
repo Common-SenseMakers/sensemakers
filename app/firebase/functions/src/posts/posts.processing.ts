@@ -1,5 +1,3 @@
-import { DataFactory } from 'n3';
-
 import { ParsePostResult, RefMeta } from '../@shared/types/types.parser';
 import {
   PlatformPost,
@@ -19,11 +17,9 @@ import {
 } from '../@shared/types/types.posts';
 import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
-import { parseRDF, writeRDF } from '../@shared/utils/n3.utils';
+import { parseRDF } from '../@shared/utils/n3.utils';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
-  LINKS_TO_URI,
-  THIS_POST_NAME_URI,
   getKeywords,
   getReferenceLabels,
   getTopic,
@@ -31,7 +27,6 @@ import {
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
-import { getOriginalRefMetaFromPost } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';
@@ -157,28 +152,9 @@ export class PostsProcessing {
     const post = await this.posts.get(postId, manager, true);
     const store = await parseRDF(semantics);
 
-    const { labels, refsLabels } = getReferenceLabels(store, post);
+    const { labels, refsLabels } = getReferenceLabels(store);
     const keywords = getKeywords(store);
     const topic = getTopic(store);
-
-    /**
-     * for each ref, enforce the linksTo triple
-     */
-    Array.from(Object.keys(refsLabels)).map(async (url) => {
-      const _labels = refsLabels[url];
-      if (!_labels.includes(LINKS_TO_URI)) {
-        store.addQuad(
-          DataFactory.quad(
-            DataFactory.namedNode(THIS_POST_NAME_URI),
-            DataFactory.namedNode(LINKS_TO_URI),
-            DataFactory.namedNode(url)
-          )
-        );
-      }
-    });
-
-    /** get updated semantics */
-    const newSemantics = await writeRDF(store);
 
     /**
      * for each ref, read and update its metadata from the links service,
@@ -188,7 +164,7 @@ export class PostsProcessing {
 
     await Promise.all(
       Array.from(Object.keys(refsLabels)).map(async (url) => {
-        const refMetaOrg = getOriginalRefMetaFromPost(post, url);
+        const refMetaOrg = post.originalParsed?.support?.refs_meta?.[url];
 
         const refMeta = await this.enhanceRefMeta(url, manager, refMetaOrg);
         refsMeta[url] = { ...refMeta, labels: refsLabels[url] || undefined };
@@ -216,11 +192,7 @@ export class PostsProcessing {
       })
     );
 
-    await this.posts.update(
-      postId,
-      { structuredSemantics, semantics: newSemantics },
-      manager
-    );
+    await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
   async syncRefPost(
@@ -284,7 +256,7 @@ export class PostsProcessing {
     const postFullMeta: Map<string, RefDisplayMeta> = new Map();
     await Promise.all(
       post.structuredSemantics?.refs?.map(async (ref) => {
-        const refMetaOrg = getOriginalRefMetaFromPost(post, ref);
+        const refMetaOrg = post.originalParsed?.support?.refs_meta?.[ref];
         const oembed = await this.linksService.getOEmbed(
           ref,
           manager,

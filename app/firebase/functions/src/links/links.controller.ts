@@ -4,7 +4,6 @@ import { object, string } from 'yup';
 import { RefDisplayMeta } from '../@shared/types/types.references';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
-import { getOriginalRefMetaFromPost } from './links.utils';
 
 const DEBUG = true;
 
@@ -36,11 +35,12 @@ export const getRefMetaController: RequestHandler = async (
       if (!refPost) {
         throw new Error(`No post found for ref ${queryParams.ref}`);
       }
-      const refMetaOrg = getOriginalRefMetaFromPost(refPost, queryParams.ref);
+      const refMeta = refPost.originalParsed?.support?.refs_meta;
+
       const refOEmbed = await links.getOEmbed(
         queryParams.ref,
         manager,
-        refMetaOrg
+        refMeta && refMeta[queryParams.ref]
       );
       return { refOEmbed, refPost };
     });

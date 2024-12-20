@@ -1,7 +1,10 @@
+import { DataFactory } from 'n3';
+
 import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PARSER_MODE,
   ParsePostRequest,
+  ParsePostResult,
   SciFilterClassfication,
   TopicsParams,
 } from '../@shared/types/types.parser';
@@ -29,13 +32,24 @@ import {
 } from '../@shared/types/types.posts';
 import { FetchedDetails } from '../@shared/types/types.profiles';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
-import { addTripleToSemantics } from '../@shared/utils/n3.utils';
+import {
+  handleQuotePostReference,
+  normalizeUrl,
+} from '../@shared/utils/links.utils';
+import {
+  cloneStore,
+  forEachStore,
+  parseRDF,
+  writeRDF,
+} from '../@shared/utils/n3.utils';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
   HAS_TOPIC_URI,
+  LINKS_TO_URI,
   NOT_SCIENCE_TOPIC_URI,
   SCIENCE_TOPIC_URI,
   THIS_POST_NAME_URI,
+  isReferenceLabel,
 } from '../@shared/utils/semantics.helper';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
@@ -702,6 +716,96 @@ export class PostsManager {
     }
   }
 
+  /** single place where we enforce rules over semantics before feeding our system */
+  private async sanitizeParserResult(
+    post: AppPost,
+    parserResult: ParsePostResult
+  ): Promise<ParsePostResult> {
+    /** process semantics and enfore */
+    const originalStore = await parseRDF(parserResult.semantics);
+    const newStore = cloneStore(originalStore);
+    const newResult = { ...parserResult };
+
+    /** PATCH #1: Science topic must be in the semantics */
+    const isScience = [
+      SciFilterClassfication.AI_DETECTED_RESEARCH,
+      SciFilterClassfication.CITOID_DETECTED_RESEARCH,
+    ].includes(parserResult.filter_classification);
+
+    newStore.addQuad(
+      DataFactory.quad(
+        DataFactory.namedNode(THIS_POST_NAME_URI),
+        DataFactory.namedNode(HAS_TOPIC_URI),
+        DataFactory.namedNode(
+          isScience ? SCIENCE_TOPIC_URI : NOT_SCIENCE_TOPIC_URI
+        )
+      )
+    );
+
+    forEachStore(newStore, (quad) => {
+      if (isReferenceLabel(quad)) {
+        const originalReference = quad.object.value;
+        /** PATCH #2: References must use normalized urls */
+        const _normalizedReference = normalizeUrl(originalReference);
+        const normalizedReference = handleQuotePostReference(
+          _normalizedReference,
+          post
+        );
+
+        newStore.removeQuad(quad);
+        newStore.addQuad(
+          DataFactory.quad(
+            quad.subject,
+            quad.predicate,
+            DataFactory.namedNode(normalizedReference)
+          )
+        );
+
+        /** PATCH #3: We enforce a linksTo label */
+        const linksToQuad = DataFactory.quad(
+          DataFactory.namedNode(THIS_POST_NAME_URI),
+          DataFactory.namedNode(LINKS_TO_URI),
+          DataFactory.namedNode(normalizedReference)
+        );
+
+        const unormalizedLinksTo = DataFactory.quad(
+          DataFactory.namedNode(THIS_POST_NAME_URI),
+          DataFactory.namedNode(LINKS_TO_URI),
+          DataFactory.namedNode(originalReference)
+        );
+
+        if (newStore.has(unormalizedLinksTo)) {
+          newStore.removeQuad(unormalizedLinksTo);
+        }
+
+        if (!newStore.has(linksToQuad)) {
+          newStore.addQuad(linksToQuad);
+        }
+
+        /** PATCH #4: Use normalized references in the support data too */
+        const originalRefMeta = newResult.support?.refs_meta;
+
+        if (originalRefMeta) {
+          const refMeta = originalRefMeta[originalReference];
+          /** delete the old entry */
+          delete originalRefMeta[originalReference];
+          /** add it as normalized */
+          originalRefMeta[normalizedReference] = refMeta;
+        }
+      }
+    });
+
+    const newSemantics = await writeRDF(newStore);
+
+    if (!newSemantics) {
+      throw new Error('Unexpected error writing RDF');
+    }
+
+    newResult.semantics = newSemantics;
+
+    return newResult;
+  }
+
   protected async _parsePost(postId: string) {
     const post = await this.db.run(async (manager) => {
       return this.processing.posts.get(postId, manager, true);
@@ -716,28 +820,17 @@ export class PostsManager {
     };
 
     /** Call the parser */
-    const parserResult = await this.parserService.parsePost(params);
+    const _parserResult = await this.parserService.parsePost(params);
 
-    if (!parserResult) {
+    if (!_parserResult) {
       throw new Error(`Error parsing post: ${post.id}`);
     }
 
-    /** temp hack to convert filter_classification into topic semantics*/
-    const hackedSemantics = await (async () => {
-      const isScience = [
-        SciFilterClassfication.AI_DETECTED_RESEARCH,
-        SciFilterClassfication.CITOID_DETECTED_RESEARCH,
-      ].includes(parserResult.filter_classification);
-
-      return addTripleToSemantics(parserResult.semantics, [
-        THIS_POST_NAME_URI,
-        HAS_TOPIC_URI,
-        isScience ? SCIENCE_TOPIC_URI : NOT_SCIENCE_TOPIC_URI,
-      ]);
-    })();
+    /** single place where we enforce rules over semantics */
+    const parserResult = await this.sanitizeParserResult(post, _parserResult);
 
     const update: PostUpdate = {
-      semantics: hackedSemantics,
+      semantics: parserResult.semantics,
       originalParsed: parserResult,
       parsedStatus: AppPostParsedStatus.PROCESSED,
       parsingStatus: AppPostParsingStatus.IDLE,

@@ -1,7 +1,5 @@
-import { Store } from 'n3';
+import { Quad, Store } from 'n3';
 
-import { AppPost } from '../types/types.posts';
-import { handleQuotePostReference, normalizeUrl } from './links.utils';
 import { forEachStore } from './n3.utils';
 
 export const THIS_POST_NAME_URI = 'https://sense-nets.xyz/mySemanticPost';
@@ -45,20 +43,27 @@ export const getTopic = (store: Store) => {
   return topic;
 };
 
+export const isReferenceLabel = (quad: Quad) => {
+  if (
+    quad.predicate.value === HAS_KEYWORD_URI ||
+    quad.predicate.value === HAS_TOPIC_URI ||
+    quad.predicate.value === HAS_ZOTERO_REFERENCE_TYPE_URI ||
+    quad.predicate.value === HAS_RDF_SYNTAX_TYPE_URI
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
 export const getReferenceLabels = (
-  store: Store,
-  post: AppPost
+  store: Store
 ): { labels: string[]; refsLabels: Record<string, string[]> } => {
   const labels: Set<string> = new Set();
   const refsLabels: Record<string, string[]> = {};
 
   forEachStore(store, (q) => {
-    if (
-      q.predicate.value === HAS_KEYWORD_URI ||
-      q.predicate.value === HAS_TOPIC_URI ||
-      q.predicate.value === HAS_ZOTERO_REFERENCE_TYPE_URI ||
-      q.predicate.value === HAS_RDF_SYNTAX_TYPE_URI
-    ) {
+    if (!isReferenceLabel(q)) {
       return;
     }
 
@@ -74,19 +79,8 @@ export const getReferenceLabels = (
       return;
     }
 
-    /** normalize URL when they are feed  */
-    const _normalizedReference = normalizeUrl(reference);
-    /** temporary hotfit until the parser handles the quote post edge cases */
-    const normalizedReference = handleQuotePostReference(
-      _normalizedReference,
-      post
-    );
-
     labels.add(label);
-    refsLabels[normalizedReference] = [
-      ...(refsLabels[normalizedReference] || []),
-      label,
-    ];
+    refsLabels[reference] = [...(refsLabels[reference] || []), label];
   });
 
   return { labels: Array.from(labels), refsLabels };
