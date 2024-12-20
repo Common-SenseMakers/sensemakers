@@ -43,22 +43,6 @@ export const writeRDF = async (store: Store): Promise<string | undefined> => {
   });
 };
 
-export const addTripleToSemantics = async (
-  semantics: string,
-  triple: string[]
-) => {
-  const [subject, predicate, object] = triple;
-  const store = await parseRDF(semantics);
-  store.addQuad(
-    DataFactory.quad(
-      DataFactory.namedNode(subject),
-      DataFactory.namedNode(predicate),
-      DataFactory.namedNode(object)
-    )
-  );
-  return writeRDF(store);
-};
-
 export const mapStore = (
   store: Store,
   callback: (q: Quad) => Quad,

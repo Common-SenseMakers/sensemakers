@@ -63,7 +63,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./migrations/008-links-iframely-status.ts"
+        "./migrations/009-sanitize-semantics.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
