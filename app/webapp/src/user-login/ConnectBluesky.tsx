@@ -32,7 +32,12 @@ export const ConnectBlueskyPage = () => {
 
   const handleConnect = () => {
     if (connect) {
-      connect(username, appPassword, 'read').catch(console.error);
+      let cleanUsername = username.trim();
+
+      if (cleanUsername.startsWith('@')) {
+        cleanUsername = cleanUsername.slice(1);
+      }
+      connect(cleanUsername, appPassword, 'read').catch(console.error);
     }
   };
 
