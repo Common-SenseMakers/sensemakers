@@ -111,16 +111,6 @@ export interface PostAndAuthor {
 }
 
 /**
- * Payload to mirror a post on other platforms,
- */
-export interface AppPostMirror {
-  postId: string;
-  content?: string;
-  semantics?: AppPostSemantics;
-  mirrors: PlatformPost[];
-}
-
-/**
  * PostUpdate
  */
 export type PostUpdate = Partial<
