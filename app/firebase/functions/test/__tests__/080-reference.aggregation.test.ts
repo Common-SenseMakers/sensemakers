@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
+import { normalizeUrl } from '../../src/@shared/utils/links.utils';
 import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
@@ -22,7 +23,7 @@ import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
 
-describe('080 get reference aggregation', () => {
+describe.only('080 get reference aggregation', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -89,21 +90,23 @@ describe('080 get reference aggregation', () => {
       }
       const { postsManager } = services;
 
-      const references = [
-        'https://twitter.com/ItaiYanai/status/1780813867213336910',
-      ];
-      const aggregatedLabels =
-        await postsManager.processing.posts.getAggregatedRefLabels(references);
-      const labels = aggregatedLabels[references[0]];
+      const reference = normalizeUrl(
+        'https://twitter.com/ItaiYanai/status/1780813867213336910'
+      );
+      const labels =
+        await postsManager.processing.posts.getAggregatedRefLabels(reference);
       const expectedLabels = [
         'http://purl.org/spar/cito/discusses',
+        'http://purl.org/spar/cito/linksTo',
         'https://sense-nets.xyz/asksQuestionAbout',
       ];
       expect(labels.length).to.equal(expectedLabels.length);
+
       for (const label of labels) {
         expect(expectedLabels).to.include(label.label);
       }
     });
+
     it('gets a post with aggregated labels', async () => {
       const { postsManager } = services;
       const postIds = await postsManager.processing.posts.getAll();

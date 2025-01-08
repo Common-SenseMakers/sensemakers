@@ -826,9 +826,12 @@ export class PostsManager {
   }
 
   protected async _parsePost(postId: string) {
+    /** split the read post and write semantics in two transactions because the parsePost
+     * can take longer than the transaction expiration time */
     const post = await this.db.run(async (manager) => {
       return this.processing.posts.get(postId, manager, true);
     });
+
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {

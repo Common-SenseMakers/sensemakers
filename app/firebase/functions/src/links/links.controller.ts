@@ -45,13 +45,13 @@ export const getRefMetaController: RequestHandler = async (
       return { refOEmbed, refPost };
     });
     const refLabels =
-      await postsManager.processing.posts.getAggregatedRefLabels([
-        queryParams.ref,
-      ]);
+      await postsManager.processing.posts.getAggregatedRefLabels(
+        queryParams.ref
+      );
 
     const refDisplayMeta: RefDisplayMeta = {
       oembed: refOEmbed,
-      aggregatedLabels: refLabels[queryParams.ref],
+      aggregatedLabels: refLabels,
       ontology: refPost.originalParsed?.support?.ontology,
     };
 

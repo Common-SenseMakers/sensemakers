@@ -116,7 +116,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     const keywordsKey: keyof StructuredSemantics = 'keywords';
 
-    const labelsKey: keyof StructuredSemantics = 'labels';
+    const tabsKey: keyof StructuredSemantics = 'tabs';
     const topicKey: keyof StructuredSemantics = 'topic';
     const refsKey: keyof StructuredSemantics = 'refs';
 
@@ -153,11 +153,15 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       );
     }
 
-    query = filterByArrayContainsAny(
-      query,
-      `${structuredSemanticsKey}.${labelsKey}`,
-      queryParams.semantics?.labels
-    );
+    const tabIx = queryParams.semantics?.tab;
+    query =
+      tabIx !== undefined
+        ? filterByEqual(
+            query,
+            `${structuredSemanticsKey}.${tabsKey}.isTab${tabIx.toString().padStart(2, '0')}`,
+            true
+          )
+        : query;
 
     query = filterByArrayContainsAny(
       query,
@@ -233,46 +237,33 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
-  public async getAggregatedRefLabels(
-    references: string[]
-  ): Promise<Record<string, RefLabel[]>> {
-    const refsStats: Record<string, RefLabel[]> = {};
+  public async getAggregatedRefLabels(reference: string): Promise<RefLabel[]> {
+    const refLabels: RefLabel[] = [];
 
-    // Get all posts for each reference from their respective subcollections
-    const postsPromises = references.map(async (reference) => {
-      const linkId = hashUrl(reference);
-      const linkPosts = await this.db.collections.links
-        .doc(linkId)
-        .collection(CollectionNames.LinkPostsSubcollection)
-        .get();
+    // Get all posts for reference from their respective subcollections
+    const linkId = hashUrl(reference);
+    const linkPosts = await this.db.collections.linkPosts(linkId).get();
 
-      // Process each post's labels directly from the subcollection documents
-      linkPosts.docs.forEach((doc) => {
-        const refPost = doc.data() as RefPostData;
-        if (
-          refPost?.structuredSemantics?.labels &&
-          refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
-        ) {
-          const refLabels = refPost.structuredSemantics?.labels?.map(
-            (label): RefLabel => ({
-              label,
-              postId: doc.id,
-              authorProfileId: refPost.authorProfileId,
-              platformPostUrl: refPost.platformPostUrl,
-            })
-          );
-          if (refLabels) {
-            refsStats[reference] = [
-              ...(refsStats[reference] || []),
-              ...refLabels,
-            ];
-          }
-        }
-      });
+    // Process each post's labels directly from the subcollection documents
+    linkPosts.docs.forEach((doc) => {
+      const refPost = doc.data() as RefPostData;
+      if (
+        refPost?.structuredSemantics?.labels &&
+        refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
+      ) {
+        const thisRefLabels = refPost.structuredSemantics?.labels?.map(
+          (label): RefLabel => ({
+            label,
+            postId: doc.id,
+            authorProfileId: refPost.authorProfileId,
+            platformPostUrl: refPost.platformPostUrl,
+          })
+        );
+        refLabels.push(...thisRefLabels);
+      }
     });
 
-    await Promise.all(postsPromises);
-    return refsStats;
+    return refLabels;
   }
 
   public async getAllOfQuery(queryParams: PostsQueryDefined, limit?: number) {

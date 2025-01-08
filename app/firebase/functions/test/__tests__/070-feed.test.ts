@@ -87,10 +87,7 @@ describe('070 test feed', () => {
       const query1 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
-          labels: [
-            'https://sense-nets.xyz/announcesResource',
-            'http://purl.org/spar/cito/discusses',
-          ],
+          tab: 1,
         },
       };
       const result1 = await feed.getFeed(query1);
@@ -101,10 +98,7 @@ describe('070 test feed', () => {
       const query2 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
-          labels: [
-            'https://sense-nets.xyz/asksQuestionAbout',
-            'http://purl.org/spar/cito/includesQuotationFrom',
-          ],
+          tab: 2,
         },
       };
       const result2 = await feed.getFeed(query2);
@@ -114,7 +108,7 @@ describe('070 test feed', () => {
 
       const query3 = {
         fetchParams: { expectedAmount: 10 },
-        semantics: { labels: [] },
+        semantics: {},
       };
       const result3 = await feed.getFeed(query3);
       expect(result3).to.have.length(5);
@@ -130,10 +124,7 @@ describe('070 test feed', () => {
       const query1 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
-          labels: [
-            'https://sense-nets.xyz/announcesResource',
-            'http://purl.org/spar/cito/discusses',
-          ],
+          tab: 1,
         },
         hydrateConfig: { addAggregatedLabels: true },
       };
@@ -152,10 +143,7 @@ describe('070 test feed', () => {
       const query2 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
-          labels: [
-            'https://sense-nets.xyz/asksQuestionAbout',
-            'http://purl.org/spar/cito/includesQuotationFrom',
-          ],
+          tab: 2,
         },
         hydrateConfig: { addAggregatedLabels: true },
       };
@@ -173,7 +161,7 @@ describe('070 test feed', () => {
 
       const query3 = {
         fetchParams: { expectedAmount: 10 },
-        semantics: { labels: [] },
+        semantics: { tab: 0 },
         hydrateConfig: { addAggregatedLabels: true },
       };
       const result3 = await feed.getFeed(query3);

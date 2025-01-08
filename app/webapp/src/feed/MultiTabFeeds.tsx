@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import { PostFetcherInterface } from '../posts.fetcher/posts.fetcher.hook';
+import { FeedTabConfig } from '../shared/utils/feed.config';
 import { FeedTabs } from './FeedTabs';
-import { FeedTabConfig } from './feed.config';
 
 export const MultiTabFeeds = (props: {
   feeds: PostFetcherInterface[];

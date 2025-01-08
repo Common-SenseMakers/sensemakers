@@ -26,8 +26,18 @@ export interface GenericThread {
 }
 
 /** Structured semantics */
+export interface TabsInfo {
+  isTab01: boolean;
+  isTab02: boolean;
+  isTab03: boolean;
+  isTab04: boolean;
+  isTab05: boolean;
+  isTab06: boolean;
+}
+
 export interface StructuredSemantics {
-  labels?: string[];
+  labels?: ArrayIncludeQuery;
+  tabs?: TabsInfo;
   keywords?: string[];
   refs?: string[];
   refsMeta?: Record<string, RefMeta>;
@@ -37,7 +47,7 @@ export interface StructuredSemantics {
 export type ArrayIncludeQuery = string[];
 
 export interface StructuredSemanticsQuery {
-  labels?: ArrayIncludeQuery;
+  tab?: number;
   keywords?: ArrayIncludeQuery;
   refs?: ArrayIncludeQuery;
   topic?: string;

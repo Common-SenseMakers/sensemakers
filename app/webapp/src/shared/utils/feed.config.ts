@@ -1,6 +1,8 @@
-import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
+import { TabsInfo } from '../types/types.posts';
+import { SCIENCE_TOPIC_URI } from './semantics.helper';
 
 export interface FeedTabConfig {
+  index: number;
   id: string;
   title: string;
   tooltip: string;
@@ -10,6 +12,7 @@ export interface FeedTabConfig {
 
 export const feedTabs: FeedTabConfig[] = [
   {
+    index: 1,
     id: 'all',
     title: 'All',
     tooltip: '',
@@ -17,6 +20,7 @@ export const feedTabs: FeedTabConfig[] = [
     topic: SCIENCE_TOPIC_URI,
   },
   {
+    index: 2,
     id: 'recommendations',
     title: 'Recommendations',
     tooltip: '',
@@ -32,6 +36,7 @@ export const feedTabs: FeedTabConfig[] = [
     topic: SCIENCE_TOPIC_URI,
   },
   {
+    index: 3,
     id: 'new-research',
     title: 'New research',
     tooltip: '',
@@ -42,6 +47,7 @@ export const feedTabs: FeedTabConfig[] = [
     topic: SCIENCE_TOPIC_URI,
   },
   {
+    index: 4,
     id: 'opportunities',
     title: 'Opportunities',
     tooltip: '',
@@ -54,6 +60,7 @@ export const feedTabs: FeedTabConfig[] = [
     topic: SCIENCE_TOPIC_URI,
   },
   {
+    index: 5,
     id: 'discussions',
     title: 'Discussions',
     tooltip: '',
@@ -68,3 +75,35 @@ export const feedTabs: FeedTabConfig[] = [
     topic: SCIENCE_TOPIC_URI,
   },
 ];
+
+export const getPostTabs = (labels: string[]): TabsInfo => {
+  const tabsInfo: TabsInfo = {
+    isTab01: false,
+    isTab02: false,
+    isTab03: false,
+    isTab04: false,
+    isTab05: false,
+    isTab06: false,
+  };
+
+  if (feedTabs.length > 6) {
+    throw new Error('Maximum of 6 tabs allowed');
+  }
+
+  for (let ix = 0; ix < feedTabs.length; ix++) {
+    const tab = feedTabs[ix];
+
+    /**
+     * - if the tab labels are empty, include all posts
+     * - if there is a label that is in the tab config labels mark that isTab as true
+     * */
+    if (
+      tab.labels.length === 0 ||
+      labels.some((label) => tab.labels.includes(label))
+    ) {
+      tabsInfo[`isTab0${ix + 1}` as keyof TabsInfo] = true;
+    }
+  }
+
+  return tabsInfo;
+};

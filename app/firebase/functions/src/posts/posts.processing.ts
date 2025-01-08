@@ -17,6 +17,7 @@ import {
 } from '../@shared/types/types.posts';
 import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
+import { getPostTabs } from '../@shared/utils/feed.config';
 import { parseRDF } from '../@shared/utils/n3.utils';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
@@ -171,8 +172,11 @@ export class PostsProcessing {
       })
     );
 
+    const tabs = getPostTabs(labels);
+
     const structuredSemantics: StructuredSemantics = {
       labels: Array.from(labels),
+      tabs: tabs,
       keywords: Array.from(keywords),
       topic,
       refsMeta: removeUndefined(refsMeta),
@@ -263,8 +267,8 @@ export class PostsProcessing {
           refMetaOrg
         );
         if (config.addAggregatedLabels) {
-          const refLabels = await this.posts.getAggregatedRefLabels([ref]);
-          postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels[ref] });
+          const refLabels = await this.posts.getAggregatedRefLabels(ref);
+          postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels });
         } else postFullMeta.set(ref, { oembed });
       }) || []
     );

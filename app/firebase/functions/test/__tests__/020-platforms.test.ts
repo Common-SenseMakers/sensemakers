@@ -242,7 +242,8 @@ describe('02-platforms', () => {
         expect(result.avatar).to.be.a('string');
       }
     });
-    it.only('handles newlines in the content html', async () => {
+
+    it('handles newlines in the content html', async () => {
       const post_id =
         'https://w3c.social/users/w3c/statuses/113561528162272973';
       const result = await mastodonService.get(

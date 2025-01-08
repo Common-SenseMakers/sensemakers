@@ -2,10 +2,10 @@ import { Box, BoxExtendedProps, Text } from 'grommet';
 import { useEffect, useRef, useState } from 'react';
 import { CSSProperties } from 'styled-components';
 
+import { FeedTabConfig } from '../shared/utils/feed.config';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { FeedTabConfig } from './feed.config';
 
 const Chevron = (props: { direction: 'left' | 'right' }) => {
   const { direction } = props;
