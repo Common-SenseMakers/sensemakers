@@ -13,6 +13,8 @@ import {
 import { DBInstance } from '../../src/db/instance';
 import { FeedService } from '../../src/feed/feed.service';
 import { Services } from '../../src/instances/services';
+import { KeywordsRepository } from '../../src/keywords/keywords.repository';
+import { KeywordsService } from '../../src/keywords/keywords.service';
 import { LinksRepository } from '../../src/links/links.repository';
 import { LinksMockConfig, LinksService } from '../../src/links/links.service';
 import { getLinksMock } from '../../src/links/links.service.mock';
@@ -94,6 +96,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
   const linksRepo = new LinksRepository(db);
+  const keywordsRepo = new KeywordsRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -175,6 +178,9 @@ export const getTestServices = (config: TestServicesConfig) => {
   });
   const links = getLinksMock(_linksService, config.links);
 
+  /** keywords */
+  const keywordsService = new KeywordsService(keywordsRepo, time);
+
   /** posts service */
   const postsProcessing = new PostsProcessing(
     usersService,
@@ -182,7 +188,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     postsRepo,
     platformPostsRepo,
     platformsService,
-    links
+    links,
+    keywordsService
   );
 
   const postsManager = new PostsManager(

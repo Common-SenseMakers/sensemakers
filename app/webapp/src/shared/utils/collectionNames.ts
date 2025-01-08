@@ -8,4 +8,6 @@ export enum CollectionNames {
   Activity = 'activity',
   Links = 'links',
   LinkPostsSubcollection = 'posts',
+  Keywords = 'keywords',
+  KeywordPostsSubcollection = 'posts',
 }

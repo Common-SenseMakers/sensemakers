@@ -1,4 +1,5 @@
-import { LinkMeta, RefPostData } from '../@shared/types/types.references';
+import { PostSubcollectionIndex } from '../@shared/types/types.posts';
+import { LinkMeta } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance } from '../db/instance';
 import { BaseRepository } from '../db/repo.base';
@@ -22,7 +23,7 @@ export class LinksRepository extends BaseRepository<LinkMeta, LinkMeta> {
 
   async setRefPost(
     linkId: string,
-    refPost: RefPostData,
+    refPost: PostSubcollectionIndex,
     manager: TransactionManager
   ) {
     const postRef = this.getRefPostRef(linkId, refPost.id);
@@ -32,13 +33,13 @@ export class LinksRepository extends BaseRepository<LinkMeta, LinkMeta> {
   async getRefPosts(
     linkId: string,
     manager: TransactionManager
-  ): Promise<RefPostData[]> {
+  ): Promise<PostSubcollectionIndex[]> {
     const linkDoc = this.db.collections.links.doc(linkId);
     const postsSnap = await manager.query(
       linkDoc.collection(CollectionNames.LinkPostsSubcollection)
     );
 
-    return postsSnap.docs.map((doc) => doc.data() as RefPostData);
+    return postsSnap.docs.map((doc) => doc.data() as PostSubcollectionIndex);
   }
   async deleteRefPost(
     linkId: string,

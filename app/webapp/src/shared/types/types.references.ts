@@ -1,5 +1,4 @@
 import { ParserOntology } from './types.parser';
-import { AppPost } from './types.posts';
 
 export enum LinkSource {
   parser = 'PARSER',
@@ -37,13 +36,6 @@ export interface OEmbed {
   provider_url?: string;
   author_name?: string;
 }
-
-export type RefPostData = Pick<
-  AppPost,
-  'id' | 'authorProfileId' | 'createdAtMs' | 'structuredSemantics'
-> & {
-  platformPostUrl?: string;
-};
 
 export interface RefLabel {
   label: string;
