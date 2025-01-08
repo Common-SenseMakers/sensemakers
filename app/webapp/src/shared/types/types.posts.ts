@@ -184,7 +184,10 @@ export interface GetPostPayload {
 
 export type PostSubcollectionIndex = Pick<
   AppPost,
-  'id' | 'authorProfileId' | 'createdAtMs' | 'structuredSemantics'
-> & {
-  platformPostUrl?: string;
-};
+  | 'id'
+  | 'authorUserId'
+  | 'origin'
+  | 'authorProfileId'
+  | 'createdAtMs'
+  | 'structuredSemantics'
+>;

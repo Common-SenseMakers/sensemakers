@@ -38,10 +38,9 @@ export interface OEmbed {
 }
 
 export interface RefLabel {
-  label: string;
   postId?: string;
   authorProfileId?: string;
-  platformPostUrl?: string;
+  label: string;
 }
 
 export interface RefDisplayMeta {

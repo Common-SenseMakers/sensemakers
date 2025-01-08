@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { PostsQueryDefined } from '../../src/@shared/types/types.posts';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { normalizeUrl } from '../../src/@shared/utils/links.utils';
 import { SCIENCE_TOPIC_URI } from '../../src/@shared/utils/semantics.helper';
 import { logger } from '../../src/instances/logger';
-import { doesQueryUseSubcollection } from '../../src/posts/posts.helper';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { fetchPostInTests } from '../utils/posts.utils';
@@ -94,8 +94,6 @@ describe.only('070 test feed', () => {
       };
       const result1 = await feed.getFeed(query1);
       expect(result1).to.have.length(5);
-      expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be
-        .false;
 
       // recommendations tab
       const query2 = {
@@ -106,8 +104,6 @@ describe.only('070 test feed', () => {
       };
       const result2 = await feed.getFeed(query2);
       expect(result2).to.have.length(2);
-      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be
-        .false;
 
       const query3 = {
         fetchParams: { expectedAmount: 10 },
@@ -117,8 +113,6 @@ describe.only('070 test feed', () => {
       };
       const result3 = await feed.getFeed(query3);
       expect(result3).to.have.length(1);
-      expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be
-        .false;
 
       const query4 = {
         fetchParams: { expectedAmount: 10 },
@@ -128,8 +122,6 @@ describe.only('070 test feed', () => {
       };
       const result4 = await feed.getFeed(query4);
       expect(result4).to.have.length(0);
-      expect(doesQueryUseSubcollection(query4).useLinksSubcollection).to.be
-        .false;
 
       const query5 = {
         fetchParams: { expectedAmount: 10 },
@@ -139,8 +131,6 @@ describe.only('070 test feed', () => {
       };
       const result5 = await feed.getFeed(query5);
       expect(result5).to.have.length(4);
-      expect(doesQueryUseSubcollection(query5).useLinksSubcollection).to.be
-        .false;
 
       /** check aggregatred labels */
       const query5a = {
@@ -172,7 +162,7 @@ describe.only('070 test feed', () => {
           return;
         }
         const { feed } = services;
-        const query = {
+        const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
             refs: [TEST_REF],
@@ -182,8 +172,6 @@ describe.only('070 test feed', () => {
         };
         const result = await feed.getFeed(query);
         expect(result).to.have.length(2);
-        expect(doesQueryUseSubcollection(query).useLinksSubcollection).to.be
-          .true;
       });
 
       it('returns reference page feed filtered by labels', async () => {
@@ -192,7 +180,7 @@ describe.only('070 test feed', () => {
           return;
         }
         const { feed } = services;
-        const query = {
+        const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
             refs: [TEST_REF],
@@ -202,8 +190,6 @@ describe.only('070 test feed', () => {
         };
         const result = await feed.getFeed(query);
         expect(result).to.have.length(1);
-        expect(doesQueryUseSubcollection(query).useLinksSubcollection).to.be
-          .true;
       });
 
       it('returns reference page feed filtered by keywords', async () => {
@@ -212,7 +198,7 @@ describe.only('070 test feed', () => {
           return;
         }
         const { feed } = services;
-        const query = {
+        const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
             refs: [TEST_REF],
@@ -223,8 +209,6 @@ describe.only('070 test feed', () => {
         };
         const result = await feed.getFeed(query);
         expect(result).to.have.length(2); // there are 2 posts with this tag and reference, but one of them is marked as not science
-        expect(doesQueryUseSubcollection(query).useLinksSubcollection).to.be
-          .true;
       });
     });
 
@@ -237,7 +221,7 @@ describe.only('070 test feed', () => {
           return;
         }
         const { feed } = services;
-        const query = {
+        const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
             keywords: [TEST_KEYWORD],
@@ -246,29 +230,25 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(1);
-        expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
-          .true;
+        expect(result).to.have.length(2);
       });
 
-      it('returns keyword page feed filtered by labels', async () => {
+      it('returns keyword page feed filtered by tab', async () => {
         if (USE_REAL_TWITTER) {
           logger.warn(`Feed test disabled with real twitter`);
           return;
         }
         const { feed } = services;
-        const query = {
+        const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
             keywords: [TEST_KEYWORD],
-            labels: ['http://purl.org/spar/cito/discusses'],
+            tab: 2,
           },
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
         expect(result).to.have.length(1);
-        expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
-          .true;
       });
 
       it('returns keyword page feed filtered by references', async () => {
@@ -277,7 +257,7 @@ describe.only('070 test feed', () => {
           return;
         }
         const { feed } = services;
-        const query = {
+        const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
             keywords: [TEST_KEYWORD],
@@ -288,8 +268,6 @@ describe.only('070 test feed', () => {
         };
         const result = await feed.getFeed(query);
         expect(result).to.have.length(1);
-        expect(doesQueryUseSubcollection(query).useKeywordsSubcollection).to.be
-          .false; // in this case it would use the reference subcollection
       });
     });
   });

@@ -22,12 +22,12 @@ import {
   AUTHOR_PROFILE_KEY,
   AUTHOR_USER_KEY,
   CREATED_AT_KEY,
+  KEYWORDS_KEY,
   ORIGIN_KEY,
+  REFS_KEY,
   STRUCTURED_SEMANTICS_KEY,
   TABS_KEY,
   TOPIC_KEY,
-  doesQueryUseSubcollection,
-  getBaseQuery,
 } from '../posts/posts.helper';
 
 const DEBUG = false;
@@ -113,15 +113,38 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     manager.update(ref, { mirrorsIds: FieldValue.arrayUnion(mirrorId) });
   }
 
+  /** checks if this query should use a subcollection and set up the query object on the best collection */
+  private getBaseQuery = (queryParams: PostsQueryDefined) => {
+    /** general posts subcollection */
+    if (queryParams.semantics?.refs?.length === 1) {
+      const linkId = hashUrl(queryParams.semantics.refs[0]);
+      const base = this.db.collections.linkPosts(linkId);
+      return filterByArrayContainsAny(
+        base,
+        `${STRUCTURED_SEMANTICS_KEY}.${REFS_KEY}`,
+        queryParams.semantics?.refs
+      );
+    }
+
+    if (queryParams.semantics?.keywords?.length === 1) {
+      const keyword = queryParams.semantics.keywords[0];
+      const base = this.db.collections.keywordPosts(keyword);
+      return filterByArrayContainsAny(
+        base,
+        `${STRUCTURED_SEMANTICS_KEY}.${KEYWORDS_KEY}`,
+        queryParams.semantics?.keywords
+      );
+    }
+
+    return this.db.collections.posts;
+  };
+
   /** Cannot be part of a transaction */
   public async getMany(queryParams: PostsQueryDefined) {
     /** type protection against properties renaming */
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
-    const { useLinksSubcollection, useKeywordsSubcollection } =
-      doesQueryUseSubcollection(queryParams);
-
-    const baseQuery = getBaseQuery(this.db.collections, queryParams);
+    const baseQuery = this.getBaseQuery(queryParams);
 
     let query = filterByEqual(baseQuery, AUTHOR_USER_KEY, queryParams.userId);
 
@@ -182,30 +205,36 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       }
     })(query);
 
-    const posts = await paginated
+    const postsIds = await paginated
       .limit(queryParams.fetchParams.expectedAmount)
+      .select('id')
       .get();
 
-    let appPosts = (await (async () => {
-      if (useLinksSubcollection || useKeywordsSubcollection) {
-        const docRefs = posts.docs.map((doc) =>
-          this.db.collections.posts.doc(doc.id)
-        );
-        if (docRefs.length === 0) return [];
-        const docs = await this.db.firestore.getAll(...docRefs);
-        return docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-      }
-      return posts.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-    })()) as AppPost[];
+    /** need to get the full AppPost objects since the baseQuery just included indexed properties */
+    const docRefs = postsIds.docs.map((doc) =>
+      this.db.collections.posts.doc(doc.id)
+    );
+
+    const appPosts = await this.getDocsFromRefs<AppPost>(docRefs);
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
+
+  private getDocsFromRefs = async <T>(
+    refs: FirebaseFirestore.DocumentReference<
+      FirebaseFirestore.DocumentData,
+      FirebaseFirestore.DocumentData
+    >[]
+  ): Promise<T[]> => {
+    if (refs.length === 0) return [] as T[];
+
+    const docs = await this.db.firestore.getAll(...refs);
+
+    return docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as T[];
+  };
 
   public async getAggregatedRefLabels(reference: string): Promise<RefLabel[]> {
     const refLabels: RefLabel[] = [];
@@ -226,7 +255,6 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
             label,
             postId: doc.id,
             authorProfileId: refPost.authorProfileId,
-            platformPostUrl: refPost.platformPostUrl,
           })
         );
         refLabels.push(...thisRefLabels);

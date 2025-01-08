@@ -223,7 +223,8 @@ export class PostsProcessing {
           authorProfileId: post.authorProfileId,
           createdAtMs: post.createdAtMs,
           structuredSemantics,
-          platformPostUrl: post.generic.thread[0].url,
+          origin: post.origin,
+          authorUserId: post.authorUserId,
         };
         await this.keywordsService.deleteKeywordPost(keyword, post.id, manager);
         await this.keywordsService.setKeywordPost(keyword, postData, manager);
@@ -244,8 +245,9 @@ export class PostsProcessing {
       authorProfileId: post.authorProfileId,
       createdAtMs: post.createdAtMs,
       structuredSemantics: semantics,
-      platformPostUrl: post.generic.thread[0].url,
-    } as PostSubcollectionIndex);
+      origin: post.origin,
+      authorUserId: post.authorUserId,
+    });
 
     /** always delete all labels from a post for a reference */
     await this.linksService.deleteRefPost(url, post.id, manager);
