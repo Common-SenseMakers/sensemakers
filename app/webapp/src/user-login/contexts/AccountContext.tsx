@@ -262,6 +262,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     setHideShareInfo(null);
     _setLoginFlowState(LoginFlowState.Idle);
     _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
+    posthog?.reset();
   };
 
   const email = connectedUser ? connectedUser.email : undefined;
