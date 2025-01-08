@@ -2,6 +2,7 @@ import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
+import { normalizeUrl } from '../../src/@shared/utils/links.utils';
 import { SCIENCE_TOPIC_URI } from '../../src/@shared/utils/semantics.helper';
 import { logger } from '../../src/instances/logger';
 import { doesQueryUseSubcollection } from '../../src/posts/posts.helper';
@@ -84,6 +85,7 @@ describe('070 test feed', () => {
         return;
       }
       const { feed } = services;
+      // all tab
       const query1 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
@@ -91,10 +93,11 @@ describe('070 test feed', () => {
         },
       };
       const result1 = await feed.getFeed(query1);
-      expect(result1).to.have.length(3);
+      expect(result1).to.have.length(5);
       expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be
         .false;
 
+      // recommendations tab
       const query2 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
@@ -108,67 +111,48 @@ describe('070 test feed', () => {
 
       const query3 = {
         fetchParams: { expectedAmount: 10 },
-        semantics: {},
+        semantics: {
+          tab: 3,
+        },
       };
       const result3 = await feed.getFeed(query3);
-      expect(result3).to.have.length(5);
+      expect(result3).to.have.length(1);
       expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be
         .false;
-    });
-    it('returns a feed with aggregated reference labels', async () => {
-      if (USE_REAL_TWITTER) {
-        logger.warn(`Feed test disbaled with real twitter`);
-        return;
-      }
-      const { feed } = services;
-      const query1 = {
+
+      const query4 = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
-          tab: 1,
+          tab: 4,
+        },
+      };
+      const result4 = await feed.getFeed(query4);
+      expect(result4).to.have.length(0);
+      expect(doesQueryUseSubcollection(query4).useLinksSubcollection).to.be
+        .false;
+
+      const query5 = {
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          tab: 5,
+        },
+      };
+      const result5 = await feed.getFeed(query5);
+      expect(result5).to.have.length(4);
+      expect(doesQueryUseSubcollection(query5).useLinksSubcollection).to.be
+        .false;
+
+      /** check aggregatred labels */
+      const query5a = {
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          tab: 5,
         },
         hydrateConfig: { addAggregatedLabels: true },
       };
-      const result1 = await feed.getFeed(query1);
-      expect(result1).to.have.length(3);
-      expect(doesQueryUseSubcollection(query1).useLinksSubcollection).to.be
-        .false;
-      result1.forEach((post) => {
-        expect(post.meta?.references).to.not.be.undefined;
-        post.meta &&
-          expect(Object.keys(post.meta.references)).to.have.length.greaterThan(
-            0
-          );
-      });
+      const result5a = await feed.getFeed(query5a);
 
-      const query2 = {
-        fetchParams: { expectedAmount: 10 },
-        semantics: {
-          tab: 2,
-        },
-        hydrateConfig: { addAggregatedLabels: true },
-      };
-      const result2 = await feed.getFeed(query2);
-      expect(result2).to.have.length(2);
-      expect(doesQueryUseSubcollection(query2).useLinksSubcollection).to.be
-        .false;
-      result2.forEach((post) => {
-        expect(post.meta?.references).to.not.be.undefined;
-        post.meta &&
-          expect(Object.keys(post.meta.references)).to.have.length.greaterThan(
-            0
-          );
-      });
-
-      const query3 = {
-        fetchParams: { expectedAmount: 10 },
-        semantics: { tab: 0 },
-        hydrateConfig: { addAggregatedLabels: true },
-      };
-      const result3 = await feed.getFeed(query3);
-      expect(result3).to.have.length(5);
-      expect(doesQueryUseSubcollection(query3).useLinksSubcollection).to.be
-        .false;
-      result3.forEach((post) => {
+      result5a.forEach((post) => {
         expect(post.meta?.references).to.not.be.undefined;
         post.meta &&
           expect(Object.keys(post.meta.references)).to.have.length.greaterThan(
@@ -176,9 +160,11 @@ describe('070 test feed', () => {
           );
       });
     });
+
     describe('reference page feed', () => {
-      const TEST_REF =
-        'https://twitter.com/ItaiYanai/status/1780813867213336910';
+      const TEST_REF = normalizeUrl(
+        'https://twitter.com/ItaiYanai/status/1780813867213336910'
+      );
 
       it('returns unfiltered reference page feed', async () => {
         if (USE_REAL_TWITTER) {
@@ -195,7 +181,7 @@ describe('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(1);
+        expect(result).to.have.length(2);
         expect(doesQueryUseSubcollection(query).useLinksSubcollection).to.be
           .true;
       });
@@ -210,10 +196,7 @@ describe('070 test feed', () => {
           fetchParams: { expectedAmount: 10 },
           semantics: {
             refs: [TEST_REF],
-            labels: [
-              'http://purl.org/spar/cito/discusses',
-              'http://sense-nets.xyz/includesQuotationFrom',
-            ],
+            tab: 3,
           },
           hydrateConfig: { addAggregatedLabels: false },
         };
@@ -239,7 +222,7 @@ describe('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(1); // there are 2 posts with this tag and reference, but one of them is marked as not science
+        expect(result).to.have.length(2); // there are 2 posts with this tag and reference, but one of them is marked as not science
         expect(doesQueryUseSubcollection(query).useLinksSubcollection).to.be
           .true;
       });
