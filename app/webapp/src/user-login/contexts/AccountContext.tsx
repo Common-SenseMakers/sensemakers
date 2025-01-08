@@ -1,3 +1,4 @@
+import { usePostHog } from 'posthog-js/react';
 import {
   PropsWithChildren,
   createContext,
@@ -5,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -14,6 +16,7 @@ import { OrcidProfile } from '../../shared/types/types.orcid';
 import {
   ALL_IDENTITY_PLATFORMS,
   ALL_PUBLISH_PLATFORMS,
+  ALL_SOURCE_PLATFORMS,
   IDENTITY_PLATFORM,
   PLATFORM,
 } from '../../shared/types/types.platforms';
@@ -126,6 +129,8 @@ export const AccountContext = (props: PropsWithChildren) => {
     );
 
   const [, setHideShareInfo] = usePersist<boolean>(HIDE_SHARE_INFO, false);
+  const posthog = usePostHog();
+  const identifiedRef = useRef(false);
 
   const setOverallLoginStatus = useCallback(
     (status: OverallLoginStatus) => {
@@ -318,6 +323,25 @@ export const AccountContext = (props: PropsWithChildren) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectedPlatforms, connectedUser, platformsConnectedStatus]);
+
+  useEffect(() => {
+    let username = undefined;
+    if (connectedUser?.profiles) {
+      ALL_SOURCE_PLATFORMS.forEach((platform) => {
+        if (connectedUser.profiles?.[platform]) {
+          username = connectedUser.profiles[platform]?.username;
+        }
+      });
+    }
+
+    if (connectedUser && username && !identifiedRef.current) {
+      posthog?.identify(connectedUser.userId, {
+        username,
+        userId: connectedUser.userId,
+      });
+      identifiedRef.current = true;
+    }
+  }, [connectedUser, posthog]);
 
   return (
     <AccountContextValue.Provider
