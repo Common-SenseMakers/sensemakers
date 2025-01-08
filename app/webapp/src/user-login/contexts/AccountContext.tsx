@@ -328,11 +328,12 @@ export const AccountContext = (props: PropsWithChildren) => {
   useEffect(() => {
     let username = undefined;
     if (connectedUser?.profiles) {
-      ALL_SOURCE_PLATFORMS.forEach((platform) => {
-        if (connectedUser.profiles?.[platform]) {
+      for (const platform of ALL_SOURCE_PLATFORMS) {
+        if (connectedUser.profiles[platform]) {
           username = connectedUser.profiles[platform]?.username;
+          break;
         }
-      });
+      }
     }
 
     if (connectedUser && username && !identifiedRef.current) {
