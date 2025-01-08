@@ -1,10 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
-import {
-  ArrayIncludeQuery,
-  PostSubcollectionIndex,
-} from '../@shared/types/types.posts';
+import { ArrayIncludeQuery, IndexedPost } from '../@shared/types/types.posts';
 import {
   AppPost,
   AppPostCreate,
@@ -29,6 +26,7 @@ import {
   TABS_KEY,
   TOPIC_KEY,
 } from '../posts/posts.helper';
+import { IndexedPostsRepo } from './indexed.posts.repository';
 
 const DEBUG = false;
 const DEBUG_PREFIX = 'PostsRepository';
@@ -115,27 +113,19 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
   /** checks if this query should use a subcollection and set up the query object on the best collection */
   private getBaseQuery = (queryParams: PostsQueryDefined) => {
+    if (queryParams.semantics?.ref) {
+      const refId = hashUrl(queryParams.semantics.ref);
+      const indexedRepo = new IndexedPostsRepo(this.db.collections.refs);
+      return indexedRepo.getPostsCollection(refId);
+    }
+
+    if (queryParams.semantics?.keyword) {
+      const keyword = queryParams.semantics.keyword;
+      const indexedRepo = new IndexedPostsRepo(this.db.collections.keywords);
+      return indexedRepo.getPostsCollection(keyword);
+    }
+
     /** general posts subcollection */
-    if (queryParams.semantics?.refs?.length === 1) {
-      const linkId = hashUrl(queryParams.semantics.refs[0]);
-      const base = this.db.collections.linkPosts(linkId);
-      return filterByArrayContainsAny(
-        base,
-        `${STRUCTURED_SEMANTICS_KEY}.${REFS_KEY}`,
-        queryParams.semantics?.refs
-      );
-    }
-
-    if (queryParams.semantics?.keywords?.length === 1) {
-      const keyword = queryParams.semantics.keywords[0];
-      const base = this.db.collections.keywordPosts(keyword);
-      return filterByArrayContainsAny(
-        base,
-        `${STRUCTURED_SEMANTICS_KEY}.${KEYWORDS_KEY}`,
-        queryParams.semantics?.keywords
-      );
-    }
-
     return this.db.collections.posts;
   };
 
@@ -211,41 +201,26 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       .get();
 
     /** need to get the full AppPost objects since the baseQuery just included indexed properties */
-    const docRefs = postsIds.docs.map((doc) =>
-      this.db.collections.posts.doc(doc.id)
-    );
-
-    const appPosts = await this.getDocsFromRefs<AppPost>(docRefs);
+    const docIds = postsIds.docs.map((doc) => doc.id);
+    const appPosts = await this.getFromIds(docIds);
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
-  private getDocsFromRefs = async <T>(
-    refs: FirebaseFirestore.DocumentReference<
-      FirebaseFirestore.DocumentData,
-      FirebaseFirestore.DocumentData
-    >[]
-  ): Promise<T[]> => {
-    if (refs.length === 0) return [] as T[];
-
-    const docs = await this.db.firestore.getAll(...refs);
-
-    return docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as T[];
-  };
-
-  public async getAggregatedRefLabels(reference: string): Promise<RefLabel[]> {
+  public async getAggregatedRefLabels(
+    reference: string,
+    manager: TransactionManager
+  ): Promise<RefLabel[]> {
     const refLabels: RefLabel[] = [];
 
     // Get all posts for reference from their respective subcollections
-    const linkId = hashUrl(reference);
-    const linkPosts = await this.db.collections.linkPosts(linkId).get();
+    const refId = hashUrl(reference);
+    const indexedRepo = new IndexedPostsRepo(this.db.collections.refs);
+
+    const refPosts = await indexedRepo.getAllPosts(refId, manager);
 
     // Process each post's labels directly from the subcollection documents
-    linkPosts.docs.forEach((doc) => {
-      const refPost = doc.data() as PostSubcollectionIndex;
+    refPosts.forEach((refPost) => {
       if (
         refPost?.structuredSemantics?.labels &&
         refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
@@ -253,7 +228,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
         const thisRefLabels = refPost.structuredSemantics?.labels?.map(
           (label): RefLabel => ({
             label,
-            postId: doc.id,
+            postId: refPost.id,
             authorProfileId: refPost.authorProfileId,
           })
         );

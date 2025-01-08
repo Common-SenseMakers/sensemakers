@@ -6,8 +6,6 @@ import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
 import { DBInstance } from '../db/instance';
 import { FeedService } from '../feed/feed.service';
-import { KeywordsRepository } from '../keywords/keywords.repository';
-import { KeywordsService } from '../keywords/keywords.service';
 import { LinksRepository } from '../links/links.repository';
 import { LinksConfig, LinksService } from '../links/links.service';
 import { getLinksMock } from '../links/links.service.mock';
@@ -91,7 +89,6 @@ export const createServices = (
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
   const linksRepo = new LinksRepository(db);
-  const keywordsRepo = new KeywordsRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -172,8 +169,6 @@ export const createServices = (
     config.mock.USE_REAL_LINKS ? undefined : { get: true, enable: true }
   );
 
-  const keywordsService = new KeywordsService(keywordsRepo, time);
-
   /** posts service */
   const postsProcessing = new PostsProcessing(
     usersService,
@@ -181,8 +176,7 @@ export const createServices = (
     postsRepo,
     platformPostsRepo,
     platformsService,
-    linksService,
-    keywordsService
+    linksService
   );
   // const postsParser = new PostsParser(platformsService, parserService);
   const postsManager = new PostsManager(

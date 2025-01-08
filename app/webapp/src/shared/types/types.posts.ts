@@ -1,5 +1,10 @@
 import { FetchParams } from './types.fetch';
-import { AppPostSemantics, ParsePostResult, RefMeta } from './types.parser';
+import {
+  AppPostSemantics,
+  OntologyItem,
+  ParsePostResult,
+  RefMeta,
+} from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 import { PLATFORM } from './types.platforms';
 import { RefDisplayMeta } from './types.references';
@@ -36,20 +41,22 @@ export interface TabsInfo {
 }
 
 export interface StructuredSemantics {
-  labels?: ArrayIncludeQuery;
   tabs?: TabsInfo;
   keywords?: string[];
   refs?: string[];
-  refsMeta?: Record<string, RefMeta>;
   topic?: string;
+
+  labels?: ArrayIncludeQuery;
+  refsMeta?: Record<string, RefMeta>;
+  ontology?: OntologyItem[];
 }
 
 export type ArrayIncludeQuery = string[];
 
 export interface StructuredSemanticsQuery {
   tab?: number;
-  keywords?: ArrayIncludeQuery;
-  refs?: ArrayIncludeQuery;
+  keyword?: string;
+  ref?: string;
   topic?: string;
 }
 
@@ -182,7 +189,7 @@ export interface GetPostPayload {
   config?: HydrateConfig;
 }
 
-export type PostSubcollectionIndex = Pick<
+export type IndexedPost = Pick<
   AppPost,
   | 'id'
   | 'authorUserId'

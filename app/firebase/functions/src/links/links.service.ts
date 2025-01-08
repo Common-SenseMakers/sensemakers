@@ -1,5 +1,4 @@
 import { RefMeta } from '../@shared/types/types.parser';
-import { PostSubcollectionIndex } from '../@shared/types/types.posts';
 import {
   LinkMeta,
   LinkSource,
@@ -131,28 +130,5 @@ export class LinksService {
 
     const newOembed = await this.refreshOEmbed(url, manager, refMetaOrg);
     return newOembed;
-  }
-
-  async setRefPost(
-    url: string,
-    postData: PostSubcollectionIndex,
-    manager: TransactionManager
-  ) {
-    const linkId = hashUrl(url);
-    await this.links.setRefPost(linkId, postData, manager);
-  }
-
-  async getRefPosts(url: string, manager: TransactionManager) {
-    const linkId = hashUrl(url);
-    return this.links.getRefPosts(linkId, manager);
-  }
-
-  async deleteRefPost(
-    url: string,
-    postId: string,
-    manager: TransactionManager
-  ) {
-    const linkId = hashUrl(url);
-    return this.links.deleteRefPost(linkId, postId, manager);
   }
 }

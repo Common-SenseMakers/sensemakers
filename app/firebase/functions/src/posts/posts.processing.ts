@@ -1,3 +1,5 @@
+import { CollectionReference } from 'firebase-admin/firestore';
+
 import { ParsePostResult, RefMeta } from '../@shared/types/types.parser';
 import {
   PlatformPost,
@@ -13,7 +15,7 @@ import {
   AppPostParsedStatus,
   AppPostParsingStatus,
   HydrateConfig,
-  PostSubcollectionIndex,
+  IndexedPost,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import { RefDisplayMeta } from '../@shared/types/types.references';
@@ -26,13 +28,14 @@ import {
   getReferenceLabels,
   getTopic,
 } from '../@shared/utils/semantics.helper';
+import { DBInstance } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
-import { KeywordsService } from '../keywords/keywords.service';
 import { LinksService } from '../links/links.service';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';
+import { IndexedPostsRepo } from './indexed.posts.repository';
 import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
 
@@ -48,7 +51,7 @@ export class PostsProcessing {
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService,
     public linksService: LinksService,
-    public keywordsService: KeywordsService
+    public db: DBInstance
   ) {}
 
   /**
@@ -187,71 +190,56 @@ export class PostsProcessing {
       refs: Object.keys(refsMeta),
     };
 
-    /** Sync ref posts semantics on redundant subcollections */
-    await Promise.all(
-      Array.from(Object.keys(refsLabels)).map(async (ref) => {
-        const refStructuredSemantics = {
-          ...structuredSemantics,
-          /** filter - only labels that apply to that ref */
-          labels: refsLabels[ref],
-        };
-
-        await this.syncRefPost(ref, post, refStructuredSemantics, manager);
-      })
-    );
+    /** Indexed post */
+    const postData: IndexedPost = {
+      id: post.id,
+      authorProfileId: post.authorProfileId,
+      createdAtMs: post.createdAtMs,
+      structuredSemantics,
+      origin: post.origin,
+      authorUserId: post.authorUserId,
+    };
 
     // Sync keywords subcollections - remove deleted keywords and add new ones or update existing ones
+    const deletedKeywords = originalStructuredSemantics?.keywords
+      ? originalStructuredSemantics?.keywords.filter(
+          (element) => !Array.from(keywords).includes(element)
+        )
+      : [];
 
-    const deletedKeywords = (
-      originalStructuredSemantics?.keywords || []
-    ).filter((element) => !Array.from(keywords).includes(element));
-
-    await Promise.all(
-      deletedKeywords.map(async (keyword) => {
-        await this.keywordsService.deleteKeywordPost(keyword, postId, manager);
-      })
-    );
-
-    await Promise.all(
-      Array.from(keywords).map(async (keyword) => {
-        // Create the keyword document if it doesn't exist
-        this.keywordsService.setKeyword(keyword, manager);
-
-        // Add post to keyword's posts subcollection
-        const postData: PostSubcollectionIndex = {
-          id: post.id,
-          authorProfileId: post.authorProfileId,
-          createdAtMs: post.createdAtMs,
-          structuredSemantics,
-          origin: post.origin,
-          authorUserId: post.authorUserId,
-        };
-        await this.keywordsService.deleteKeywordPost(keyword, post.id, manager);
-        await this.keywordsService.setKeywordPost(keyword, postData, manager);
-      })
-    );
+    this.syncPostInCluster();
 
     await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
-  async syncRefPost(
-    url: string,
-    post: AppPost,
-    semantics: StructuredSemantics,
+  async syncPostInCluster(
+    cluster: CollectionReference,
+    postData: IndexedPost,
+    refs: string[],
+    keywords: { added: string[]; removed: string[] },
     manager: TransactionManager
   ) {
-    const refPostData: PostSubcollectionIndex = removeUndefined({
-      id: post.id,
-      authorProfileId: post.authorProfileId,
-      createdAtMs: post.createdAtMs,
-      structuredSemantics: semantics,
-      origin: post.origin,
-      authorUserId: post.authorUserId,
-    });
+    /** Sync ref posts semantics on redundant subcollections */
+    await Promise.all(
+      refs.map(async (ref) => {
+        const indexedRepo = new IndexedPostsRepo(cluster.refs);
+        await indexedRepo.setPost(ref, postData, manager);
+      })
+    );
 
-    /** always delete all labels from a post for a reference */
-    await this.linksService.deleteRefPost(url, post.id, manager);
-    await this.linksService.setRefPost(url, refPostData, manager);
+    await Promise.all(
+      keywords.removed.map(async (keyword) => {
+        const indexedRepo = new IndexedPostsRepo(this.db.collections.keywords);
+        await indexedRepo.deletePost(keyword, postData.id, manager);
+      })
+    );
+
+    await Promise.all(
+      keywords.added.map(async (keyword) => {
+        const indexedRepo = new IndexedPostsRepo(this.db.collections.keywords);
+        await indexedRepo.setPost(keyword, postData, manager);
+      })
+    );
   }
 
   async createAppPost(
@@ -303,7 +291,10 @@ export class PostsProcessing {
           refMetaOrg
         );
         if (config.addAggregatedLabels) {
-          const refLabels = await this.posts.getAggregatedRefLabels(ref);
+          const refLabels = await this.posts.getAggregatedRefLabels(
+            ref,
+            manager
+          );
           postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels });
         } else postFullMeta.set(ref, { oembed });
       }) || []
