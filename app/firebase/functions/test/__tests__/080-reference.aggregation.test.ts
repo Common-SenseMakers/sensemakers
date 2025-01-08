@@ -23,7 +23,7 @@ import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
 
-describe('080 get reference aggregation', () => {
+describe.only('080 get reference aggregation', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -99,7 +99,10 @@ describe('080 get reference aggregation', () => {
         'http://purl.org/spar/cito/discusses',
         'http://purl.org/spar/cito/linksTo',
         'https://sense-nets.xyz/asksQuestionAbout',
+        'https://sense-nets.xyz/includesQuotationFrom',
+        'http://purl.org/spar/cito/linksTo',
       ];
+
       expect(labels.length).to.equal(expectedLabels.length);
 
       for (const label of labels) {
