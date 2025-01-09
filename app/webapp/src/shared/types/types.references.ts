@@ -1,3 +1,5 @@
+import { OntologyItem } from './types.parser';
+
 export enum LinkSource {
   parser = 'PARSER',
   iframely = 'IFRAMELY',
@@ -44,4 +46,5 @@ export interface RefLabel {
 export interface RefDisplayMeta {
   aggregatedLabels?: RefLabel[];
   oembed?: OEmbed;
+  ontology?: OntologyItem[];
 }

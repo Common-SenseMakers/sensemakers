@@ -56,6 +56,7 @@ export interface Services {
   db: DBInstance;
   activity: ActivityService;
   links: LinksService;
+  ontology: OntologiesService;
 }
 
 export interface ServicesConfig {
@@ -210,6 +211,7 @@ export const createServices = (
     db,
     activity,
     links: linksService,
+    ontology: ontologiesService,
   };
 
   if (DEBUG) {

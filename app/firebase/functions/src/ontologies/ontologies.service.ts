@@ -20,4 +20,11 @@ export class OntologiesService {
       }
     }
   }
+
+  async getMany(uris: string[], manager: TransactionManager) {
+    const ontology = await Promise.all(
+      uris.map((uri) => this.repo.get(hashUrl(uri), manager))
+    );
+    return ontology.filter((o) => o !== undefined) as OntologyItem[];
+  }
 }

@@ -21,21 +21,34 @@ export const getRefMetaController: RequestHandler = async (
     };
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
-    const { db, postsManager, links } = getServices(request);
+    const {
+      db,
+      postsManager,
+      links,
+      ontology: ontologyService,
+    } = getServices(request);
 
-    const { refOEmbed, refLabels } = await db.run(async (manager) => {
+    const { refOEmbed, refLabels, ontology } = await db.run(async (manager) => {
       const refOEmbed = await links.getOEmbed(queryParams.ref, manager);
+
       const refLabels =
         await postsManager.processing.posts.getAggregatedRefLabels(
           queryParams.ref,
           manager
         );
-      return { refOEmbed, refLabels };
+
+      const ontology = await ontologyService.getMany(
+        refLabels.map((l) => l.label),
+        manager
+      );
+
+      return { refOEmbed, refLabels, ontology };
     });
 
     const refDisplayMeta: RefDisplayMeta = {
       oembed: refOEmbed,
       aggregatedLabels: refLabels,
+      ontology,
     };
 
     if (DEBUG)
