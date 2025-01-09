@@ -165,7 +165,7 @@ describe.only('070 test feed', () => {
         const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
-            refs: [TEST_REF],
+            ref: TEST_REF,
             topic: SCIENCE_TOPIC_URI,
           },
           hydrateConfig: { addAggregatedLabels: false },
@@ -183,7 +183,7 @@ describe.only('070 test feed', () => {
         const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
-            refs: [TEST_REF],
+            ref: TEST_REF,
             tab: 3,
           },
           hydrateConfig: { addAggregatedLabels: false },
@@ -201,8 +201,8 @@ describe.only('070 test feed', () => {
         const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
-            refs: [TEST_REF],
-            keywords: ['AI'],
+            ref: TEST_REF,
+            keyword: 'AI',
             topic: SCIENCE_TOPIC_URI,
           },
           hydrateConfig: { addAggregatedLabels: false },
@@ -224,7 +224,7 @@ describe.only('070 test feed', () => {
         const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
-            keywords: [TEST_KEYWORD],
+            keyword: TEST_KEYWORD,
             topic: SCIENCE_TOPIC_URI,
           },
           hydrateConfig: { addAggregatedLabels: false },
@@ -242,8 +242,8 @@ describe.only('070 test feed', () => {
         const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
-            keywords: [TEST_KEYWORD],
-            tab: 2,
+            keyword: TEST_KEYWORD,
+            tab: 3,
           },
           hydrateConfig: { addAggregatedLabels: false },
         };
@@ -260,14 +260,14 @@ describe.only('070 test feed', () => {
         const query: PostsQueryDefined = {
           fetchParams: { expectedAmount: 10 },
           semantics: {
-            keywords: [TEST_KEYWORD],
-            refs: ['https://x.com/ItaiYanai/status/1780813867213336910'],
+            keyword: TEST_KEYWORD,
+            ref: 'https://x.com/ItaiYanai/status/1780813867213336910',
             topic: SCIENCE_TOPIC_URI,
           },
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(1);
+        expect(result).to.have.length(2);
       });
     });
   });

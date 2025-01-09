@@ -88,18 +88,25 @@ describe.only('080 get reference aggregation', () => {
         logger.warn(`Feed test disbaled with real twitter`);
         return;
       }
-      const { postsManager } = services;
+      const { postsManager, db } = services;
 
       const reference = normalizeUrl(
         'https://twitter.com/ItaiYanai/status/1780813867213336910'
       );
-      const labels =
-        await postsManager.processing.posts.getAggregatedRefLabels(reference);
+
+      const labels = await db.run(async (manager) => {
+        return postsManager.processing.posts.getAggregatedRefLabels(
+          reference,
+          manager
+        );
+      });
+
       const expectedLabels = [
-        'http://purl.org/spar/cito/discusses',
-        'http://purl.org/spar/cito/linksTo',
-        'https://sense-nets.xyz/asksQuestionAbout',
+        'https://sense-nets.xyz/announcesResource',
         'https://sense-nets.xyz/includesQuotationFrom',
+        'http://purl.org/spar/cito/linksTo',
+        'http://purl.org/spar/cito/discusses',
+        'https://sense-nets.xyz/asksQuestionAbout',
         'http://purl.org/spar/cito/linksTo',
       ];
 

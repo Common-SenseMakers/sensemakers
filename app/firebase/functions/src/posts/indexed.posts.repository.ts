@@ -1,5 +1,6 @@
 import { IndexedPost } from '../@shared/types/types.posts';
 import { CollectionNames } from '../@shared/utils/collectionNames';
+import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
 /** a repository of a collection that has posts as a subcollection  */
@@ -25,7 +26,7 @@ export class IndexedPostsRepo {
 
   async setPost(id: string, post: IndexedPost, manager: TransactionManager) {
     const postRef = this.getPostRef(id, post.id);
-    manager.create(postRef, post);
+    manager.create(postRef, removeUndefined(post));
   }
 
   async getAllPosts(

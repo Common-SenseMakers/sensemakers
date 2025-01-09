@@ -33,6 +33,7 @@ import { DBInstance } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
+import { hashUrl } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';
@@ -245,9 +246,9 @@ export class PostsProcessing {
             cluster.collection(CollectionNames.Refs)
           );
           if (action === 'add' && postData) {
-            await indexedRepo.setPost(ref, postData, manager);
+            await indexedRepo.setPost(hashUrl(ref), postData, manager);
           } else {
-            await indexedRepo.deletePost(ref, postId, manager);
+            await indexedRepo.deletePost(hashUrl(ref), postId, manager);
           }
         })
       );
