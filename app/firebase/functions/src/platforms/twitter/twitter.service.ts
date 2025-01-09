@@ -64,6 +64,7 @@ import {
   getTweetTextWithUrls,
   getTweetUrl,
   handleTwitterError,
+  startsWithRetweetPattern,
 } from './twitter.utils';
 
 export interface TwitterApiCredentials {
@@ -283,7 +284,7 @@ export class TwitterService
         expansions,
         'tweet.fields': tweetFields,
         'user.fields': userFields,
-        exclude: ['retweets', 'replies'],
+        exclude: ['replies'],
       };
 
       let nextToken: string | undefined = undefined;
@@ -452,7 +453,7 @@ export class TwitterService
     const genericThread: GenericPost[] = twitterThread.tweets.map((tweet) => {
       const genericPost: GenericPost = {
         url: getTweetUrl(twitterThread.author.username, tweet.id),
-        content: tweet.text,
+        content: startsWithRetweetPattern(tweet.text) ? '' : tweet.text, // if it is a retweet, make content an empty string
       };
 
       if (tweet.quoted_tweet) {

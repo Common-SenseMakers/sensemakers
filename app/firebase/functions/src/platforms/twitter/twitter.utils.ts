@@ -104,7 +104,7 @@ export const convertToAppTweets = (
   const formattedTweets = tweets.map((tweet): AppTweet => {
     const appTweetBase = convertToAppTweetBase(tweet);
     const quotedTweetId = tweet.referenced_tweets?.find(
-      (ref) => ref.type === 'quoted'
+      (ref) => ref.type === 'quoted' || ref.type === 'retweeted'
     )?.id;
     if (quotedTweetId) {
       const quotedTweet = includes?.tweets?.find(
@@ -222,4 +222,9 @@ export const getOriginalAuthor = (
   includes?: ApiV2Includes
 ) => {
   return includes?.users?.find((user) => user.id === user_id);
+};
+
+export const startsWithRetweetPattern = (text: string) => {
+  const retweetPattern = /^RT @[^:]+:/;
+  return retweetPattern.test(text);
 };
