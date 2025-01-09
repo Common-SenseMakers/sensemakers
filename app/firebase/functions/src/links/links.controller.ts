@@ -21,38 +21,34 @@ export const getRefMetaController: RequestHandler = async (
     };
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
-    const { db, postsManager, links } = getServices(request);
+    const {
+      db,
+      postsManager,
+      links,
+      ontology: ontologyService,
+    } = getServices(request);
 
-    const { refOEmbed, refPost } = await db.run(async (manager) => {
-      const refPosts = await links.getRefPosts(queryParams.ref, manager);
-      if (refPosts.length === 0) {
-        throw new Error(`No posts found for ref ${queryParams.ref}`);
-      }
-      const refPost = await postsManager.processing.posts.get(
-        refPosts[0].id,
+    const { refOEmbed, refLabels, ontology } = await db.run(async (manager) => {
+      const refOEmbed = await links.getOEmbed(queryParams.ref, manager);
+
+      const refLabels =
+        await postsManager.processing.posts.getAggregatedRefLabels(
+          queryParams.ref,
+          manager
+        );
+
+      const ontology = await ontologyService.getMany(
+        refLabels.map((l) => l.label),
         manager
       );
-      if (!refPost) {
-        throw new Error(`No post found for ref ${queryParams.ref}`);
-      }
-      const refMeta = refPost.originalParsed?.support?.refs_meta;
 
-      const refOEmbed = await links.getOEmbed(
-        queryParams.ref,
-        manager,
-        refMeta && refMeta[queryParams.ref]
-      );
-      return { refOEmbed, refPost };
+      return { refOEmbed, refLabels, ontology };
     });
-    const refLabels =
-      await postsManager.processing.posts.getAggregatedRefLabels([
-        queryParams.ref,
-      ]);
 
     const refDisplayMeta: RefDisplayMeta = {
       oembed: refOEmbed,
-      aggregatedLabels: refLabels[queryParams.ref],
-      ontology: refPost.originalParsed?.support?.ontology,
+      aggregatedLabels: refLabels,
+      ontology,
     };
 
     if (DEBUG)

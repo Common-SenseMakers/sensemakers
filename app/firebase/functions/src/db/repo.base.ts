@@ -94,6 +94,11 @@ export class BaseRepository<DataType, DataCreateType> {
     });
   }
 
+  public async exists(id: string, manager: TransactionManager) {
+    const doc = await this.getDoc(id, manager);
+    return doc.exists;
+  }
+
   public async get<T extends boolean, R = DataType>(
     id: string,
     manager: TransactionManager,

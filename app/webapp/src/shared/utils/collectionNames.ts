@@ -7,5 +7,9 @@ export enum CollectionNames {
   Profiles = 'profiles',
   Activity = 'activity',
   Links = 'links',
-  LinkPostsSubcollection = 'posts',
+  Ontologies = 'ontologies',
+
+  Refs = 'refs',
+  Keywords = 'keywords',
+  IndexedPostsSubcollection = 'IndexedPostsSubcollection',
 }

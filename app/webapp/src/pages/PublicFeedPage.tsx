@@ -5,7 +5,6 @@ import { Location, useLocation, useSearchParams } from 'react-router-dom';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { MultiTabFeeds } from '../feed/MultiTabFeeds';
-import { FeedTabConfig, feedTabs } from '../feed/feed.config';
 import { OverlayValue } from '../overlays/Overlay';
 import { OverlayContext, OverlayQueryParams } from '../overlays/OverlayContext';
 import { PublicFeedContext } from '../overlays/PublicFeedContext';
@@ -19,6 +18,7 @@ import {
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { PostClickEvent } from '../semantics/patterns/patterns';
+import { FeedTabConfig, feedTabs } from '../shared/utils/feed.config';
 
 const DEBUG = false;
 
@@ -47,7 +47,7 @@ const getFeedConfig = (
   return {
     endpoint: '/api/feed/get',
     queryParams: {
-      semantics: { labels: tab.labels, topic: tab.topic },
+      semantics: { tab: tab.index, topic: tab.topic },
       hydrateConfig: { addAggregatedLabels: true },
     },
     DEBUG_PREFIX,

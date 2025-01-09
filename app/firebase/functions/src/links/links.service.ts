@@ -3,7 +3,6 @@ import {
   LinkMeta,
   LinkSource,
   OEmbed,
-  RefPostData,
 } from '../@shared/types/types.references';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -131,28 +130,5 @@ export class LinksService {
 
     const newOembed = await this.refreshOEmbed(url, manager, refMetaOrg);
     return newOembed;
-  }
-
-  async setRefPost(
-    url: string,
-    postData: RefPostData,
-    manager: TransactionManager
-  ) {
-    const linkId = hashUrl(url);
-    await this.links.setRefPost(linkId, postData, manager);
-  }
-
-  async getRefPosts(url: string, manager: TransactionManager) {
-    const linkId = hashUrl(url);
-    return this.links.getRefPosts(linkId, manager);
-  }
-
-  async deleteRefPost(
-    url: string,
-    postId: string,
-    manager: TransactionManager
-  ) {
-    const linkId = hashUrl(url);
-    return this.links.deleteRefPost(linkId, postId, manager);
   }
 }

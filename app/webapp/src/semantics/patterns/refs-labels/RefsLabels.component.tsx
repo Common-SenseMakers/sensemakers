@@ -157,7 +157,10 @@ export const RefLabelsComponent = (props: PatternProps) => {
                       aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
                       showDescription={false}
                       editable={props.editable}
-                      ontology={props.originalParsed?.support?.ontology}
+                      ontology={
+                        props.originalParsed?.support?.ontology
+                          ?.semantic_predicates
+                      }
                       removeLabel={(labelUri: string) => {
                         removeLabel(ref, labelUri).catch(console.error);
                       }}
