@@ -1,5 +1,6 @@
 import { DataFactory } from 'n3';
 
+import { ClusterInstance } from '../@shared/types/types.clusters';
 import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PARSER_MODE,
@@ -52,6 +53,7 @@ import {
   isReferenceLabel,
   isZoteroType,
 } from '../@shared/utils/semantics.helper';
+import { ClustersService } from '../clusters/clusters.service';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
@@ -78,7 +80,8 @@ export class PostsManager {
     protected platforms: PlatformsService,
     protected parserService: ParserService,
     protected time: TimeService,
-    protected ontologies: OntologiesService
+    protected ontologies: OntologiesService,
+    protected clusters: ClustersService
   ) {}
 
   /**
@@ -480,7 +483,10 @@ export class PostsManager {
    * single place where new posts are fetched for a signedup user
    * from any platform
    * */
-  private async fetchIfNecessary(queryParams: PostsQueryDefined): Promise<{
+  private async fetchIfNecessary(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ): Promise<{
     posts: AppPost[];
     enough: boolean;
   }> {
@@ -505,7 +511,7 @@ export class PostsManager {
     let enough: boolean = true;
 
     /** if untilId is provided fetch backwards, but only if not enough posts are already stored */
-    const posts = await this.processing.posts.getMany(queryParams);
+    const posts = await this.processing.posts.getMany(queryParams, cluster);
 
     /** fetch if older posts are less thant he expected amount */
     if (posts.length < queryParams.fetchParams.expectedAmount) {
@@ -548,13 +554,16 @@ export class PostsManager {
   }
 
   /** get AppPost and fetch for new posts if necessary */
-  private async getAndFetchIfNecessary(queryParams: PostsQueryDefined) {
+  private async getAndFetchIfNecessary(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ) {
     if (!queryParams.userId) {
       throw new Error('userId is required');
     }
 
     /** only fetch if searching for all "my posts" and not filtering by status or  */
-    const { posts, enough } = await this.fetchIfNecessary(queryParams);
+    const { posts, enough } = await this.fetchIfNecessary(queryParams, cluster);
 
     /**
      * after fetching (if it was necessary), get the posts from
@@ -566,10 +575,13 @@ export class PostsManager {
         return posts;
       }
 
-      return this.processing.posts.getMany({
-        ...queryParams,
-        userId: queryParams.userId,
-      });
+      return this.processing.posts.getMany(
+        {
+          ...queryParams,
+          userId: queryParams.userId,
+        },
+        cluster
+      );
     })();
 
     return _posts;
@@ -605,7 +617,8 @@ export class PostsManager {
       ..._queryParams,
     };
 
-    const appPosts = await this.getAndFetchIfNecessary(queryParams);
+    const cluster = this.clusters.getInstance(queryParams.clusterId);
+    const appPosts = await this.getAndFetchIfNecessary(queryParams, cluster);
 
     const postsFull = await Promise.all(
       appPosts.map((post) =>
@@ -953,10 +966,14 @@ export class PostsManager {
               /** udpate the profile */
               const profileId = getProfileId(platform, account.user_id);
               /** get this account platform posts */
-              const posts = await this.processing.posts.getAllOfQuery({
-                profileId,
-                fetchParams: { expectedAmount: 1000 },
-              });
+              const posts = await this.processing.posts.getAllOfQuery(
+                {
+                  profileId,
+                  fetchParams: { expectedAmount: 1000 },
+                },
+                this.clusters.getInstance()
+              );
+
               if (DEBUG) {
                 logger.debug(`got ${posts.length} posts of ${profileId}`);
               }
@@ -988,10 +1005,13 @@ export class PostsManager {
   async deleteAccountFull(platformId: PLATFORM, user_id: string) {
     const profileId = getProfileId(platformId, user_id);
 
-    const posts = await this.processing.posts.getAllOfQuery({
-      profileId,
-      fetchParams: { expectedAmount: 100000 },
-    });
+    const posts = await this.processing.posts.getAllOfQuery(
+      {
+        profileId,
+        fetchParams: { expectedAmount: 100000 },
+      },
+      this.clusters.getInstance()
+    );
 
     if (DEBUG) {
       logger.debug(`fully deleting ${posts.length} posts of ${profileId}`);

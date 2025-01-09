@@ -4,6 +4,8 @@ import { OurTokenConfig } from '../@shared/types/types.fetch';
 import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
+import { ClustersRepository } from '../clusters/clusters.repository';
+import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
 import { FeedService } from '../feed/feed.service';
 import { LinksRepository } from '../links/links.repository';
@@ -93,11 +95,13 @@ export const createServices = (
   const activityRepo = new ActivityRepository(db);
   const linksRepo = new LinksRepository(db);
   const ontologiesRepo = new OntologiesRepository(db);
+  const clustersRepo = new ClustersRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
   const time = new TimeService();
   const ontologiesService = new OntologiesService(ontologiesRepo);
+  const clusters = new ClustersService(clustersRepo);
 
   const orcid = new OrcidService();
   const _twitter = new TwitterService(time, userRepo, config.twitter);
@@ -168,7 +172,13 @@ export const createServices = (
     config.mock.USE_REAL_PARSER ? 'real' : 'mock'
   );
 
-  const _linksService = new LinksService(linksRepo, time, config.links);
+  const _linksService = new LinksService(
+    clusters,
+    linksRepo,
+    time,
+    ontologiesService,
+    config.links
+  );
   const linksService = getLinksMock(
     _linksService,
     config.mock.USE_REAL_LINKS ? undefined : { get: true, enable: true }
@@ -192,14 +202,15 @@ export const createServices = (
     platformsService,
     parser,
     time,
-    ontologiesService
+    ontologiesService,
+    clusters
   );
 
   /** activity service */
   const activity = new ActivityService(activityRepo);
 
   /** feed */
-  const feed = new FeedService(db, postsManager);
+  const feed = new FeedService(db, postsManager, clusters);
 
   /** all services */
   const services: Services = {

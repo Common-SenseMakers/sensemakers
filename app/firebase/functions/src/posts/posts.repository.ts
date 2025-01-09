@@ -1,6 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
+import { ClusterInstance } from '../@shared/types/types.clusters';
 import { ArrayIncludeQuery } from '../@shared/types/types.posts';
 import {
   AppPost,
@@ -10,6 +11,7 @@ import {
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
 import { RefLabel } from '../@shared/types/types.references';
+import { CollectionNames } from '../@shared/utils/collectionNames';
 import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
 import { DBInstance, Query } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
@@ -82,7 +84,7 @@ export const filterByArrayContainsAny = (
 
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
-    super(db.collections.posts, db);
+    super(db.collections.posts);
   }
 
   public async update(
@@ -110,29 +112,39 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   /** checks if this query should use a subcollection and set up the query object on the best collection */
-  private getBaseQuery = (queryParams: PostsQueryDefined) => {
+  private getBaseQuery = (
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ) => {
     if (queryParams.semantics?.ref) {
       const refId = hashUrl(queryParams.semantics.ref);
-      const indexedRepo = new IndexedPostsRepo(this.db.collections.refs);
+      const indexedRepo = new IndexedPostsRepo(
+        cluster.collection(CollectionNames.Refs)
+      );
       return indexedRepo.getPostsCollection(refId);
     }
 
     if (queryParams.semantics?.keyword) {
       const keyword = queryParams.semantics.keyword;
-      const indexedRepo = new IndexedPostsRepo(this.db.collections.keywords);
+      const indexedRepo = new IndexedPostsRepo(
+        cluster.collection(CollectionNames.Keywords)
+      );
       return indexedRepo.getPostsCollection(keyword);
     }
 
     /** general posts subcollection */
-    return this.db.collections.posts;
+    return cluster.collection(CollectionNames.Posts);
   };
 
   /** Cannot be part of a transaction */
-  public async getMany(queryParams: PostsQueryDefined) {
+  public async getMany(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ) {
     /** type protection against properties renaming */
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
-    const baseQuery = this.getBaseQuery(queryParams);
+    const baseQuery = this.getBaseQuery(queryParams, cluster);
 
     let query = filterByEqual(baseQuery, AUTHOR_USER_KEY, queryParams.userId);
 
@@ -205,45 +217,17 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
-  public async getAggregatedRefLabels(
-    reference: string,
-    manager: TransactionManager
-  ): Promise<RefLabel[]> {
-    const refLabels: RefLabel[] = [];
-
-    // Get all posts for reference from their respective subcollections
-    const refId = hashUrl(reference);
-    const indexedRepo = new IndexedPostsRepo(this.db.collections.refs);
-
-    const refPosts = await indexedRepo.getAllPosts(refId, manager);
-
-    // Process each post's labels directly from the subcollection documents
-    refPosts.forEach((refPost) => {
-      if (
-        refPost?.structuredSemantics?.labels &&
-        refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
-      ) {
-        const thisRefLabels = refPost.structuredSemantics?.labels?.map(
-          (label): RefLabel => ({
-            label,
-            postId: refPost.id,
-            authorProfileId: refPost.authorProfileId,
-          })
-        );
-        refLabels.push(...thisRefLabels);
-      }
-    });
-
-    return refLabels;
-  }
-
-  public async getAllOfQuery(queryParams: PostsQueryDefined, limit?: number) {
+  public async getAllOfQuery(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance,
+    limit?: number
+  ) {
     let stillPending = true;
     const allPosts: AppPost[] = [];
 
     while (stillPending) {
       if (DEBUG) logger.debug('getAllOfQuery', queryParams, DEBUG_PREFIX);
-      const posts = await this.getMany(queryParams);
+      const posts = await this.getMany(queryParams, cluster);
 
       stillPending = posts.length === queryParams.fetchParams.expectedAmount;
 
@@ -301,5 +285,10 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   delete(postId: string, manager: TransactionManager) {
     const ref = this.getRef(postId);
     manager.delete(ref);
+  }
+
+  getPostClusters(postId: string) {
+    const docRef = this.getRef(postId);
+    const clusters = docRef.collection(CollectionNames.PostClusters);
   }
 }

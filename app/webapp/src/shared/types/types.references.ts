@@ -48,3 +48,8 @@ export interface RefDisplayMeta {
   oembed?: OEmbed;
   ontology?: OntologyItem[];
 }
+
+export interface GetRefDisplayMeta {
+  ref: string;
+  clusterId?: string;
+}

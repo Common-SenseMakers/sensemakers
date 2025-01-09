@@ -160,6 +160,7 @@ export interface PostsQueryParams {
 
 export interface PostsQuery extends PostsQueryParams {
   fetchParams?: FetchParams;
+  clusterId?: string;
 }
 
 export type PostsQueryDefined = Omit<PostsQuery, 'fetchParams'> & {

@@ -1,7 +1,6 @@
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
-import { DBInstance } from './instance';
 
 const DEBUG = false;
 
@@ -25,7 +24,6 @@ export function removeUndefined<T>(obj: T): T {
 export class BaseRepository<DataType, DataCreateType> {
   constructor(
     protected collection: FirebaseFirestore.CollectionReference,
-    protected db: DBInstance,
     protected idConvert?: {
       encode: (id: string) => string;
       decode: (encoded: string) => string;
@@ -62,7 +60,7 @@ export class BaseRepository<DataType, DataCreateType> {
     };
   }
 
-  protected getRef(id: string) {
+  public getRef(id: string) {
     const ref = this.collection.doc(this.encode ? this.encode(id) : id);
     if (DEBUG) logger.debug(`Getting ${this.decode(ref.id)}`);
     return ref;
@@ -88,7 +86,7 @@ export class BaseRepository<DataType, DataCreateType> {
     if (ids.length === 0) return [];
 
     const refs = Array.from(ids).map((id) => this.getRef(id));
-    const snapshot = await this.db.firestore.getAll(...refs);
+    const snapshot = await this.collection.firestore.getAll(...refs);
     return snapshot.map((doc) => {
       return { id: this.decode(doc.id), ...doc.data() } as DataType;
     });

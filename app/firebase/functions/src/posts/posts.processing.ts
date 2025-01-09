@@ -1,5 +1,4 @@
-import { CollectionReference } from 'firebase-admin/firestore';
-
+import { ClusterInstance } from '../@shared/types/types.clusters';
 import { ParsePostResult, RefMeta } from '../@shared/types/types.parser';
 import {
   PlatformPost,
@@ -29,8 +28,9 @@ import {
   getReferenceLabels,
   getTopic,
 } from '../@shared/utils/semantics.helper';
+import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
-import { removeUndefined } from '../db/repo.base';
+import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
 import { hashUrl } from '../links/links.utils';
@@ -40,10 +40,6 @@ import { UsersService } from '../users/users.service';
 import { IndexedPostsRepo } from './indexed.posts.repository';
 import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
-
-export interface ClusterType {
-  collection(collectionPath: string): CollectionReference;
-}
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
@@ -57,7 +53,7 @@ export class PostsProcessing {
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService,
     public linksService: LinksService,
-    public db: DBInstance
+    public clusters: ClustersService
   ) {}
 
   /**
@@ -213,24 +209,30 @@ export class PostsProcessing {
         )
       : [];
 
-    await this.syncPostInCluster(
-      this.db.firestore,
-      'add',
-      post.id,
-      manager,
-      postData,
-      structuredSemantics.refs || [],
-      {
-        new: structuredSemantics.keywords || [],
-        removed: deletedKeywords,
-      }
-    );
+      const clustersIds = await this.posts.getPostClusters(postId, manager);
+
+    await Promise.all(clustersIds.map(async (clusterId) => {
+      const cluster = this.clusters.getInstance(clusterId);
+      await this.syncPostInCluster(
+        cluster,
+        'add',
+        post.id,
+        manager,
+        postData,
+        structuredSemantics.refs || [],
+        {
+          new: structuredSemantics.keywords || [],
+          removed: deletedKeywords,
+        }
+      );
+    })
 
     await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
+
   async syncPostInCluster(
-    cluster: ClusterType,
+    cluster: ClusterInstance,
     action: 'add' | 'remove',
     postId: string,
     manager: TransactionManager,
@@ -238,6 +240,9 @@ export class PostsProcessing {
     refs?: string[],
     keywords?: { new: string[]; removed: string[] }
   ) {
+    /** Sync post in a cluster global posts collection */
+    const posts = new BaseRepository(cluster.collection(CollectionNames.Posts));
+
     /** Sync ref posts semantics on redundant subcollections */
     if (refs) {
       await Promise.all(
@@ -310,7 +315,8 @@ export class PostsProcessing {
   async hydratePostFull(
     post: AppPost,
     config: HydrateConfig,
-    manager: TransactionManager
+    manager: TransactionManager,
+    cluster: ClusterInstance
   ): Promise<AppPostFull> {
     const postFull: AppPostFull = post;
 
@@ -335,8 +341,9 @@ export class PostsProcessing {
           refMetaOrg
         );
         if (config.addAggregatedLabels) {
-          const refLabels = await this.posts.getAggregatedRefLabels(
+          const refLabels = await this.linksService.getAggregatedRefLabels(
             ref,
+            cluster,
             manager
           );
           postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels });
@@ -355,6 +362,7 @@ export class PostsProcessing {
     postId: string,
     config: HydrateConfig,
     manager: TransactionManager,
+    clusterId?: string,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
     const post = await this.posts.get(postId, manager, shouldThrow);
@@ -367,7 +375,8 @@ export class PostsProcessing {
       return undefined as DefinedIfTrue<T, R>;
     }
 
-    const postFull = await this.hydratePostFull(post, config, manager);
+    const cluster = this.clusters.getInstance(clusterId);
+    const postFull = await this.hydratePostFull(post, config, manager, cluster);
 
     return postFull as unknown as DefinedIfTrue<T, R>;
   }

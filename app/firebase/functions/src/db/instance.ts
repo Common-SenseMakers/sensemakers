@@ -29,9 +29,6 @@ export class DBInstance {
     activity: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     links: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     ontologies: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
-
-    refs: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
-    keywords: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
   constructor(firestore: Firestore) {
@@ -48,9 +45,6 @@ export class DBInstance {
       activity: this.firestore.collection(CollectionNames.Activity),
       links: this.firestore.collection(CollectionNames.Links),
       ontologies: this.firestore.collection(CollectionNames.Ontologies),
-
-      refs: this.firestore.collection(CollectionNames.Refs),
-      keywords: this.firestore.collection(CollectionNames.Keywords),
     };
   }
 
