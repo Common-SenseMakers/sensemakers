@@ -243,9 +243,15 @@ export class BlueskyService
         filter: 'posts_and_author_threads',
       });
 
-      const posts = response.data.feed
-        .map((item) => item.post)
-        .filter((post) => post.author.did === user_id) as BlueskyPost[];
+      const posts = response.data.feed.map((item) => {
+        if (item.reason?.$type === 'app.bsky.feed.defs#reasonRepost') {
+          return {
+            ...item.post,
+            repostedBy: item.reason,
+          };
+        }
+        return item.post;
+      }) as BlueskyPost[];
       if (posts.length === 0) break;
 
       allPosts.push(...posts);
@@ -317,7 +323,11 @@ export class BlueskyService
     const platformPosts = threads.map((thread) => ({
       post_id: thread.thread_id,
       user_id: thread.author.id,
-      timestampMs: new Date(thread.posts[0].record.createdAt).getTime(),
+      timestampMs: new Date(
+        thread.posts[0].repostedBy
+          ? thread.posts[0].repostedBy.indexedAt
+          : thread.posts[0].record.createdAt
+      ).getTime(),
       post: thread,
     }));
 
