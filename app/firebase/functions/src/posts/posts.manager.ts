@@ -56,6 +56,7 @@ import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { OntologiesService } from '../ontologies/ontologies.service';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TimeService } from '../time/time.service';
@@ -76,7 +77,8 @@ export class PostsManager {
     public processing: PostsProcessing,
     protected platforms: PlatformsService,
     protected parserService: ParserService,
-    protected time: TimeService
+    protected time: TimeService,
+    protected ontologies: OntologiesService
   ) {}
 
   /**
@@ -851,17 +853,23 @@ export class PostsManager {
     /** single place where we enforce rules over semantics */
     const parserResult = await this.sanitizeParserResult(post, _parserResult);
 
-    const update: PostUpdate = {
-      semantics: parserResult.semantics,
-      originalParsed: parserResult,
-      parsedStatus: AppPostParsedStatus.PROCESSED,
-      parsingStatus: AppPostParsingStatus.IDLE,
-    };
-
-    if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
+    if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId });
 
     /** store the semantics and mark as processed */
     await this.db.run(async (manager) => {
+      /** store the ontology */
+      if (parserResult.metadata?.ontology) {
+        await this.ontologies.setMany(parserResult.metadata?.ontology, manager);
+      }
+
+      /** store the semantics in the post */
+      const update: PostUpdate = {
+        semantics: parserResult.semantics,
+        originalParsed: parserResult,
+        parsedStatus: AppPostParsedStatus.PROCESSED,
+        parsingStatus: AppPostParsingStatus.IDLE,
+      };
+
       return this.updatePost(post.id, update, manager);
     });
   }

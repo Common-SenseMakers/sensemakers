@@ -1,10 +1,5 @@
 import { FetchParams } from './types.fetch';
-import {
-  AppPostSemantics,
-  OntologyItem,
-  ParsePostResult,
-  RefMeta,
-} from './types.parser';
+import { AppPostSemantics, ParsePostResult, RefMeta } from './types.parser';
 import { PlatformPost } from './types.platform.posts';
 import { PLATFORM } from './types.platforms';
 import { RefDisplayMeta } from './types.references';
@@ -48,7 +43,6 @@ export interface StructuredSemantics {
 
   labels?: ArrayIncludeQuery;
   refsMeta?: Record<string, RefMeta>;
-  ontology?: OntologyItem[];
 }
 
 export type ArrayIncludeQuery = string[];

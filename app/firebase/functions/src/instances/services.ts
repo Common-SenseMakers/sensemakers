@@ -9,6 +9,8 @@ import { FeedService } from '../feed/feed.service';
 import { LinksRepository } from '../links/links.repository';
 import { LinksConfig, LinksService } from '../links/links.service';
 import { getLinksMock } from '../links/links.service.mock';
+import { OntologiesRepository } from '../ontologies/ontologies.repository';
+import { OntologiesService } from '../ontologies/ontologies.service';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import {
@@ -89,10 +91,12 @@ export const createServices = (
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
   const linksRepo = new LinksRepository(db);
+  const ontologiesRepo = new OntologiesRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
   const time = new TimeService();
+  const ontologiesService = new OntologiesService(ontologiesRepo);
 
   const orcid = new OrcidService();
   const _twitter = new TwitterService(time, userRepo, config.twitter);
@@ -176,7 +180,8 @@ export const createServices = (
     postsRepo,
     platformPostsRepo,
     platformsService,
-    linksService
+    linksService,
+    db
   );
   // const postsParser = new PostsParser(platformsService, parserService);
   const postsManager = new PostsManager(
@@ -185,7 +190,8 @@ export const createServices = (
     postsProcessing,
     platformsService,
     parser,
-    time
+    time,
+    ontologiesService
   );
 
   /** activity service */

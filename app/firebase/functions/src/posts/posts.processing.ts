@@ -20,6 +20,7 @@ import {
 } from '../@shared/types/types.posts';
 import { RefDisplayMeta } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
+import { CollectionNames } from '../@shared/utils/collectionNames';
 import { getPostTabs } from '../@shared/utils/feed.config';
 import { parseRDF } from '../@shared/utils/n3.utils';
 import { getProfileId } from '../@shared/utils/profiles.utils';
@@ -38,6 +39,10 @@ import { UsersService } from '../users/users.service';
 import { IndexedPostsRepo } from './indexed.posts.repository';
 import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
+
+export interface ClusterType {
+  collection(collectionPath: string): CollectionReference;
+}
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
@@ -200,46 +205,84 @@ export class PostsProcessing {
       authorUserId: post.authorUserId,
     };
 
-    // Sync keywords subcollections - remove deleted keywords and add new ones or update existing ones
+    // Detect deleted keywords
     const deletedKeywords = originalStructuredSemantics?.keywords
       ? originalStructuredSemantics?.keywords.filter(
           (element) => !Array.from(keywords).includes(element)
         )
       : [];
 
-    this.syncPostInCluster();
+    await this.syncPostInCluster(
+      this.db.firestore,
+      'add',
+      post.id,
+      manager,
+      postData,
+      structuredSemantics.refs || [],
+      {
+        new: structuredSemantics.keywords || [],
+        removed: deletedKeywords,
+      }
+    );
 
     await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
   async syncPostInCluster(
-    cluster: CollectionReference,
-    postData: IndexedPost,
-    refs: string[],
-    keywords: { added: string[]; removed: string[] },
-    manager: TransactionManager
+    cluster: ClusterType,
+    action: 'add' | 'remove',
+    postId: string,
+    manager: TransactionManager,
+    postData?: IndexedPost,
+    refs?: string[],
+    keywords?: { new: string[]; removed: string[] }
   ) {
     /** Sync ref posts semantics on redundant subcollections */
-    await Promise.all(
-      refs.map(async (ref) => {
-        const indexedRepo = new IndexedPostsRepo(cluster.refs);
-        await indexedRepo.setPost(ref, postData, manager);
-      })
-    );
+    if (refs) {
+      await Promise.all(
+        refs.map(async (ref) => {
+          const indexedRepo = new IndexedPostsRepo(
+            cluster.collection(CollectionNames.Refs)
+          );
+          if (action === 'add' && postData) {
+            await indexedRepo.setPost(ref, postData, manager);
+          } else {
+            await indexedRepo.deletePost(ref, postId, manager);
+          }
+        })
+      );
+    }
 
-    await Promise.all(
-      keywords.removed.map(async (keyword) => {
-        const indexedRepo = new IndexedPostsRepo(this.db.collections.keywords);
-        await indexedRepo.deletePost(keyword, postData.id, manager);
-      })
-    );
+    if (keywords) {
+      if (action === 'add') {
+        await Promise.all(
+          keywords.removed.map(async (keyword) => {
+            const indexedRepo = new IndexedPostsRepo(
+              cluster.collection(CollectionNames.Keywords)
+            );
+            if (action === 'add' && postData) {
+              /** delete the post of the removed keywords, still an add post action */
+              await indexedRepo.deletePost(keyword, postData.id, manager);
+            } else {
+              await indexedRepo.deletePost(keyword, postId, manager);
+            }
+          })
+        );
+      }
 
-    await Promise.all(
-      keywords.added.map(async (keyword) => {
-        const indexedRepo = new IndexedPostsRepo(this.db.collections.keywords);
-        await indexedRepo.setPost(keyword, postData, manager);
-      })
-    );
+      await Promise.all(
+        keywords.new.map(async (keyword) => {
+          const indexedRepo = new IndexedPostsRepo(
+            cluster.collection(CollectionNames.Keywords)
+          );
+          if (action === 'add' && postData) {
+            await indexedRepo.setPost(keyword, postData, manager);
+          } else {
+            await indexedRepo.deletePost(keyword, postId, manager);
+          }
+        })
+      );
+    }
   }
 
   async createAppPost(
@@ -364,19 +407,7 @@ export class PostsProcessing {
       )
     );
 
-    /** delete all link subcollection posts */
-    await Promise.all(
-      post.structuredSemantics?.refs?.map((ref) => {
-        this.linksService.deleteRefPost(ref, postId, manager);
-      }) || []
-    );
-
-    /** delete all keyword subcollection posts */
-    await Promise.all(
-      post.structuredSemantics?.keywords?.map((keyword) => {
-        this.keywordsService.deleteKeywordPost(keyword, postId, manager);
-      }) || []
-    );
+    await this.syncPostInCluster(this.db.firestore, 'remove', postId, manager);
 
     this.posts.delete(postId, manager);
   }

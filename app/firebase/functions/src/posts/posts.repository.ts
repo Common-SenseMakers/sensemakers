@@ -1,7 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
-import { ArrayIncludeQuery, IndexedPost } from '../@shared/types/types.posts';
+import { ArrayIncludeQuery } from '../@shared/types/types.posts';
 import {
   AppPost,
   AppPostCreate,
@@ -19,9 +19,7 @@ import {
   AUTHOR_PROFILE_KEY,
   AUTHOR_USER_KEY,
   CREATED_AT_KEY,
-  KEYWORDS_KEY,
   ORIGIN_KEY,
-  REFS_KEY,
   STRUCTURED_SEMANTICS_KEY,
   TABS_KEY,
   TOPIC_KEY,

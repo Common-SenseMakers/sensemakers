@@ -36,7 +36,6 @@ export const getRefMetaController: RequestHandler = async (
     const refDisplayMeta: RefDisplayMeta = {
       oembed: refOEmbed,
       aggregatedLabels: refLabels,
-      ontology: refPost.originalParsed?.support?.ontology,
     };
 
     if (DEBUG)
