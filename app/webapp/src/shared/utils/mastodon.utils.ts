@@ -51,15 +51,19 @@ export function parseMastodonPostURI(uri: string) {
 
     const parts = uri.split('/');
 
-    if (parts.length !== 7) {
-      throw new Error('Invalid URI: expected exactly 7 parts.');
+    if (parts.length === 7) {
+      const [, , server, , username, , postId] = parts;
+
+      return { server, username, postId };
     }
+    if (parts.length === 8) {
+      const [, , server, , username, , postId] = parts;
 
-    const [, , server, , username, , postId] = parts;
-
-    return { server, username, postId };
+      return { server, username, postId };
+    }
+    throw new Error('Invalid URI: unexpected number of components.');
   } catch (error) {
     console.error((error as { message: string }).message);
-    throw new Error(`Error parsing mastodon uri ${uri}`);
+    throw new Error(`Error parsing mastodon uri ${uri}: ${error}`);
   }
 }

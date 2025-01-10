@@ -355,10 +355,33 @@ export class MastodonService
       avatarUrl: thread.author.avatar,
     };
 
-    const genericPosts: GenericPost[] = thread.posts.map((status) => ({
+    const genericPosts: GenericPost[] = thread.posts.map((status) => {
+      if (status.reblog) {
+        return {
+          content: cleanMastodonContent(status.content),
+          quotedThread: {
+            author: {
+              platformId: PLATFORM.Mastodon,
+              id: status.reblog.account.id,
+              username: parseMastodonAccountURI(status.reblog.account.url)
+                .globalUsername,
+              name: status.reblog.account.displayName,
+              avatarUrl: status.reblog.account.avatar,
+            },
+            thread: [
+              {
+                url: status.reblog.url || undefined,
+                content: cleanMastodonContent(status.reblog.content),
+              },
+            ],
+          },
+        };
+      }
+      return {
       url: status.url ? status.url : undefined,
       content: cleanMastodonContent(status.content),
-    }));
+      };
+    });
 
     return {
       author: genericAuthor,
