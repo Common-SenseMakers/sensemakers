@@ -395,6 +395,26 @@ export class BlueskyService
     };
 
     const genericPosts: GenericPost[] = thread.posts.map((post) => {
+      if (post.repostedBy) {
+        const genericRePost: GenericPost = {
+          content: '',
+          quotedThread: {
+            author: {
+              platformId: PLATFORM.Bluesky,
+              id: post.repostedBy.by.did,
+              username: post.repostedBy.by.handle,
+              name: post.repostedBy.by.displayName || post.repostedBy.by.handle,
+            },
+            thread: [
+              {
+                url: `https://bsky.app/profile/${post.repostedBy.by.handle}/post/${parseBlueskyURI(post.uri).rkey}`,
+                content: post.record.text,
+              },
+            ],
+          },
+        };
+        return genericRePost;
+      }
       const genericPost: GenericPost = {
         url: `https://bsky.app/profile/${post.author.handle}/post/${parseBlueskyURI(post.uri).rkey}`,
         content: cleanBlueskyContent(post.record),
