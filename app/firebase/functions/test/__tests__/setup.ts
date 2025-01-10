@@ -40,7 +40,7 @@ export interface TestUserData {
 }
 
 export interface TestProfileData {
-  profile: AccountProfileCreate;
+  profile: AccountProfileCreate<{ id: string; username: string }>;
   clustersIds: string[];
 }
 

@@ -23,7 +23,18 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-const feedThreads = [[''], [''], [''], [''], ['']];
+const feedThreads = [
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+];
 
 describe.only('070 test feed', () => {
   const services = getTestServices({
@@ -103,7 +114,7 @@ describe.only('070 test feed', () => {
         },
       };
       const result1 = await feed.getFeed(query1);
-      expect(result1).to.have.length(5);
+      expect(result1).to.have.length(10);
 
       // recommendations tab
       const query2: PostsQueryDefined = {
@@ -113,7 +124,7 @@ describe.only('070 test feed', () => {
         },
       };
       const result2 = await feed.getFeed(query2);
-      expect(result2).to.have.length(2);
+      expect(result2).to.have.length(3);
 
       const query3: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
@@ -122,7 +133,7 @@ describe.only('070 test feed', () => {
         },
       };
       const result3 = await feed.getFeed(query3);
-      expect(result3).to.have.length(1);
+      expect(result3).to.have.length(2);
 
       const query4: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
@@ -140,7 +151,7 @@ describe.only('070 test feed', () => {
         },
       };
       const result5 = await feed.getFeed(query5);
-      expect(result5).to.have.length(4);
+      expect(result5).to.have.length(8);
 
       /** check aggregatred labels */
       const query5a: PostsQueryDefined = {
@@ -173,10 +184,20 @@ describe.only('070 test feed', () => {
         semantics: {
           tab: 1,
         },
-        clusterId: 'test-cluster-02',
+        clusterId: 'test-cluster-01',
       };
       const result1 = await feed.getFeed(query1);
-      expect(result1).to.have.length(5);
+      expect(result1).to.have.length(7);
+
+      const query2: PostsQueryDefined = {
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          tab: 1,
+        },
+        clusterId: 'test-cluster-02',
+      };
+      const result2 = await feed.getFeed(query2);
+      expect(result2).to.have.length(5);
     });
 
     describe('reference page feed', () => {
@@ -199,7 +220,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(2);
+        expect(result).to.have.length(5);
       });
 
       it('returns reference page feed filtered by labels', async () => {
@@ -217,7 +238,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(1);
+        expect(result).to.have.length(2);
       });
 
       it('returns reference page feed filtered by keywords', async () => {
@@ -236,7 +257,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(2); // there are 2 posts with this tag and reference, but one of them is marked as not science
+        expect(result).to.have.length(5);
       });
     });
 
@@ -258,7 +279,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(2);
+        expect(result).to.have.length(5);
       });
 
       it('returns keyword page feed filtered by tab', async () => {
@@ -276,7 +297,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(1);
+        expect(result).to.have.length(2);
       });
 
       it('returns keyword page feed filtered by references', async () => {
@@ -295,7 +316,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(2);
+        expect(result).to.have.length(5);
       });
     });
   });
