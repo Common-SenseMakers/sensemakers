@@ -10,9 +10,7 @@ import {
   PostUpdate,
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
-import { RefLabel } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
-import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
 import { DBInstance, Query } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -287,8 +285,12 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     manager.delete(ref);
   }
 
-  getPostClusters(postId: string) {
+  async getPostClusters(postId: string) {
     const docRef = this.getRef(postId);
-    const clusters = docRef.collection(CollectionNames.PostClusters);
+    const clustersRef = docRef.collection(CollectionNames.PostClusters);
+    const snap = await clustersRef.select('id').get();
+    const clustersIds = snap.docs.map((doc) => doc.id);
+
+    return clustersIds;
   }
 }

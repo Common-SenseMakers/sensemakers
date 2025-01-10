@@ -29,7 +29,6 @@ import {
   getTopic,
 } from '../@shared/utils/semantics.helper';
 import { ClustersService } from '../clusters/clusters.service';
-import { DBInstance } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
@@ -209,27 +208,28 @@ export class PostsProcessing {
         )
       : [];
 
-      const clustersIds = await this.posts.getPostClusters(postId, manager);
+    const clustersIds = await this.posts.getPostClusters(postId);
 
-    await Promise.all(clustersIds.map(async (clusterId) => {
-      const cluster = this.clusters.getInstance(clusterId);
-      await this.syncPostInCluster(
-        cluster,
-        'add',
-        post.id,
-        manager,
-        postData,
-        structuredSemantics.refs || [],
-        {
-          new: structuredSemantics.keywords || [],
-          removed: deletedKeywords,
-        }
-      );
-    })
+    await Promise.all(
+      clustersIds.map(async (clusterId) => {
+        const cluster = this.clusters.getInstance(clusterId);
+        await this.syncPostInCluster(
+          cluster,
+          'add',
+          post.id,
+          manager,
+          postData,
+          structuredSemantics.refs || [],
+          {
+            new: structuredSemantics.keywords || [],
+            removed: deletedKeywords,
+          }
+        );
+      })
+    );
 
     await this.posts.update(postId, { structuredSemantics }, manager);
   }
-
 
   async syncPostInCluster(
     cluster: ClusterInstance,
@@ -240,8 +240,14 @@ export class PostsProcessing {
     refs?: string[],
     keywords?: { new: string[]; removed: string[] }
   ) {
-    /** Sync post in a cluster global posts collection */
+    /** Sync post in a cluster-specifc posts collection */
     const posts = new BaseRepository(cluster.collection(CollectionNames.Posts));
+
+    if (action === 'add') {
+      posts.set(postId, postData, manager);
+    } else {
+      posts.delete(postId, manager);
+    }
 
     /** Sync ref posts semantics on redundant subcollections */
     if (refs) {
@@ -362,7 +368,7 @@ export class PostsProcessing {
     postId: string,
     config: HydrateConfig,
     manager: TransactionManager,
-    clusterId?: string,
+    cluster: ClusterInstance,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
     const post = await this.posts.get(postId, manager, shouldThrow);
@@ -375,7 +381,6 @@ export class PostsProcessing {
       return undefined as DefinedIfTrue<T, R>;
     }
 
-    const cluster = this.clusters.getInstance(clusterId);
     const postFull = await this.hydratePostFull(post, config, manager, cluster);
 
     return postFull as unknown as DefinedIfTrue<T, R>;
@@ -417,7 +422,13 @@ export class PostsProcessing {
       )
     );
 
-    await this.syncPostInCluster(this.db.firestore, 'remove', postId, manager);
+    const clustersIds = await this.posts.getPostClusters(postId);
+    await Promise.all(
+      clustersIds.map(async (clusterId) => {
+        const cluster = this.clusters.getInstance(clusterId);
+        await this.syncPostInCluster(cluster, 'remove', postId, manager);
+      })
+    );
 
     this.posts.delete(postId, manager);
   }

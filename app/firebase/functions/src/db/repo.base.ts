@@ -71,6 +71,11 @@ export class BaseRepository<DataType, DataCreateType> {
     manager.set(ref, data);
   }
 
+  public delete(id: string, manager: TransactionManager) {
+    const ref = this.getRef(id);
+    manager.delete(ref);
+  }
+
   protected async getDoc(id: string, manager: TransactionManager) {
     const ref = this.getRef(id);
     if (DEBUG) logger.debug(`Getting doc ${this.decode(ref.id)}`);

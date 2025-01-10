@@ -192,7 +192,7 @@ export const createServices = (
     platformPostsRepo,
     platformsService,
     linksService,
-    db
+    clusters
   );
   // const postsParser = new PostsParser(platformsService, parserService);
   const postsManager = new PostsManager(

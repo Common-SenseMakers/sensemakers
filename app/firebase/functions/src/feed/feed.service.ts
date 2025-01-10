@@ -52,7 +52,8 @@ export class FeedService {
           this.postsManager.processing.hydratePostFull(
             post,
             hydrateConfig,
-            manager
+            manager,
+            cluster
           )
         )
       )

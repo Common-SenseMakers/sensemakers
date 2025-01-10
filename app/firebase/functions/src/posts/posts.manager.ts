@@ -623,7 +623,7 @@ export class PostsManager {
     const postsFull = await Promise.all(
       appPosts.map((post) =>
         this.db.run((manager) =>
-          this.processing.hydratePostFull(post, hydrateConfig, manager)
+          this.processing.hydratePostFull(post, hydrateConfig, manager, cluster)
         )
       )
     );
@@ -639,13 +639,17 @@ export class PostsManager {
     postId: string,
     config: HydrateConfig,
     shouldThrow?: T,
-    manager?: TransactionManager
+    manager?: TransactionManager,
+    clusterId?: string
   ) {
     const func = async (manager: TransactionManager) => {
+      const cluster = this.clusters.getInstance(clusterId);
+
       const post = await this.processing.getPostFull(
         postId,
         config,
         manager,
+        cluster,
         shouldThrow
       );
       // use this occassion to check if post processing expired
@@ -667,6 +671,7 @@ export class PostsManager {
             postId,
             config,
             manager,
+            cluster,
             shouldThrow
           );
         }
