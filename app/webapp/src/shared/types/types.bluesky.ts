@@ -97,4 +97,4 @@ export interface AccessJwtPayload {
   aud: string;
 }
 
-export const BLUESKY_REPOST_URI_PARAM = 'reposted_by';
+export const BLUESKY_REPOSTED_BY_URI_PARAM = 'reposted_by';

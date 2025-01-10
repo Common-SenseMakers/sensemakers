@@ -7,7 +7,7 @@ import { Link } from '@atproto/api/dist/client/types/app/bsky/richtext/facet';
 import { Firestore } from 'firebase-admin/firestore';
 
 import {
-  BLUESKY_REPOST_URI_PARAM,
+  BLUESKY_REPOSTED_BY_URI_PARAM,
   BlueskyPost,
   BlueskyThread,
   QuotedBlueskyPost,
@@ -68,9 +68,13 @@ export const convertBlueskyPostsToThreads = (
       if (!post.repostedBy) {
         throw new Error('reposted by info not present');
       }
+      const threadIdUrl = new URL(post.uri);
+      threadIdUrl.searchParams.append(
+        BLUESKY_REPOSTED_BY_URI_PARAM,
+        post.repostedBy.by.did
+      );
       return {
-        thread_id:
-          post.uri + `?${BLUESKY_REPOST_URI_PARAM}=${post.repostedBy.by.did}`,
+        thread_id: threadIdUrl.toString(),
         posts: [cleanBlueskyPost(post)],
         author: {
           id: post.repostedBy.by.did,
