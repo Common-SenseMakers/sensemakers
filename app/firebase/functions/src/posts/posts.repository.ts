@@ -284,13 +284,4 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const ref = this.getRef(postId);
     manager.delete(ref);
   }
-
-  async getPostClusters(postId: string) {
-    const docRef = this.getRef(postId);
-    const clustersRef = docRef.collection(CollectionNames.PostClusters);
-    const snap = await clustersRef.select('id').get();
-    const clustersIds = snap.docs.map((doc) => doc.id);
-
-    return clustersIds;
-  }
 }

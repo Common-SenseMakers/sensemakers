@@ -36,13 +36,15 @@ export const createUsers = async (
           manager
         );
 
-        userData.clustersIds.map((clusterId) => {
-          services.users.profiles.addCluster(
-            createdProfile.id,
-            clusterId,
-            manager
-          );
-        });
+        await Promise.all(
+          userData.clustersIds.map((clusterId) => {
+            return services.users.profiles.addCluster(
+              createdProfile.id,
+              clusterId,
+              manager
+            );
+          })
+        );
       });
 
       return services.users.repo.getUser(userId, manager, true);
@@ -67,13 +69,15 @@ export const createProfiles = async (
         manager
       );
 
-      clustersIds.map((clusterId) => {
-        services.users.profiles.addCluster(
-          createdProfile.id,
-          clusterId,
-          manager
-        );
-      });
+      await Promise.all(
+        clustersIds.map((clusterId) => {
+          return services.users.profiles.addCluster(
+            createdProfile.id,
+            clusterId,
+            manager
+          );
+        })
+      );
 
       return createdProfile;
     })

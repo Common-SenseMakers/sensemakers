@@ -1,3 +1,5 @@
+import { FieldValue } from 'firebase-admin/firestore';
+
 import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountProfile,
@@ -8,7 +10,6 @@ import {
   profileDefaults,
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
-import { CollectionNames } from '../@shared/utils/collectionNames';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import { DBInstance, Query } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
@@ -282,15 +283,26 @@ export class ProfilesRepository {
     });
   }
 
-  addCluster(
+  async getClusters(profileId: string, manager: TransactionManager) {
+    const profile = await this.getByProfileId(profileId, manager, true);
+    return profile.clusters;
+  }
+
+  async addCluster(
     profileId: string,
     clusterId: string,
     manager: TransactionManager
   ) {
-    const ref = this.db.collections.profiles.doc(profileId);
-    const collection = ref.collection(CollectionNames.ProfileClusters);
-    const cluster = collection.doc(clusterId);
+    const ref = await this.getRef(profileId, manager, true);
+    manager.update(ref, { clusters: FieldValue.arrayUnion(clusterId) });
+  }
 
-    manager.create(cluster, { id: clusterId });
+  async removeCluster(
+    profileId: string,
+    clusterId: string,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getRef(profileId, manager, true);
+    manager.update(ref, { clusters: FieldValue.arrayRemove(clusterId) });
   }
 }

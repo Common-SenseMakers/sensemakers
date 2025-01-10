@@ -96,7 +96,7 @@ describe.only('070 test feed', () => {
       }
       const { feed } = services;
       // all tab
-      const query1 = {
+      const query1: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 1,
@@ -106,7 +106,7 @@ describe.only('070 test feed', () => {
       expect(result1).to.have.length(5);
 
       // recommendations tab
-      const query2 = {
+      const query2: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 2,
@@ -115,7 +115,7 @@ describe.only('070 test feed', () => {
       const result2 = await feed.getFeed(query2);
       expect(result2).to.have.length(2);
 
-      const query3 = {
+      const query3: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 3,
@@ -124,7 +124,7 @@ describe.only('070 test feed', () => {
       const result3 = await feed.getFeed(query3);
       expect(result3).to.have.length(1);
 
-      const query4 = {
+      const query4: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 4,
@@ -133,7 +133,7 @@ describe.only('070 test feed', () => {
       const result4 = await feed.getFeed(query4);
       expect(result4).to.have.length(0);
 
-      const query5 = {
+      const query5: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 5,
@@ -143,7 +143,7 @@ describe.only('070 test feed', () => {
       expect(result5).to.have.length(4);
 
       /** check aggregatred labels */
-      const query5a = {
+      const query5a: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 5,
@@ -159,6 +159,24 @@ describe.only('070 test feed', () => {
             0
           );
       });
+    });
+
+    it('returns a cluster feed', async () => {
+      if (USE_REAL_TWITTER) {
+        logger.warn(`Feed test disbaled with real twitter`);
+        return;
+      }
+      const { feed } = services;
+      // all tab
+      const query1: PostsQueryDefined = {
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          tab: 1,
+        },
+        clusterId: 'test-cluster-02',
+      };
+      const result1 = await feed.getFeed(query1);
+      expect(result1).to.have.length(5);
     });
 
     describe('reference page feed', () => {

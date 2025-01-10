@@ -206,6 +206,7 @@ export class UsersService {
           ...profile,
           userId: _userId,
           platformId: platform,
+          clusters: [],
         };
 
         await this.upsertProfile(profileCreate, manager);
@@ -251,6 +252,7 @@ export class UsersService {
             ...profile,
             userId,
             platformId: platform,
+            clusters: [],
           };
 
           await this.upsertProfile(profileCreate, manager);
@@ -289,6 +291,7 @@ export class UsersService {
           ...profile,
           userId,
           platformId: platform,
+          clusters: [],
         };
 
         await this.upsertProfile(profileCreate, manager);
@@ -513,6 +516,7 @@ export class UsersService {
       ...profile,
       userId: null,
       platformId,
+      clusters: [],
     };
     this.createProfile(profileCreate, manager);
     return { user_id: profileCreate.user_id, profile: profileCreate.profile };
@@ -551,6 +555,7 @@ export class UsersService {
       ...profileBase,
       userId: null,
       platformId: platform,
+      clusters: [],
     };
 
     return this.createProfile(profileCreate, manager);

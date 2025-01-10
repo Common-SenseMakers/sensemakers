@@ -232,8 +232,11 @@ export class PostsProcessing {
     refs?: string[],
     keywords?: { new: string[]; removed: string[] }
   ) {
+    const post = await this.posts.get(postId, manager, true);
+
+    /** post clusters are derived from the post authorProfileId */
     const clustersIds: (string | undefined)[] =
-      await this.posts.getPostClusters(postId);
+      await this.users.profiles.getClusters(post.authorProfileId, manager);
 
     // undefined means the global root cluster where all posts are stored
     clustersIds.push(undefined);
@@ -335,7 +338,7 @@ export class PostsProcessing {
       editStatus: AppPostEditStatus.PENDING,
     };
 
-    /** Create the post */
+    /** Create the post in the root cluster */
     const post = this.posts.create(removeUndefined(postCreate), manager);
     return post;
   }
