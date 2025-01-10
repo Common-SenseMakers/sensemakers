@@ -16,7 +16,10 @@ import {
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
-import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.utils';
+import {
+  parseMastodonGlobalUsername,
+  parseMastodonPostURI,
+} from '../../src/@shared/utils/mastodon.utils';
 import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
@@ -213,6 +216,65 @@ describe('02-platforms', () => {
         expect(result.platformPosts.length).to.be.greaterThan(0);
       }
     });
+    it.only('it can use repost post ids in fetch params', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const userDetails = allUserDetails[0];
+      if (userDetails.credentials.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      const mastodonService = services.platforms.get(PLATFORM.Mastodon);
+      const fetchParams: PlatformFetchParams = {
+        expectedAmount: 5,
+        until_id:
+          'https://cosocial.ca/users/weswalla/statuses/113801618847445543/activity',
+      };
+
+      const result = await mastodonService.fetch(
+        userDetails.user_id,
+        fetchParams,
+        userDetails.credentials
+      );
+
+      if (USE_REAL_MASTODON) {
+        expect(result).to.not.be.undefined;
+        expect(result.platformPosts.length).to.be.greaterThan(0);
+        result.platformPosts.forEach((post) => {
+          expect(
+            BigInt('113801618847445543') -
+              BigInt(parseMastodonPostURI(post.post_id).postId) >
+              0
+          ).to.be.true;
+        });
+      }
+
+      const fetchParams2: PlatformFetchParams = {
+        expectedAmount: 5,
+        since_id:
+          'https://cosocial.ca/users/weswalla/statuses/113430780810995021/activity',
+      };
+
+      const result2 = await mastodonService.fetch(
+        userDetails.user_id,
+        fetchParams2,
+        userDetails.credentials
+      );
+
+      if (USE_REAL_MASTODON) {
+        expect(result2).to.not.be.undefined;
+        expect(result2.platformPosts.length).to.be.greaterThan(0);
+        result2.platformPosts.forEach((post) => {
+          const postId = parseMastodonPostURI(post.post_id).postId;
+          expect(BigInt('113430780810995021') - BigInt(postId) < 0).to.be.true;
+        });
+      }
+    });
 
     it('gets account by username', async () => {
       // https://fediscience.org/@petergleick
@@ -242,7 +304,7 @@ describe('02-platforms', () => {
         expect(result.avatar).to.be.a('string');
       }
     });
-    it.only('handles newlines in the content html', async () => {
+    it('handles newlines in the content html', async () => {
       const post_id =
         'https://w3c.social/users/w3c/statuses/113561528162272973';
       const result = await mastodonService.get(
