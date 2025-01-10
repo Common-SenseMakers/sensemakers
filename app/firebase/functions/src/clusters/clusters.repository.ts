@@ -5,6 +5,6 @@ import { BaseRepository } from '../db/repo.base';
 /** the LinksRepository store the links OEmbed data only */
 export class ClustersRepository extends BaseRepository<Cluster, Cluster> {
   constructor(public db: DBInstance) {
-    super(db.collections.ontologies);
+    super(db.collections.clusters);
   }
 }
