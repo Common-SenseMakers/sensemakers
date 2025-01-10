@@ -9,6 +9,7 @@ export enum CollectionNames {
   Links = 'links',
   Ontologies = 'ontologies',
   PostClusters = 'postClusters',
+  ProfileClusters = 'profileClusters',
 
   Refs = 'refs',
   Keywords = 'keywords',

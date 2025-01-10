@@ -9,13 +9,18 @@ import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { fetchPostInTests } from '../utils/posts.utils';
-import { createUsers } from '../utils/users.utils';
+import { createProfiles, createUsers } from '../utils/users.utils';
 import {
   _01_createAndFetchUsers,
   _02_publishTweet,
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
-import { USE_REAL_PARSER, USE_REAL_TWITTER, testUsers } from './setup';
+import {
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+  testProfiles,
+  testUsers,
+} from './setup';
 import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
@@ -42,9 +47,13 @@ describe.only('070 test feed', () => {
     let user: AppUser | undefined;
 
     before(async () => {
-      const users = await services.db.run((manager) => {
-        return createUsers(services, testUsers, manager);
+      const { users } = await services.db.run(async (manager) => {
+        const createdUsers = await createUsers(services, testUsers, manager);
+        const profiles = await createProfiles(services, testProfiles, manager);
+
+        return { users: createdUsers, profiles };
       });
+
       user = users.find(
         (u) => UsersHelper.getAccount(u, PLATFORM.Twitter) !== undefined
       );
@@ -52,9 +61,10 @@ describe.only('070 test feed', () => {
 
     it('fetch and parse all posts', async () => {
       if (USE_REAL_TWITTER) {
-        logger.warn(`Feed test disbaled with real twitter`);
+        logger.warn(`Feed test disabled with real twitter`);
         return;
       }
+
       for (let ix = 0; ix < feedThreads.length; ix++) {
         const post_id = ix.toString();
 

@@ -8,6 +8,7 @@ import {
   profileDefaults,
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
+import { CollectionNames } from '../@shared/utils/collectionNames';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import { DBInstance, Query } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
@@ -279,5 +280,17 @@ export class ProfilesRepository {
     return snapshot.docs.map((doc) => {
       return doc.id;
     });
+  }
+
+  addCluster(
+    profileId: string,
+    clusterId: string,
+    manager: TransactionManager
+  ) {
+    const ref = this.db.collections.profiles.doc(profileId);
+    const collection = ref.collection(CollectionNames.ProfileClusters);
+    const cluster = collection.doc(clusterId);
+
+    manager.create(cluster, { id: clusterId });
   }
 }

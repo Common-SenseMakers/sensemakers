@@ -145,7 +145,7 @@ export interface AppUserPublicRead extends UserWithId {
 
 /** Test users support for mocks and tests */
 export interface TestUserCredentials {
-  userId: string;
+  clustersIds: string[];
   twitter: TwitterSigninCredentials;
   mastodon: MastodonSigninCredentials;
   bluesky: BlueskySigninCredentials;
