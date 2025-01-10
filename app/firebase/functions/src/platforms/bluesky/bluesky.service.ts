@@ -222,16 +222,9 @@ export class BlueskyService
     let oldestId: string | undefined;
     let cursor: string | undefined;
 
-    const sincePost = params.since_id
-      ? await this.getPost(params.since_id, credentials?.read)
-      : undefined;
-    const untilPost = params.until_id
-      ? await this.getPost(params.until_id, credentials?.read)
-      : undefined;
-
-    // If until_id is provided, use its createdAt as the initial cursor
-    if (untilPost) {
-      cursor = new Date(untilPost.value.createdAt).toISOString();
+    // If until_timestamp is provided, use it as the cursor
+    if (params.until_timestamp) {
+      cursor = new Date(params.until_timestamp).toISOString();
     }
 
     let shouldBreak = false;
@@ -274,23 +267,21 @@ export class BlueskyService
           DEBUG_PREFIX
         );
 
-      // Case 1: No since_id or until_id
-      if (!params.since_id && !params.until_id) {
+      // Case 1: No since_timestamp or until_timestamp
+      if (!params.since_timestamp && !params.until_timestamp) {
         if (threads.length >= params.expectedAmount || !response.data.cursor) {
           shouldBreak = true;
         }
       }
-      // Case 2: until_id is provided
-      else if (params.until_id) {
+      // Case 2: until_timestamp is provided
+      else if (params.until_timestamp) {
         if (threads.length >= params.expectedAmount || !response.data.cursor) {
           shouldBreak = true;
         }
       }
-      // Case 3: since_id is provided
-      else if (params.since_id) {
-        const sinceDate = sincePost
-          ? new Date(sincePost.value.createdAt).getTime()
-          : Infinity;
+      // Case 3: since_timestamp is provided
+      else if (params.since_timestamp) {
+        const sinceDate = params.since_timestamp;
         const hasOlderPost = posts.some(
           (post) => new Date(post.record.createdAt).getTime() <= sinceDate
         );
@@ -302,18 +293,12 @@ export class BlueskyService
       cursor = response.data.cursor;
     }
 
-    // Filter posts based on since_id and until_id
+    // Filter posts based on since_timestamp and until_timestamp
     allPosts = allPosts.filter((post) => {
       const postDate = new Date(post.record.createdAt).getTime();
-      if (
-        sincePost &&
-        postDate <= new Date(sincePost.value.createdAt).getTime()
-      )
+      if (params.since_timestamp && postDate <= params.since_timestamp)
         return false;
-      if (
-        untilPost &&
-        postDate >= new Date(untilPost.value.createdAt).getTime()
-      )
+      if (params.until_timestamp && postDate >= params.until_timestamp)
         return false;
       return true;
     });
