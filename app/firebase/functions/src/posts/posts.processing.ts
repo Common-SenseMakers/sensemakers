@@ -208,27 +208,50 @@ export class PostsProcessing {
         )
       : [];
 
-    const clustersIds = await this.posts.getPostClusters(postId);
+    await this.syncPostInClusters(
+      'add',
+      post.id,
+      manager,
+      postData,
+      structuredSemantics.refs || [],
+      {
+        new: structuredSemantics.keywords || [],
+        removed: deletedKeywords,
+      }
+    );
+
+    await this.posts.update(postId, { structuredSemantics }, manager);
+  }
+
+  /** from postId make sure the post is updated on all clusters that include that post */
+  async syncPostInClusters(
+    action: 'add' | 'remove',
+    postId: string,
+    manager: TransactionManager,
+    postData?: IndexedPost,
+    refs?: string[],
+    keywords?: { new: string[]; removed: string[] }
+  ) {
+    const clustersIds: (string | undefined)[] =
+      await this.posts.getPostClusters(postId);
+
+    // undefined means the global root cluster where all posts are stored
+    clustersIds.push(undefined);
 
     await Promise.all(
       clustersIds.map(async (clusterId) => {
         const cluster = this.clusters.getInstance(clusterId);
         await this.syncPostInCluster(
           cluster,
-          'add',
-          post.id,
+          action,
+          postId,
           manager,
           postData,
-          structuredSemantics.refs || [],
-          {
-            new: structuredSemantics.keywords || [],
-            removed: deletedKeywords,
-          }
+          refs || [],
+          keywords
         );
       })
     );
-
-    await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
   async syncPostInCluster(
@@ -240,11 +263,11 @@ export class PostsProcessing {
     refs?: string[],
     keywords?: { new: string[]; removed: string[] }
   ) {
-    /** Sync post in a cluster-specifc posts collection */
+    /** Sync post in a cluster-specifc "posts" collection */
     const posts = new BaseRepository(cluster.collection(CollectionNames.Posts));
 
     if (action === 'add') {
-      posts.set(postId, postData, manager);
+      posts.set(postId, postData, manager, { merge: true });
     } else {
       posts.delete(postId, manager);
     }
@@ -422,13 +445,7 @@ export class PostsProcessing {
       )
     );
 
-    const clustersIds = await this.posts.getPostClusters(postId);
-    await Promise.all(
-      clustersIds.map(async (clusterId) => {
-        const cluster = this.clusters.getInstance(clusterId);
-        await this.syncPostInCluster(cluster, 'remove', postId, manager);
-      })
-    );
+    await this.syncPostInClusters('remove', postId, manager);
 
     this.posts.delete(postId, manager);
   }

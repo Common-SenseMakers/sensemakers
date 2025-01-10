@@ -1,3 +1,5 @@
+import { SetOptions } from 'firebase-admin/firestore';
+
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -66,9 +68,14 @@ export class BaseRepository<DataType, DataCreateType> {
     return ref;
   }
 
-  public set(id: string, data: DataType, manager: TransactionManager) {
+  public set(
+    id: string,
+    data: DataType,
+    manager: TransactionManager,
+    options?: SetOptions
+  ) {
     const ref = this.getRef(id);
-    manager.set(ref, data);
+    manager.set(ref, data, options);
   }
 
   public delete(id: string, manager: TransactionManager) {
