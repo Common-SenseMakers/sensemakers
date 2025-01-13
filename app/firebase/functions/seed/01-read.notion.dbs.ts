@@ -38,9 +38,8 @@ interface AccountDetails {
 
   communities.forEach((community) => {
     const filePath = path.join(outputDir, `${community}.csv`);
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, 'account,communities\n', 'utf-8');
-    }
+    fs.unlinkSync(filePath);
+    fs.writeFileSync(filePath, 'account\n', 'utf-8');
   });
 
   /** read the entries in the DB */
@@ -74,7 +73,7 @@ interface AccountDetails {
         if (account.twitter) return account.twitter;
         throw new Error('No account URL found');
       })();
-      const line = `${accountUrl},${JSON.stringify(account.communities)}\n`;
+      const line = `${accountUrl}\n`;
       fs.appendFileSync(filePath, line, 'utf-8');
     });
   });
