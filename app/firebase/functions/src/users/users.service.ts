@@ -32,7 +32,7 @@ import {
   IdentityServicesMap,
   PlatformsMap,
 } from '../platforms/platforms.service';
-import { ProfilesRepository } from '../profiles/profiles.repository';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
@@ -240,7 +240,7 @@ export class UsersService {
         );
 
         // patch to recover uncreated profiles
-        const existing = await this.profiles.getByProfileId(
+        const existing = await this.profiles.repo.getByProfileId(
           getProfileId(platform, authenticatedDetails.user_id),
           manager
         );
@@ -382,7 +382,7 @@ export class UsersService {
 
         await Promise.all(
           accounts.map(async (account) => {
-            const profile = await this.profiles.getProfile(
+            const profile = await this.profiles.repo.getProfile(
               platform,
               account.user_id,
               manager

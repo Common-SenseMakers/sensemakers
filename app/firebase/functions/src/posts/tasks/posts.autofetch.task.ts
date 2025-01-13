@@ -31,7 +31,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
         DEBUG_PREFIX
       );
 
-    const profilesIds = await users.profiles.getMany({
+    const profilesIds = await users.profiles.repo.getMany({
       autofetch: true,
       platformId: platformId as IDENTITY_PLATFORM,
       userIdDefined: false,

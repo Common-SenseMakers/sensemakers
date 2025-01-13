@@ -228,7 +228,7 @@ export class PostsManager {
         fetchedPosts.fetched
       );
 
-      await this.users.profiles.setAccountProfileFetched(
+      await this.profiles.repo.setAccountProfileFetched(
         platformId,
         user_id,
         newFetchedDetails,
@@ -366,7 +366,7 @@ export class PostsManager {
       }
 
       const authorUserId =
-        await this.users.profiles.getUserIdWithPlatformAccount(
+        await this.profiles.repo.getUserIdWithPlatformAccount(
           platformId,
           user_id,
           manager
@@ -945,7 +945,7 @@ export class PostsManager {
                 );
               }
 
-              const profile = await this.users.profiles.getByProfileId(
+              const profile = await this.profiles.repo.getByProfileId(
                 profileId,
                 manager,
                 true
@@ -954,7 +954,7 @@ export class PostsManager {
                 throw new Error('unexpected missing profile');
               }
 
-              await this.users.profiles.setUserId(profileId, userId, manager);
+              await this.profiles.repo.setUserId(profileId, userId, manager);
             })
           );
         })
@@ -1050,7 +1050,7 @@ export class PostsManager {
           manager
         );
       }
-      this.users.profiles.delete(profileId, manager);
+      this.profiles.repo.delete(profileId, manager);
     });
   }
 }

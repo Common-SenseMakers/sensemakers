@@ -236,7 +236,7 @@ export class PostsProcessing {
 
     /** post clusters are derived from the post authorProfileId */
     const clustersIds: (string | undefined)[] =
-      await this.users.profiles.getClusters(post.authorProfileId, manager);
+      await this.users.profiles.repo.getClusters(post.authorProfileId, manager);
 
     // undefined means the global root cluster where all posts are stored
     clustersIds.push(undefined);

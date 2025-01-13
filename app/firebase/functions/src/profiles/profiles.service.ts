@@ -6,8 +6,10 @@ import {
 import {
   AccountProfile,
   AccountProfileCreate,
+  AccountProfileRead,
   PlatformProfile,
 } from '../@shared/types/types.profiles';
+import { GetProfilePayload } from '../@shared/types/types.user';
 import {
   ParsedProfile,
   getProfileId,
@@ -123,6 +125,38 @@ export class ProfilesService {
   ) {
     const profileId = getProfileId(platformId, username);
     return this.getOrCreateProfile(profileId, manager, credentials);
+  }
+
+  async getPublicProfile(payload: GetProfilePayload) {
+    const profile = await this.db.run(async (manager) => {
+      if (payload.user_id) {
+        return this.repo.getByProfileId(
+          getProfileId(payload.platformId, payload.user_id),
+          manager,
+          false
+        );
+      }
+
+      const profileId = await this.repo.getByPlatformUsername(
+        payload.platformId,
+        payload.username!,
+        manager,
+        false
+      );
+
+      if (!profileId) return undefined;
+
+      return this.repo.getByProfileId(profileId, manager, false);
+    });
+
+    const publicProfile: AccountProfileRead | undefined = profile && {
+      platformId: profile.platformId,
+      user_id: profile.user_id,
+      profile: profile.profile,
+      userId: profile.userId,
+    };
+
+    return publicProfile;
   }
 
   async parseAndAdd(profileUrls: string[]): Promise<void> {

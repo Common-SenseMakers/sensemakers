@@ -147,22 +147,22 @@ export const createServices = (
   platformsMap.set(PLATFORM.Mastodon, mastodon);
   platformsMap.set(PLATFORM.Bluesky, bluesky);
 
-  /** users service */
-  const usersService = new UsersService(
-    db,
-    userRepo,
-    profilesRepo,
-    identityPlatforms,
-    platformsMap,
-    time,
-    config.our
-  );
-
   /** profiles service */
   const profilesService = new ProfilesService(
     profilesRepo,
     identityPlatforms,
     db
+  );
+
+  /** users service */
+  const usersService = new UsersService(
+    db,
+    userRepo,
+    profilesService,
+    identityPlatforms,
+    platformsMap,
+    time,
+    config.our
   );
 
   // trigger magic init
