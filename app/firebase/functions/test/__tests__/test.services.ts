@@ -4,6 +4,8 @@ import { spy, when } from 'ts-mockito';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { ActivityRepository } from '../../src/activity/activity.repository';
 import { ActivityService } from '../../src/activity/activity.service';
+import { ClustersRepository } from '../../src/clusters/clusters.repository';
+import { ClustersService } from '../../src/clusters/clusters.service';
 import {
   BLUESKY_APP_PASSWORD,
   BLUESKY_SERVICE_URL,
@@ -97,11 +99,13 @@ export const getTestServices = (config: TestServicesConfig) => {
   const activityRepo = new ActivityRepository(db);
   const linksRepo = new LinksRepository(db);
   const ontologiesRepo = new OntologiesRepository(db);
+  const clustersRepo = new ClustersRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
   const time = getTimeMock(new TimeService(), config.time);
   const ontologiesService = new OntologiesService(ontologiesRepo);
+  const clusters = new ClustersService(clustersRepo);
 
   const MockedTime = spy(new TimeService());
 
@@ -174,10 +178,16 @@ export const getTestServices = (config: TestServicesConfig) => {
   const parser = getParserMock(_parser, config.parser);
 
   /** links */
-  const _linksService = new LinksService(linksRepo, time, {
-    apiKey: process.env.IFRAMELY_API_KEY as string,
-    apiUrl: process.env.IFRAMELY_API_URL as string,
-  });
+  const _linksService = new LinksService(
+    clusters,
+    linksRepo,
+    time,
+    ontologiesService,
+    {
+      apiKey: process.env.IFRAMELY_API_KEY as string,
+      apiUrl: process.env.IFRAMELY_API_URL as string,
+    }
+  );
   const links = getLinksMock(_linksService, config.links);
 
   /** posts service */
@@ -188,7 +198,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     platformPostsRepo,
     platformsService,
     links,
-    db
+    clusters
   );
 
   const postsManager = new PostsManager(
@@ -198,12 +208,13 @@ export const getTestServices = (config: TestServicesConfig) => {
     platformsService,
     parser,
     time,
-    ontologiesService
+    ontologiesService,
+    clusters
   );
 
   const activity = new ActivityService(activityRepo);
 
-  const feed = new FeedService(db, postsManager);
+  const feed = new FeedService(db, postsManager, clusters);
 
   const services: TestServices = {
     users: usersService,
@@ -214,6 +225,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     db,
     activity,
     links,
+    ontology: ontologiesService,
   };
 
   return services;

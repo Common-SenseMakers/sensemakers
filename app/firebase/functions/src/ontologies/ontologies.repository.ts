@@ -8,6 +8,6 @@ export class OntologiesRepository extends BaseRepository<
   OntologyItem
 > {
   constructor(protected db: DBInstance) {
-    super(db.collections.ontologies, db);
+    super(db.collections.ontologies);
   }
 }

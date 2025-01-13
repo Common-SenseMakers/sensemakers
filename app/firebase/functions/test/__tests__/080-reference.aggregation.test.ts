@@ -23,7 +23,7 @@ import { getTestServices } from './test.services';
 
 const feedThreads = [[''], [''], [''], [''], ['']];
 
-describe.only('080 get reference aggregation', () => {
+describe('080 get reference aggregation', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -88,17 +88,14 @@ describe.only('080 get reference aggregation', () => {
         logger.warn(`Feed test disbaled with real twitter`);
         return;
       }
-      const { postsManager, db } = services;
+      const { db, links } = services;
 
       const reference = normalizeUrl(
         'https://twitter.com/ItaiYanai/status/1780813867213336910'
       );
 
       const labels = await db.run(async (manager) => {
-        return postsManager.processing.posts.getAggregatedRefLabels(
-          reference,
-          manager
-        );
+        return links.getAggregatedRefLabels(reference, db.firestore, manager);
       });
 
       const expectedLabels = [

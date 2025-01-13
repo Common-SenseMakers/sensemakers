@@ -1,5 +1,4 @@
-import { CollectionReference } from 'firebase-admin/firestore';
-
+import { ClusterInstance } from '../@shared/types/types.clusters';
 import { ParsePostResult, RefMeta } from '../@shared/types/types.parser';
 import {
   PlatformPost,
@@ -29,8 +28,8 @@ import {
   getReferenceLabels,
   getTopic,
 } from '../@shared/utils/semantics.helper';
-import { DBInstance } from '../db/instance';
-import { removeUndefined } from '../db/repo.base';
+import { ClustersService } from '../clusters/clusters.service';
+import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
 import { hashUrl } from '../links/links.utils';
@@ -40,10 +39,6 @@ import { UsersService } from '../users/users.service';
 import { IndexedPostsRepo } from './indexed.posts.repository';
 import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
-
-export interface ClusterType {
-  collection(collectionPath: string): CollectionReference;
-}
 
 /**
  * Per-PlatformPost or Per-AppPost methods.
@@ -57,7 +52,7 @@ export class PostsProcessing {
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService,
     public linksService: LinksService,
-    public db: DBInstance
+    public clusters: ClustersService
   ) {}
 
   /**
@@ -213,8 +208,7 @@ export class PostsProcessing {
         )
       : [];
 
-    await this.syncPostInCluster(
-      this.db.firestore,
+    await this.syncPostInClusters(
       'add',
       post.id,
       manager,
@@ -229,8 +223,8 @@ export class PostsProcessing {
     await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
-  async syncPostInCluster(
-    cluster: ClusterType,
+  /** from postId make sure the post is updated on all clusters that include that post */
+  async syncPostInClusters(
     action: 'add' | 'remove',
     postId: string,
     manager: TransactionManager,
@@ -238,6 +232,49 @@ export class PostsProcessing {
     refs?: string[],
     keywords?: { new: string[]; removed: string[] }
   ) {
+    const post = await this.posts.get(postId, manager, true);
+
+    /** post clusters are derived from the post authorProfileId */
+    const clustersIds: (string | undefined)[] =
+      await this.users.profiles.getClusters(post.authorProfileId, manager);
+
+    // undefined means the global root cluster where all posts are stored
+    clustersIds.push(undefined);
+
+    await Promise.all(
+      clustersIds.map(async (clusterId) => {
+        const cluster = this.clusters.getInstance(clusterId);
+        await this.syncPostInCluster(
+          cluster,
+          action,
+          postId,
+          manager,
+          postData,
+          refs || [],
+          keywords
+        );
+      })
+    );
+  }
+
+  async syncPostInCluster(
+    cluster: ClusterInstance,
+    action: 'add' | 'remove',
+    postId: string,
+    manager: TransactionManager,
+    postData?: IndexedPost,
+    refs?: string[],
+    keywords?: { new: string[]; removed: string[] }
+  ) {
+    /** Sync post in a cluster-specifc "posts" collection */
+    const posts = new BaseRepository(cluster.collection(CollectionNames.Posts));
+
+    if (action === 'add') {
+      posts.set(postId, postData, manager, { merge: true });
+    } else {
+      posts.delete(postId, manager);
+    }
+
     /** Sync ref posts semantics on redundant subcollections */
     if (refs) {
       await Promise.all(
@@ -301,7 +338,7 @@ export class PostsProcessing {
       editStatus: AppPostEditStatus.PENDING,
     };
 
-    /** Create the post */
+    /** Create the post in the root cluster */
     const post = this.posts.create(removeUndefined(postCreate), manager);
     return post;
   }
@@ -310,7 +347,8 @@ export class PostsProcessing {
   async hydratePostFull(
     post: AppPost,
     config: HydrateConfig,
-    manager: TransactionManager
+    manager: TransactionManager,
+    cluster: ClusterInstance
   ): Promise<AppPostFull> {
     const postFull: AppPostFull = post;
 
@@ -335,8 +373,9 @@ export class PostsProcessing {
           refMetaOrg
         );
         if (config.addAggregatedLabels) {
-          const refLabels = await this.posts.getAggregatedRefLabels(
+          const refLabels = await this.linksService.getAggregatedRefLabels(
             ref,
+            cluster,
             manager
           );
           postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels });
@@ -355,6 +394,7 @@ export class PostsProcessing {
     postId: string,
     config: HydrateConfig,
     manager: TransactionManager,
+    cluster: ClusterInstance,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
     const post = await this.posts.get(postId, manager, shouldThrow);
@@ -367,7 +407,7 @@ export class PostsProcessing {
       return undefined as DefinedIfTrue<T, R>;
     }
 
-    const postFull = await this.hydratePostFull(post, config, manager);
+    const postFull = await this.hydratePostFull(post, config, manager, cluster);
 
     return postFull as unknown as DefinedIfTrue<T, R>;
   }
@@ -408,7 +448,7 @@ export class PostsProcessing {
       )
     );
 
-    await this.syncPostInCluster(this.db.firestore, 'remove', postId, manager);
+    await this.syncPostInClusters('remove', postId, manager);
 
     this.posts.delete(postId, manager);
   }

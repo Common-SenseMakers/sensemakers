@@ -9,16 +9,32 @@ import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { fetchPostInTests } from '../utils/posts.utils';
-import { createUsers } from '../utils/users.utils';
+import { createProfiles, createUsers } from '../utils/users.utils';
 import {
   _01_createAndFetchUsers,
   _02_publishTweet,
   _03_fetchAfterPublish,
 } from './reusable/create-post-fetch';
-import { USE_REAL_PARSER, USE_REAL_TWITTER, testUsers } from './setup';
+import {
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+  testProfiles,
+  testUsers,
+} from './setup';
 import { getTestServices } from './test.services';
 
-const feedThreads = [[''], [''], [''], [''], ['']];
+const feedThreads = [
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+  [''],
+];
 
 describe.only('070 test feed', () => {
   const services = getTestServices({
@@ -42,9 +58,13 @@ describe.only('070 test feed', () => {
     let user: AppUser | undefined;
 
     before(async () => {
-      const users = await services.db.run((manager) => {
-        return createUsers(services, testUsers, manager);
+      const { users } = await services.db.run(async (manager) => {
+        const createdUsers = await createUsers(services, testUsers, manager);
+        const profiles = await createProfiles(services, testProfiles, manager);
+
+        return { users: createdUsers, profiles };
       });
+
       user = users.find(
         (u) => UsersHelper.getAccount(u, PLATFORM.Twitter) !== undefined
       );
@@ -52,9 +72,10 @@ describe.only('070 test feed', () => {
 
     it('fetch and parse all posts', async () => {
       if (USE_REAL_TWITTER) {
-        logger.warn(`Feed test disbaled with real twitter`);
+        logger.warn(`Feed test disabled with real twitter`);
         return;
       }
+
       for (let ix = 0; ix < feedThreads.length; ix++) {
         const post_id = ix.toString();
 
@@ -86,35 +107,35 @@ describe.only('070 test feed', () => {
       }
       const { feed } = services;
       // all tab
-      const query1 = {
+      const query1: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 1,
         },
       };
       const result1 = await feed.getFeed(query1);
-      expect(result1).to.have.length(5);
+      expect(result1).to.have.length(10);
 
       // recommendations tab
-      const query2 = {
+      const query2: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 2,
         },
       };
       const result2 = await feed.getFeed(query2);
-      expect(result2).to.have.length(2);
+      expect(result2).to.have.length(3);
 
-      const query3 = {
+      const query3: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 3,
         },
       };
       const result3 = await feed.getFeed(query3);
-      expect(result3).to.have.length(1);
+      expect(result3).to.have.length(2);
 
-      const query4 = {
+      const query4: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 4,
@@ -123,17 +144,17 @@ describe.only('070 test feed', () => {
       const result4 = await feed.getFeed(query4);
       expect(result4).to.have.length(0);
 
-      const query5 = {
+      const query5: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 5,
         },
       };
       const result5 = await feed.getFeed(query5);
-      expect(result5).to.have.length(4);
+      expect(result5).to.have.length(8);
 
       /** check aggregatred labels */
-      const query5a = {
+      const query5a: PostsQueryDefined = {
         fetchParams: { expectedAmount: 10 },
         semantics: {
           tab: 5,
@@ -149,6 +170,34 @@ describe.only('070 test feed', () => {
             0
           );
       });
+    });
+
+    it('returns a cluster feed', async () => {
+      if (USE_REAL_TWITTER) {
+        logger.warn(`Feed test disbaled with real twitter`);
+        return;
+      }
+      const { feed } = services;
+      // all tab
+      const query1: PostsQueryDefined = {
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          tab: 1,
+        },
+        clusterId: 'test-cluster-01',
+      };
+      const result1 = await feed.getFeed(query1);
+      expect(result1).to.have.length(7);
+
+      const query2: PostsQueryDefined = {
+        fetchParams: { expectedAmount: 10 },
+        semantics: {
+          tab: 1,
+        },
+        clusterId: 'test-cluster-02',
+      };
+      const result2 = await feed.getFeed(query2);
+      expect(result2).to.have.length(5);
     });
 
     describe('reference page feed', () => {
@@ -171,7 +220,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(2);
+        expect(result).to.have.length(5);
       });
 
       it('returns reference page feed filtered by labels', async () => {
@@ -189,7 +238,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(1);
+        expect(result).to.have.length(2);
       });
 
       it('returns reference page feed filtered by keywords', async () => {
@@ -208,7 +257,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(2); // there are 2 posts with this tag and reference, but one of them is marked as not science
+        expect(result).to.have.length(5);
       });
     });
 
@@ -230,7 +279,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(2);
+        expect(result).to.have.length(5);
       });
 
       it('returns keyword page feed filtered by tab', async () => {
@@ -248,7 +297,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(1);
+        expect(result).to.have.length(2);
       });
 
       it('returns keyword page feed filtered by references', async () => {
@@ -267,7 +316,7 @@ describe.only('070 test feed', () => {
           hydrateConfig: { addAggregatedLabels: false },
         };
         const result = await feed.getFeed(query);
-        expect(result).to.have.length(2);
+        expect(result).to.have.length(5);
       });
     });
   });

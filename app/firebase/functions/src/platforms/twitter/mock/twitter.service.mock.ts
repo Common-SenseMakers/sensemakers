@@ -48,14 +48,19 @@ export interface TwitterMockConfig {
   get?: boolean;
 }
 
+export interface InitThreadsProfiles {
+  id: string;
+  username: string;
+}
+
 export const initThreads = (
   testThreads: string[][],
-  testUsers: TestUserCredentials[]
+  testProfiles: InitThreadsProfiles[]
 ) => {
   const now = 1720805241;
 
   const threads = testThreads.map((thread, ixThread): TwitterThread => {
-    const testUser = testUsers[ixThread % testUsers.length];
+    const testProfile = testProfiles[ixThread % testProfiles.length];
 
     const tweets = thread.map((content, ixTweet) => {
       const idTweet = ixThread * 100 + ixTweet;
@@ -63,7 +68,7 @@ export const initThreads = (
       state.latestTweetId = idTweet;
       return getSampleTweet(
         idTweet.toString().padStart(5, '0'),
-        testUser.twitter.id,
+        testProfile.id,
         createdAt,
         ixThread.toString().padStart(5, '0'),
         content
@@ -74,9 +79,9 @@ export const initThreads = (
       conversation_id: `${ixThread}`,
       tweets,
       author: {
-        id: testUser.twitter.id,
-        name: testUser.twitter.username,
-        username: testUser.twitter.username,
+        id: testProfile.id,
+        name: testProfile.username,
+        username: testProfile.username,
         profile_image_url:
           'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
       },

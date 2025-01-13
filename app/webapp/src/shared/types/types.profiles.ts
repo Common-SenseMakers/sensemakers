@@ -26,13 +26,17 @@ export interface AccountProfile<P extends PlatformProfile = PlatformProfile> {
   profile?: P;
   fetched?: FetchedDetails;
   autofetch?: boolean;
+  clusters: string[];
 }
 
 export const profileDefaults: Partial<AccountProfile> = {
   autofetch: true,
 };
 
-export type AccountProfileRead = Omit<AccountProfile, 'fetched' | 'id'>;
+export type AccountProfileRead = Omit<
+  AccountProfile,
+  'fetched' | 'id' | 'clusters'
+>;
 
 export interface PlatformProfile {
   id: string;

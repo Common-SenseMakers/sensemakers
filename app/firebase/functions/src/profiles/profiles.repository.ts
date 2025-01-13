@@ -1,3 +1,5 @@
+import { FieldValue } from 'firebase-admin/firestore';
+
 import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountProfile,
@@ -279,5 +281,28 @@ export class ProfilesRepository {
     return snapshot.docs.map((doc) => {
       return doc.id;
     });
+  }
+
+  async getClusters(profileId: string, manager: TransactionManager) {
+    const profile = await this.getByProfileId(profileId, manager, true);
+    return profile.clusters;
+  }
+
+  async addCluster(
+    profileId: string,
+    clusterId: string,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getRef(profileId, manager, true);
+    manager.update(ref, { clusters: FieldValue.arrayUnion(clusterId) });
+  }
+
+  async removeCluster(
+    profileId: string,
+    clusterId: string,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getRef(profileId, manager, true);
+    manager.update(ref, { clusters: FieldValue.arrayRemove(clusterId) });
   }
 }
