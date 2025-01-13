@@ -82,7 +82,7 @@ def convert_masto_to_canonical_format(url):
 
 def identify_social_media(url):
     """
-    Identify whether a given URL is from Twitter or Mastodon.
+    Identify whether a given URL is from Twitter, Mastodon or Bluesky.
 
     Parameters:
         url (str): The URL to be identified.
@@ -91,7 +91,9 @@ def identify_social_media(url):
         str: The identified social media platform ('Twitter', 'Mastodon'), or 'Unknown' if not identified.
     """
     twitter_domains = ["twitter.com", "t.co", "x.com"]
-    # mastodon_domains = ["mastodon.social", "examplemastodoninstance.com"]  # Add Mastodon instance domains as needed
+    
+    #mastodon_domains = ["mastodon.social", "fediscience.org","hachyderm.io"]  # Add Mastodon instance domains as needed
+    bluesky_domain = "bsky.app"
 
     parsed_url = urlparse(url)
     domain = parsed_url.netloc.lower()
@@ -106,6 +108,9 @@ def identify_social_media(url):
 
     if domain in twitter_domains:
         return "twitter"
+    
+    elif domain == bluesky_domain:
+        return "bluesky"
 
     else:
         converted_masto = convert_masto_to_canonical_format(url)
