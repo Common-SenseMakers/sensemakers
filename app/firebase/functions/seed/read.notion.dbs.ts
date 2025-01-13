@@ -1,8 +1,19 @@
-import { Client } from '@notionhq/client';
+import { Client, collectPaginatedAPI } from '@notionhq/client';
+import dotenv from 'dotenv';
 
-// Initializing a client
-const notion = new Client({
-  auth: process.env.NOTION_TOKEN,
-});
+dotenv.config({ path: './seed/.env.seed' });
 
-console.log('a', { notion });
+const token = process.env.NOTION_TOKEN as string;
+const db_id = process.env.DB_ID as string;
+
+(async () => {
+  const notion = new Client({
+    auth: token,
+  });
+
+  const entries = await collectPaginatedAPI(notion.databases.query, {
+    database_id: db_id,
+  });
+
+  console.log(entries);
+})();
