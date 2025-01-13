@@ -339,29 +339,6 @@ export class BlueskyService
     return result;
   }
 
-  private async getPost(
-    postId: string,
-    credentials?: BlueskyCredentials
-  ): Promise<
-    { uri: string; cid: string; value: AppBskyFeedPost.Record } | undefined
-  > {
-    const { client: agent } = await this.getClient(credentials);
-    const { did, rkey } = parseBlueskyURI(postId);
-    if (!rkey) {
-      throw new Error('Invalid post ID');
-    }
-    try {
-      const response = await agent.getPost({
-        repo: did,
-        rkey,
-      });
-      return response;
-    } catch (error) {
-      logger.error('Error fetching post', { postId, error }, DEBUG_PREFIX);
-      return undefined;
-    }
-  }
-
   public async convertToGeneric(
     platformPost: PlatformPostCreate<BlueskyThread>
   ): Promise<GenericThread> {

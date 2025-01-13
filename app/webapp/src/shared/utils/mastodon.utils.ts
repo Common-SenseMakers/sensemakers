@@ -64,6 +64,8 @@ export function parseMastodonPostURI(uri: string) {
     throw new Error('Invalid URI: unexpected number of components.');
   } catch (error) {
     console.error((error as { message: string }).message);
-    throw new Error(`Error parsing mastodon uri ${uri}: ${error}`);
+    throw new Error(
+      `Error parsing mastodon uri ${uri}: ${(error as { message: string }).message}`
+    );
   }
 }
