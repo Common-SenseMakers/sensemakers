@@ -1,14 +1,7 @@
 import { RequestHandler } from 'express';
 import { object, string } from 'yup';
 
-import {
-  PLATFORM,
-  PUBLISHABLE_PLATFORM,
-} from '../@shared/types/types.platforms';
-import {
-  AccountProfileRead,
-  PlatformAccountProfile,
-} from '../@shared/types/types.profiles';
+import { AccountProfileRead } from '../@shared/types/types.profiles';
 import { GetProfilePayload } from '../@shared/types/types.user';
 import {
   getProfileId,
@@ -17,9 +10,6 @@ import {
 } from '../@shared/utils/profiles.utils';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
-import { useBlueskyAdminCredentials } from '../platforms/bluesky/bluesky.utils';
-import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks.config';
-import { chunkNumber, enqueueTask } from '../tasksUtils/tasks.support';
 
 const DEBUG = false;
 
@@ -91,94 +81,8 @@ export const addNonUserProfilesController: RequestHandler = async (
         payloads: request.body,
       });
 
-    const services = getServices(request);
-    const profileUrls = request.body as string[];
-    const parsedProfiles = profileUrls
-      .map((profileUrl) => {
-        const parsed = parseProfileUrl(profileUrl);
-        return parsed;
-      })
-      .filter((profile) => profile);
-
-    for (const parsedProfile of parsedProfiles) {
-      if (!parsedProfile) {
-        continue;
-      }
-      if (DEBUG)
-        logger.debug('Fetching profile', {
-          platformId: parsedProfile.platformId,
-          username: parsedProfile.username,
-        });
-
-      let profile: PlatformAccountProfile | undefined;
-      try {
-        const hasProfile = await services.db.run(async (manager) => {
-          return services.users.profiles.getByPlatformUsername(
-            parsedProfile.platformId,
-            parsedProfile.username,
-            manager
-          );
-        });
-
-        /** skip fetching this profile if it already exists, as it will be fetched regularly */
-        if (hasProfile) {
-          if (DEBUG)
-            logger.debug('Profile has already been fetched, skipping', {
-              profileId: hasProfile,
-            });
-          continue;
-        }
-        const credentials =
-          parsedProfile.platformId === PLATFORM.Bluesky
-            ? await useBlueskyAdminCredentials(services.db.firestore)
-            : undefined;
-        profile = await services.db.run(async (manager) => {
-          return services.users.getOrCreateProfileByUsername(
-            parsedProfile.platformId,
-            parsedProfile.username,
-            manager,
-            credentials?.read
-          );
-        });
-      } catch (error) {
-        logger.error(
-          `error adding profile ${JSON.stringify(parsedProfile)}:`,
-          error
-        );
-        continue;
-      }
-
-      if (!profile) {
-        const error = `unable to find profile for ${parsedProfile.username} on ${parsedProfile.platformId}`;
-        logger.error(error);
-        continue;
-      }
-
-      if (DEBUG) logger.debug('Profile found', { profile });
-
-      const profileId = getProfileId(
-        parsedProfile.platformId,
-        profile?.user_id
-      );
-      const chunkSize = 50;
-      const amount = 10;
-      const fetchAmountChunks = chunkNumber(amount, chunkSize);
-
-      for (const fetchAmountChunk of fetchAmountChunks) {
-        const taskName =
-          FETCH_ACCOUNT_TASKS[parsedProfile.platformId as PUBLISHABLE_PLATFORM];
-
-        const taskData = {
-          profileId,
-          platformId: parsedProfile.platformId,
-          latest: false,
-          amount: fetchAmountChunk,
-        };
-
-        if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
-        await enqueueTask(taskName, taskData);
-      }
-    }
+    const { profiles } = getServices(request);
+    await profiles.parseAndAdd(request.body);
 
     if (DEBUG)
       logger.debug(`${request.path}: Successfully completed addAccountsData`, {

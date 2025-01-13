@@ -22,7 +22,7 @@ const DEBUG_PREFIX = 'AUTOFETCH';
 export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
   if (DEBUG)
     logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
-  const { users, db } = services;
+  const { users, db, profiles } = services;
 
   ALL_SOURCE_PLATFORMS.forEach(async (platformId) => {
     if (DEBUG)
@@ -78,7 +78,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       for (const profileId of profilesIds) {
         // Skip profiles that belong to registered users
         const profile = await db.run((manager) =>
-          users.profiles.getByProfileId(profileId, manager, true)
+          profiles.repo.getByProfileId(profileId, manager, true)
         );
 
         if (profile.userId) {

@@ -61,6 +61,7 @@ import { logger } from '../instances/logger';
 import { OntologiesService } from '../ontologies/ontologies.service';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
@@ -76,6 +77,7 @@ export class PostsManager {
   constructor(
     protected db: DBInstance,
     protected users: UsersService,
+    protected profiles: ProfilesService,
     public processing: PostsProcessing,
     protected platforms: PlatformsService,
     protected parserService: ParserService,
@@ -184,7 +186,7 @@ export class PostsManager {
     credentials?: AccountCredentials,
     userId?: string
   ) {
-    const profile = await this.users.getOrCreateProfile(
+    const profile = await this.profiles.getOrCreateProfile(
       getProfileId(platformId, user_id),
       manager
     );
@@ -389,7 +391,7 @@ export class PostsManager {
 
       await Promise.all(
         Array.from(profileIds).map((profileId) => {
-          this.users.getOrCreateProfile(profileId, manager);
+          this.profiles.getOrCreateProfile(profileId, manager);
         })
       );
 
@@ -528,7 +530,7 @@ export class PostsManager {
       if (queryParams.userId === undefined) {
         throw new Error('userId is a required query parameter here');
       }
-      return this.users.profiles.getOfUser(queryParams.userId, manager);
+      return this.profiles.repo.getOfUser(queryParams.userId, manager);
     });
 
     const platformsWithoutFetch = profiles

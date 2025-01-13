@@ -24,7 +24,7 @@ export const fetchPlatformAccountTask = async (
 
   if (DEBUG) logger.debug('Fetching profile');
   const profile = await services.db.run(async (manager) => {
-    return services.users.getOrCreateProfile(profileId, manager);
+    return services.profiles.getOrCreateProfile(profileId, manager);
   });
 
   if (!profile) {

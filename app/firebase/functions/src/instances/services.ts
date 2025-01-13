@@ -42,6 +42,7 @@ import { PostsManager } from '../posts/posts.manager';
 import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
 import { ProfilesRepository } from '../profiles/profiles.repository';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -51,6 +52,7 @@ const DEBUG = false;
 
 export interface Services {
   users: UsersService;
+  profiles: ProfilesService;
   postsManager: PostsManager;
   feed: FeedService;
   platforms: PlatformsService;
@@ -156,6 +158,13 @@ export const createServices = (
     config.our
   );
 
+  /** profiles service */
+  const profilesService = new ProfilesService(
+    profilesRepo,
+    identityPlatforms,
+    db
+  );
+
   // trigger magic init
 
   /** platforms service */
@@ -198,6 +207,7 @@ export const createServices = (
   const postsManager = new PostsManager(
     db,
     usersService,
+    profilesService,
     postsProcessing,
     platformsService,
     parser,
@@ -223,6 +233,7 @@ export const createServices = (
     activity,
     links: linksService,
     ontology: ontologiesService,
+    profiles: profilesService,
   };
 
   if (DEBUG) {
