@@ -9,10 +9,13 @@ import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
 import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
+import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { splitArray } from '../../../ui-components/utils';
+import { getPostType } from '../../../utils/post.utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps, PostClickTarget } from '../patterns';
 import { RefWithLabels } from './RefWithLabels';
+import { RepostedLabel } from './RepostedLabel';
 import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
@@ -20,6 +23,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
     props.semantics,
     props.originalParsed
   );
+  const { constants } = useThemeContext();
   const size = props.size || 'normal';
 
   const overlay = useOverlay();
@@ -140,32 +144,38 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
               return (
                 refDisplayMeta?.oembed && (
-                  <Box
-                    key={index}
-                    style={{
-                      borderRadius: '12px',
-                      border: '1.6px solid #D1D5DB',
-                      width: '100%',
-                    }}
-                    pad="12px"
-                    onClick={(e: React.MouseEvent<HTMLDivElement>) =>
-                      handleClick(e, ref)
-                    }>
-                    <RefWithLabels
-                      ix={index}
-                      oembed={refDisplayMeta.oembed}
-                      authorLabels={refs.get(ref)?.labelsUris || []}
-                      aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
-                      showDescription={isPlatformPost(ref)}
-                      editable={props.editable}
-                      ontology={props.originalParsed?.support?.ontology}
-                      removeLabel={(labelUri: string) => {
-                        removeLabel(ref, labelUri).catch(console.error);
+                  <>
+                    {getPostType(props.post) === 'repost' &&
+                      isPlatformPost(ref) && (
+                        <RepostedLabel color={constants.colors.textLight2} />
+                      )}
+                    <Box
+                      key={index}
+                      style={{
+                        borderRadius: '12px',
+                        border: '1.6px solid #D1D5DB',
+                        width: '100%',
                       }}
-                      addLabel={(labelUri: string) => {
-                        addLabel(ref, labelUri).catch(console.error);
-                      }}></RefWithLabels>
-                  </Box>
+                      pad="12px"
+                      onClick={(e: React.MouseEvent<HTMLDivElement>) =>
+                        handleClick(e, ref)
+                      }>
+                      <RefWithLabels
+                        ix={index}
+                        oembed={refDisplayMeta.oembed}
+                        authorLabels={refs.get(ref)?.labelsUris || []}
+                        aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+                        showDescription={isPlatformPost(ref)}
+                        editable={props.editable}
+                        ontology={props.originalParsed?.support?.ontology}
+                        removeLabel={(labelUri: string) => {
+                          removeLabel(ref, labelUri).catch(console.error);
+                        }}
+                        addLabel={(labelUri: string) => {
+                          addLabel(ref, labelUri).catch(console.error);
+                        }}></RefWithLabels>
+                    </Box>
+                  </>
                 )
               );
             })}
