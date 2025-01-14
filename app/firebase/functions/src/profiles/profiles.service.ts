@@ -1,5 +1,4 @@
 import {
-  IDENTITY_PLATFORM,
   PLATFORM,
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
@@ -8,9 +7,11 @@ import {
   AccountProfileCreate,
   AccountProfileRead,
   AddProfilesPayload,
+  PlatformAccountProfile,
   PlatformProfile,
+  ProfileIdentifier,
 } from '../@shared/types/types.profiles';
-import { GetProfilePayload } from '../@shared/types/types.user';
+import { DefinedIfTrue, GetProfilePayload } from '../@shared/types/types.user';
 import {
   ParsedProfile,
   getProfileId,
@@ -56,21 +57,59 @@ export class ProfilesService {
     return profile;
   }
 
+  async fetchProfile<T extends boolean, R = PlatformAccountProfile>(
+    profileIdentifier: ProfileIdentifier,
+    credentials?: any,
+    shouldThrow?: T
+  ): Promise<DefinedIfTrue<T, R>> {
+    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
+    let base: PlatformAccountProfile | undefined = undefined;
+
+    if (profileIdentifier.profileId) {
+      const { platform, user_id } = splitProfileId(profileIdentifier.profileId);
+      base = await this.getIdentityService(platform).getProfile(
+        user_id,
+        credentials
+      );
+    }
+
+    if (profileIdentifier.platform && profileIdentifier.username) {
+      base = await this.getIdentityService(
+        profileIdentifier.platform
+      ).getProfileByUsername(profileIdentifier.username, credentials);
+    }
+
+    if (_shouldThrow && !base) {
+      throw new Error('Invalid profileId');
+    }
+
+    return base as DefinedIfTrue<T, R>;
+  }
+
   async fetchAndCreateProfile<P extends PlatformProfile = PlatformProfile>(
-    profileId: string,
+    profileIdentifier: ProfileIdentifier,
     manager: TransactionManager,
     clusters?: string[],
     credentials?: any
   ): Promise<AccountProfile<P>> {
-    const { platform, user_id } = splitProfileId(profileId);
-
-    const profileBase = await this.getIdentityService(platform).getProfile(
-      user_id,
-      credentials
+    const profileBase = await this.fetchProfile(
+      profileIdentifier,
+      credentials,
+      true
     );
 
     if (!profileBase) {
-      throw new Error(`Profile for user ${user_id} not found in ${platform}`);
+      throw new Error(
+        `Profile for user not found for ${JSON.stringify(profileIdentifier)}`
+      );
+    }
+
+    const platform = profileIdentifier.profileId
+      ? splitProfileId(profileIdentifier.profileId).platform
+      : profileIdentifier.platform;
+
+    if (!platform) {
+      throw new Error('Unexpected');
     }
 
     const profileCreate: AccountProfileCreate = {
@@ -101,21 +140,56 @@ export class ProfilesService {
     return profile;
   }
 
+  async getByIdentifier<T extends boolean, R = AccountProfile>(
+    profileIdentifier: ProfileIdentifier,
+    manager: TransactionManager,
+    shouldThrow?: boolean
+  ): Promise<DefinedIfTrue<T, R>> {
+    if (profileIdentifier.profileId) {
+      return this.repo.getByProfileId(
+        profileIdentifier.profileId,
+        manager,
+        shouldThrow
+      ) as DefinedIfTrue<T, R>;
+    }
+
+    if (profileIdentifier.platform && profileIdentifier.username) {
+      const profileId = await this.repo.getByPlatformUsername(
+        profileIdentifier.platform,
+        profileIdentifier.username,
+        manager,
+        shouldThrow
+      );
+      if (profileId) {
+        return this.repo.getByProfileId(
+          profileId,
+          manager,
+          shouldThrow
+        ) as DefinedIfTrue<T, R>;
+      } else {
+        return undefined as DefinedIfTrue<T, R>;
+      }
+    }
+
+    throw new Error('Invalid profileIdentifier');
+  }
+
   /** Get or create an account profile */
   async getOrCreateProfile<P extends PlatformProfile = PlatformProfile>(
-    profileId: string,
+    profileIdentifier: ProfileIdentifier,
     manager: TransactionManager,
     clusters?: string[],
     credentials?: any
-  ) {
-    const profile = await this.repo.getByProfileId<false, P>(
-      profileId,
-      manager
+  ): Promise<AccountProfile> {
+    const profile = await this.getByIdentifier(
+      profileIdentifier,
+      manager,
+      false
     );
 
     if (!profile) {
       return this.fetchAndCreateProfile<P>(
-        profileId,
+        profileIdentifier,
         manager,
         clusters,
         credentials
@@ -123,17 +197,6 @@ export class ProfilesService {
     }
 
     return profile;
-  }
-
-  public async getOrCreateProfileByUsername(
-    platformId: IDENTITY_PLATFORM,
-    username: string,
-    manager: TransactionManager,
-    clusters?: string[],
-    credentials?: any
-  ) {
-    const profileId = getProfileId(platformId, username);
-    return this.getOrCreateProfile(profileId, manager, clusters, credentials);
   }
 
   async getPublicProfile(payload: GetProfilePayload) {
@@ -217,9 +280,8 @@ export class ProfilesService {
         ? await useBlueskyAdminCredentials(this.db.firestore)
         : undefined;
 
-    const profile = await this.getOrCreateProfileByUsername(
-      parsedProfile.platformId,
-      parsedProfile.username,
+    const profile = await this.getOrCreateProfile(
+      { platform: parsedProfile.platformId, username: parsedProfile.username },
       manager,
       [cluster],
       credentials?.read

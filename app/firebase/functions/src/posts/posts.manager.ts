@@ -187,7 +187,7 @@ export class PostsManager {
     userId?: string
   ) {
     const profile = await this.profiles.getOrCreateProfile(
-      getProfileId(platformId, user_id),
+      { profileId: getProfileId(platformId, user_id) },
       manager
     );
 
@@ -382,7 +382,7 @@ export class PostsManager {
       /** make sure the profiles of each post exist */
       const profileIds = new Set<string>();
 
-      /** get all unique profiles */
+      /** fetch all unique profiles presets in the platform posts */
       platformPostsCreated.forEach((posts) => {
         if (!profileIds.has(posts.post.authorProfileId)) {
           profileIds.add(posts.post.authorProfileId);
@@ -391,7 +391,7 @@ export class PostsManager {
 
       await Promise.all(
         Array.from(profileIds).map((profileId) => {
-          this.profiles.getOrCreateProfile(profileId, manager);
+          this.profiles.getOrCreateProfile({ profileId }, manager);
         })
       );
 

@@ -4,6 +4,7 @@ import {
   ALL_SOURCE_PLATFORMS,
   IDENTITY_PLATFORM,
 } from '../../@shared/types/types.platforms';
+import { FetchPlatfomAccountTaskData } from '../../@shared/types/types.profiles';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 import {
@@ -87,9 +88,8 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
 
         const taskName = FETCH_ACCOUNT_TASKS[platformId];
 
-        const taskData = {
+        const taskData: FetchPlatfomAccountTaskData = {
           profileId,
-          platformId,
           amount: 50, // Fetch last 50 posts
           latest: true,
         };

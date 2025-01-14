@@ -65,3 +65,19 @@ export interface AddProfilesPayload {
   profilesUrls: string[];
   cluster: string;
 }
+
+/**
+ * wrapper to contatin the profileId or
+ * the platform/username of a profiel
+ */
+export interface ProfileIdentifier {
+  profileId?: string;
+  platform?: IDENTITY_PLATFORM;
+  username?: string;
+}
+
+export interface FetchPlatfomAccountTaskData {
+  profileId: string;
+  amount: number;
+  latest: boolean;
+}
