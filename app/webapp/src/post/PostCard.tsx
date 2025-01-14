@@ -1,5 +1,6 @@
-import { Box, Text } from 'grommet';
-import { MouseEventHandler } from 'react';
+import { Box, Text, Button } from 'grommet';
+import { FormDown } from 'grommet-icons';
+import { MouseEventHandler, useState } from 'react';
 
 import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
@@ -136,9 +137,10 @@ export const PostCard = (props: {
     onPostClick();
   };
 
+  const [isExpanded, setIsExpanded] = useState(false);
   const postText = concatenateThread(post.generic);
   const postTextTruncated = postText.slice(0, 700) + '...';
-
+  
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
       e.stopPropagation();
@@ -193,7 +195,17 @@ export const PostCard = (props: {
             onClick={handleInternalClick}
             truncate
             shade={shade}
-            text={postTextTruncated}></PostTextStatic>
+            text={isExpanded ? postText : postTextTruncated}></PostTextStatic>
+          <Box align="center" margin={{ top: "small" }}>
+            <Button
+              plain
+              icon={<FormDown style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(!isExpanded);
+              }}
+            />
+          </Box>
           {!hideSemantics && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
               <SemanticsEditor
