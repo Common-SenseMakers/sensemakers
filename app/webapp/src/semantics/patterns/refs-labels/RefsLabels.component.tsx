@@ -145,13 +145,12 @@ export const RefLabelsComponent = (props: PatternProps) => {
               return (
                 refDisplayMeta?.oembed && (
                   <>
-                    {getPostType(props.post) === 'repost' &&
-                      isPlatformPost(ref) && (
-                        <QuotedPostLabel
-                          color={constants.colors.textLight2}
-                          postType={getPostType(props.post)}
-                        />
-                      )}
+                    {isPlatformPost(ref) && (
+                      <QuotedPostLabel
+                        color={constants.colors.textLight2}
+                        postType={getPostType(props.post)}
+                      />
+                    )}
                     <Box
                       key={index}
                       style={{

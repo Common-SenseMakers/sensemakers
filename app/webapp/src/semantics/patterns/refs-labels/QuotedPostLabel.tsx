@@ -1,5 +1,6 @@
 import { Box } from 'grommet';
 
+import { QuotedIcon } from '../../../app/icons/QuotedIcon';
 import { RepostIcon } from '../../../app/icons/RepostIcon';
 import { PostType } from '../../../utils/post.utils';
 
@@ -12,15 +13,19 @@ export const QuotedPostLabel = (props: {
   }
   return (
     <Box direction="row" align="center">
-      <RepostIcon color={props.color} />
+      {props.postType === 'repost' ? (
+        <RepostIcon color={props.color} />
+      ) : (
+        <QuotedIcon color={props.color} />
+      )}
       <span
         style={{
           color: props.color,
           marginRight: '8px',
           flexShrink: 0,
-          fontSize: '14px',
+          fontSize: '12px',
         }}>
-        Reposted
+        {props.postType === 'repost' ? 'Reposted' : ' Quoted'}
       </span>
     </Box>
   );
