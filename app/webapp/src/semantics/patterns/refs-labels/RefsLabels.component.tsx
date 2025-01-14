@@ -3,6 +3,7 @@ import { DataFactory } from 'n3';
 import { useMemo } from 'react';
 
 import { useOverlay } from '../../../overlays/OverlayContext';
+import { isPlatformPost } from '../../../shared/utils/links.utils';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
@@ -155,7 +156,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                       oembed={refDisplayMeta.oembed}
                       authorLabels={refs.get(ref)?.labelsUris || []}
                       aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
-                      showDescription={false}
+                      showDescription={isPlatformPost(ref)}
                       editable={props.editable}
                       ontology={props.originalParsed?.support?.ontology}
                       removeLabel={(labelUri: string) => {
