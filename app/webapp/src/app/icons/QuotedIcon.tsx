@@ -1,5 +1,5 @@
 export const QuotedIcon = ({ color = '#000000' }) => (
-  <div style={{ marginRight: '2px' }}>
+  <div style={{ marginRight: '2px', marginBottom: '1px' }}>
     <svg
       height="10px"
       width="10px"
