@@ -14,8 +14,8 @@ import { splitArray } from '../../../ui-components/utils';
 import { getPostType } from '../../../utils/post.utils';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps, PostClickTarget } from '../patterns';
+import { QuotedPostLabel } from './QuotedPostLabel';
 import { RefWithLabels } from './RefWithLabels';
-import { RepostedLabel } from './RepostedLabel';
 import { RefsMap, processSemantics } from './process.semantics';
 
 export const RefLabelsComponent = (props: PatternProps) => {
@@ -147,7 +147,10 @@ export const RefLabelsComponent = (props: PatternProps) => {
                   <>
                     {getPostType(props.post) === 'repost' &&
                       isPlatformPost(ref) && (
-                        <RepostedLabel color={constants.colors.textLight2} />
+                        <QuotedPostLabel
+                          color={constants.colors.textLight2}
+                          postType={getPostType(props.post)}
+                        />
                       )}
                     <Box
                       key={index}
