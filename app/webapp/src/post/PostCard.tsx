@@ -1,5 +1,4 @@
-import { Box, Button, Text } from 'grommet';
-import { FormDown } from 'grommet-icons';
+import { Box, Text } from 'grommet';
 import { MouseEventHandler, useState } from 'react';
 
 import { Autoindexed } from '../app/icons/Autoindexed';
@@ -8,6 +7,7 @@ import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
+import { ChevronButton } from '../ui-components/ChevronButton';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PublishButtons } from './PostPublishButtons';
@@ -194,27 +194,26 @@ export const PostCard = (props: {
                 }}></SemanticsEditor>
             </Box>
           )}
-          <PostTextStatic
-            onClick={handleInternalClick}
-            truncate
-            shade={shade}
-            text={isExpanded ? postText : postTextTruncated}></PostTextStatic>
+          <div
+            style={{
+              overflow: 'hidden',
+              transition: 'height 0.3s ease-in-out',
+              height: 'auto',
+            }}>
+            <PostTextStatic
+              onClick={handleInternalClick}
+              truncate
+              shade={shade}
+              text={isExpanded ? postText : postTextTruncated}></PostTextStatic>
+          </div>
           {useTruncated && (
             <Box align="end" margin={{ top: 'xxxsmall', right: 'xsmall' }}>
-              <Button
-                plain
-                icon={
-                  <FormDown
-                    style={{
-                      transform: isExpanded ? 'rotate(180deg)' : 'none',
-                    }}
-                  />
-                }
+              <ChevronButton
+                isExpanded={isExpanded}
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsExpanded(!isExpanded);
-                }}
-              />
+                }}></ChevronButton>
             </Box>
           )}
           {!hideSemantics && (
