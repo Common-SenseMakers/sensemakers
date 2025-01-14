@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
-import { object, string } from 'yup';
+import { array, object, string } from 'yup';
 
+import { AddProfilesPayload } from '../@shared/types/types.profiles';
 import { GetProfilePayload } from '../@shared/types/types.user';
 import {
   parseProfileUrl,
@@ -15,6 +16,11 @@ export const getProfileSchema = object({
   platformId: string().required(),
   user_id: string().optional(),
   username: string().optional(),
+});
+
+export const addProfilesSchema = object({
+  profilesUrls: array(string()).required(),
+  cluster: string().required(),
 });
 
 /**
@@ -49,14 +55,18 @@ export const addNonUserProfilesController: RequestHandler = async (
   response
 ) => {
   try {
+    const payload = (await addProfilesSchema.validate(
+      request.body
+    )) as AddProfilesPayload;
+
     if (DEBUG)
       logger.debug(`${request.path}: Starting addAccountsDataController`, {
-        payloads: request.body,
+        payload,
       });
 
     const { profiles } = getServices(request);
 
-    await profiles.parseAndAdd(request.body);
+    await profiles.parseAndAdd(payload);
 
     response.status(200).send({ success: true });
   } catch (error) {

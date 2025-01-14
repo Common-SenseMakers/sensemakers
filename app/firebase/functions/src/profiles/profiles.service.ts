@@ -7,6 +7,7 @@ import {
   AccountProfile,
   AccountProfileCreate,
   AccountProfileRead,
+  AddProfilesPayload,
   PlatformProfile,
 } from '../@shared/types/types.profiles';
 import { GetProfilePayload } from '../@shared/types/types.user';
@@ -55,9 +56,10 @@ export class ProfilesService {
     return profile;
   }
 
-  async readAndCreateProfile<P extends PlatformProfile = PlatformProfile>(
+  async fetchAndCreateProfile<P extends PlatformProfile = PlatformProfile>(
     profileId: string,
     manager: TransactionManager,
+    clusters?: string[],
     credentials?: any
   ): Promise<AccountProfile<P>> {
     const { platform, user_id } = splitProfileId(profileId);
@@ -75,7 +77,7 @@ export class ProfilesService {
       ...profileBase,
       userId: null,
       platformId: platform,
-      clusters: [],
+      clusters: clusters || [],
     };
 
     return this.createProfile(profileCreate, manager);
@@ -103,6 +105,7 @@ export class ProfilesService {
   async getOrCreateProfile<P extends PlatformProfile = PlatformProfile>(
     profileId: string,
     manager: TransactionManager,
+    clusters?: string[],
     credentials?: any
   ) {
     const profile = await this.repo.getByProfileId<false, P>(
@@ -111,7 +114,12 @@ export class ProfilesService {
     );
 
     if (!profile) {
-      return this.readAndCreateProfile<P>(profileId, manager, credentials);
+      return this.fetchAndCreateProfile<P>(
+        profileId,
+        manager,
+        clusters,
+        credentials
+      );
     }
 
     return profile;
@@ -121,10 +129,11 @@ export class ProfilesService {
     platformId: IDENTITY_PLATFORM,
     username: string,
     manager: TransactionManager,
+    clusters?: string[],
     credentials?: any
   ) {
     const profileId = getProfileId(platformId, username);
-    return this.getOrCreateProfile(profileId, manager, credentials);
+    return this.getOrCreateProfile(profileId, manager, clusters, credentials);
   }
 
   async getPublicProfile(payload: GetProfilePayload) {
@@ -159,8 +168,8 @@ export class ProfilesService {
     return publicProfile;
   }
 
-  async parseAndAdd(profileUrls: string[]): Promise<void> {
-    const parsedProfiles = profileUrls
+  async parseAndAdd(input: AddProfilesPayload): Promise<void> {
+    const parsedProfiles = input.profilesUrls
       .map((profileUrl) => {
         const parsed = parseProfileUrl(profileUrl);
         return parsed;
@@ -168,15 +177,34 @@ export class ProfilesService {
       .filter((profile) => profile);
 
     await Promise.all(
-      parsedProfiles.map(
-        (parsedProfile) => parsedProfile && this.addProfile(parsedProfile)
-      )
+      parsedProfiles.map(async (parsedProfile) => {
+        if (parsedProfile) {
+          return this.db.run(async (manager) => {
+            return this.addAndTriggerFetch(
+              parsedProfile,
+              input.cluster,
+              manager
+            );
+          });
+        }
+      })
     );
   }
 
-  async addAndTriggerFetch() {}
+  async addAndTriggerFetch(
+    parsedProfile: ParsedProfile,
+    cluster: string,
+    manager: TransactionManager
+  ) {
+    const profile = await this.addProfile(parsedProfile, cluster, manager);
+    await this.triggerProfileFetch(profile.id);
+  }
 
-  async addProfile(parsedProfile: ParsedProfile) {
+  async addProfile(
+    parsedProfile: ParsedProfile,
+    cluster: string,
+    manager: TransactionManager
+  ) {
     if (DEBUG)
       logger.debug('Fetching profile', {
         platformId: parsedProfile.platformId,
@@ -189,16 +217,16 @@ export class ProfilesService {
         ? await useBlueskyAdminCredentials(this.db.firestore)
         : undefined;
 
-    const profile = await this.db.run(async (manager) => {
-      return this.getOrCreateProfileByUsername(
-        parsedProfile.platformId,
-        parsedProfile.username,
-        manager,
-        credentials?.read
-      );
-    });
+    const profile = await this.getOrCreateProfileByUsername(
+      parsedProfile.platformId,
+      parsedProfile.username,
+      manager,
+      [cluster],
+      credentials?.read
+    );
 
     if (DEBUG) logger.debug('Profile added', { profile });
+    return profile;
   }
 
   async triggerProfileFetch(profileId: string) {

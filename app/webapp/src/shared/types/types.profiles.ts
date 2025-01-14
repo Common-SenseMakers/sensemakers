@@ -60,3 +60,8 @@ export type PlatformAccountProfile<
 export type ProfilesQueryParams = Partial<
   Pick<AccountProfile, 'platformId' | 'userId' | 'autofetch'>
 > & { userIdDefined?: boolean } & { limit?: number };
+
+export interface AddProfilesPayload {
+  profilesUrls: string[];
+  cluster: string;
+}

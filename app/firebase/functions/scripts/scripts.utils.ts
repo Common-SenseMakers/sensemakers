@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import { AppOptions } from 'firebase-admin';
 
+import { AddProfilesPayload } from '../src/@shared/types/types.profiles';
 import { logger } from '../src/instances/logger';
 
 export const initApp = (config: AppOptions, name: string) => {
@@ -18,7 +19,7 @@ export const initApp = (config: AppOptions, name: string) => {
 };
 
 export async function callAddProfiles(
-  accounts: string[],
+  input: AddProfilesPayload,
   functionsUrl: string,
   adminApiKey: string
 ) {
@@ -29,7 +30,7 @@ export async function callAddProfiles(
         ['admin-api-key', adminApiKey],
       ],
       method: 'post',
-      body: JSON.stringify(accounts),
+      body: JSON.stringify(input),
     });
 
     if (!response.ok) {
