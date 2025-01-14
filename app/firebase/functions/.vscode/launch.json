@@ -35,7 +35,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./scripts/080-trigger-autofetch.ts"
+        "./seed/read.notion.dbs.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

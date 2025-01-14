@@ -10,11 +10,12 @@ const token = process.env.NOTION_TOKEN as string;
 const db_id = process.env.DB_ID as string;
 
 interface AccountDetails {
-  communities: string[];
+  name?: string;
+  clusters: string[];
   bluesky?: string;
   mastodon?: string;
   twitter?: string;
-  chosen: string[];
+  chosen?: string;
 }
 
 (async () => {
@@ -25,20 +26,22 @@ interface AccountDetails {
   /** read the list of communities */
   const db = await notion.databases.retrieve({ database_id: db_id });
 
-  const communities: string[] = (
-    db.properties['Communities'] as any
+  const clusters: string[] = (
+    db.properties['Clusters'] as any
   ).multi_select.options.map((option: any) => option.name as string);
 
-  console.log('Communities:', communities);
+  console.log('Clusters:', clusters);
 
   // Ensure the output directory exists
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir);
   }
 
-  communities.forEach((community) => {
-    const filePath = path.join(outputDir, `${community}.csv`);
-    fs.unlinkSync(filePath);
+  clusters.forEach((cluster) => {
+    const filePath = path.join(outputDir, `${cluster}.csv`);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
     fs.writeFileSync(filePath, 'account\n', 'utf-8');
   });
 
@@ -47,34 +50,52 @@ interface AccountDetails {
     database_id: db_id,
   });
 
-  const accounts: AccountDetails[] = entries.map((entry) => {
-    const entryAny = entry as any;
-    const chosen = entryAny.properties['Chosen'].multi_select.map(
-      (item: any) => item.name
-    );
+  const accounts = entries
+    .map((entry) => {
+      const entryAny = entry as any;
+      const chosenValue = entryAny.properties['chosen_profile'].formula;
+      const clustersValue = entryAny.properties['Clusters'].multi_select;
+      const nameValue = entryAny.properties['Name'];
 
-    return {
-      communities: entryAny.properties['Communities'].multi_select.map(
-        (item: any) => item.name
-      ),
-      bluesky: entryAny.properties['Bluesky']?.url,
-      mastodon: entryAny.properties['Mastodon']?.url,
-      twitter: entryAny.properties['Twitter']?.url,
-      chosen,
-    };
-  });
+      if (clustersValue === null) {
+        return undefined;
+      }
+
+      const name =
+        nameValue.title.length > 0 ? nameValue.title[0].plain_text : '';
+
+      const chosen =
+        chosenValue.string !== null
+          ? (chosenValue.string as string)
+          : undefined;
+
+      const clusters = clustersValue.map((item: any) => item.name);
+
+      return {
+        name,
+        clusters: clusters,
+        bluesky: entryAny.properties['Bluesky']?.url,
+        mastodon: entryAny.properties['Fediverse']?.url,
+        twitter: entryAny.properties['Twitter']?.url,
+        chosen,
+      };
+    })
+    .filter((account) => account !== undefined) as AccountDetails[];
 
   accounts.forEach(async (account) => {
-    account.communities.forEach(async (community) => {
+    account.clusters.forEach(async (community) => {
       const filePath = path.join(outputDir, `${community}.csv`);
       const accountUrl = (() => {
+        if (account.chosen) return account.chosen;
         if (account.bluesky) return account.bluesky;
         if (account.mastodon) return account.mastodon;
         if (account.twitter) return account.twitter;
-        throw new Error('No account URL found');
+        return undefined;
       })();
-      const line = `${accountUrl}\n`;
-      fs.appendFileSync(filePath, line, 'utf-8');
+      if (accountUrl) {
+        const line = `${accountUrl}\n`;
+        fs.appendFileSync(filePath, line, 'utf-8');
+      }
     });
   });
 })();

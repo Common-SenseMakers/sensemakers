@@ -10,7 +10,8 @@
     "src/index.ts",
     "src/custom.d.ts",
     "scripts/**/*",
-    "migrations/**/*"
+    "migrations/**/*",
+    "seed/**/*"
   ],
   "exclude": ["migrations/obsolete/**/*", "scripts/obsolete/**/*"]
 }
