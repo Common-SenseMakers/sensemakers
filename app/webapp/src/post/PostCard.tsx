@@ -137,6 +137,7 @@ export const PostCard = (props: {
   };
 
   const postText = concatenateThread(post.generic);
+  const postTextTruncated = postText.slice(0, 700) + '...';
 
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
@@ -192,7 +193,7 @@ export const PostCard = (props: {
             onClick={handleInternalClick}
             truncate
             shade={shade}
-            text={postText}></PostTextStatic>
+            text={postTextTruncated}></PostTextStatic>
           {!hideSemantics && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
               <SemanticsEditor
