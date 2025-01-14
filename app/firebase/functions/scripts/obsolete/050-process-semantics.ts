@@ -1,4 +1,4 @@
-import { services } from './scripts.services';
+import { services } from '../scripts.services';
 
 const BATCH_SIZE = 100; // Process 100 posts at a time
 const MAX_CONCURRENT_BATCHES = 10; // Maximum number of batches to process simultaneously

@@ -1,5 +1,5 @@
-import { PostsQueryStatus } from '../src/@shared/types/types.posts';
-import { services } from './scripts.services';
+import { PostsQueryStatus } from '../../src/@shared/types/types.posts';
+import { services } from '../scripts.services';
 
 const mandatory = ['USER_ID'];
 

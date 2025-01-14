@@ -1,7 +1,7 @@
-import { PLATFORM } from '../src/@shared/types/types.platforms';
-import { logger } from '../src/instances/logger';
-import { UsersHelper } from '../src/users/users.helper';
-import { services } from './scripts.services';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { logger } from '../../src/instances/logger';
+import { UsersHelper } from '../../src/users/users.helper';
+import { services } from '../scripts.services';
 
 // Read posts from a source and create them in the target (uses new ids and creates the platform posts and profiles)
 (async () => {

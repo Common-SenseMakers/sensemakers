@@ -1,5 +1,5 @@
-import { logger } from '../src/instances/logger';
-import { services } from './scripts.services';
+import { logger } from '../../src/instances/logger';
+import { services } from '../scripts.services';
 
 const mandatory = ['USER_ID'];
 

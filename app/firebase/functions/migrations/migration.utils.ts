@@ -1,9 +1,8 @@
 import * as readline from 'readline';
 
 // Import readline module
-import { logger } from '../src/instances/logger';
 
-const DEBUG = true;
+// const DEBUG = true;
 
 // Function to prompt user for database deletion
 export async function promptUser(

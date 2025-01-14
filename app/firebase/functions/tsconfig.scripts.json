@@ -11,5 +11,6 @@
     "src/custom.d.ts",
     "scripts/**/*",
     "migrations/**/*"
-  ]
+  ],
+  "exclude": ["migrations/obsolete/**/*", "scripts/obsolete/**/*"]
 }

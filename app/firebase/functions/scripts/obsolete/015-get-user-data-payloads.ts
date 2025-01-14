@@ -1,8 +1,8 @@
 import fs from 'fs';
 
-import { AddUserDataPayload } from '../src/@shared/types/types.fetch';
-import { IDENTITY_PLATFORM } from '../src/@shared/types/types.platforms';
-import { app } from './scripts.services';
+import { AddUserDataPayload } from '../../src/@shared/types/types.fetch';
+import { IDENTITY_PLATFORM } from '../../src/@shared/types/types.platforms';
+import { app } from '../scripts.services';
 
 const firestore = app.firestore();
 

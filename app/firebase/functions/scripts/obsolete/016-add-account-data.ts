@@ -11,7 +11,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import fs from 'fs';
 
-import { callAddProfiles } from './scripts.utils';
+import { callAddProfiles } from '../scripts.utils';
 
 dotenv.config({ path: './scripts/.script.env' });
 

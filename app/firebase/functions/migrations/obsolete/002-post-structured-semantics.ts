@@ -1,6 +1,6 @@
-import { AppPostParsedStatus } from '../src/@shared/types/types.posts';
-import { logger } from '../src/instances/logger';
-import { servicesSource } from './migrations.services';
+import { AppPostParsedStatus } from '../../src/@shared/types/types.posts';
+import { logger } from '../../src/instances/logger';
+import { servicesSource } from '../migrations.services';
 
 (async () => {
   const postsIds = await servicesSource.postsManager.processing.posts.getAll();

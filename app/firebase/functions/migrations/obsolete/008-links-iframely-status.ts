@@ -1,7 +1,7 @@
-import { RefMeta } from '../src/@shared/types/types.parser';
-import { LinkMeta } from '../src/@shared/types/types.references';
-import { processInBatches } from '../src/db/db.utils';
-import { servicesSource } from './migrations.services';
+import { RefMeta } from '../../src/@shared/types/types.parser';
+import { LinkMeta } from '../../src/@shared/types/types.references';
+import { processInBatches } from '../../src/db/db.utils';
+import { servicesSource } from '../migrations.services';
 
 const DEBUG = true;
 

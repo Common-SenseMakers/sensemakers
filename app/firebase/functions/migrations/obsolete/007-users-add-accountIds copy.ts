@@ -1,7 +1,7 @@
-import { ALL_IDENTITY_PLATFORMS } from '../src/@shared/types/types.platforms';
-import { processInBatches } from '../src/db/db.utils';
-import { UsersHelper } from '../src/users/users.helper';
-import { servicesSource } from './migrations.services';
+import { ALL_IDENTITY_PLATFORMS } from '../../src/@shared/types/types.platforms';
+import { processInBatches } from '../../src/db/db.utils';
+import { UsersHelper } from '../../src/users/users.helper';
+import { servicesSource } from '../migrations.services';
 
 const DEBUG = true;
 

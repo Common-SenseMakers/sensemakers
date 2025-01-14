@@ -1,8 +1,8 @@
 import fs from 'fs';
 
-import { PLATFORM } from '../src/@shared/types/types.platforms';
-import { PostsQueryStatus } from '../src/@shared/types/types.posts';
-import { services } from './scripts.services';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { PostsQueryStatus } from '../../src/@shared/types/types.posts';
+import { services } from '../scripts.services';
 
 (async () => {
   const data: any = {};

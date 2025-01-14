@@ -1,6 +1,6 @@
-import { StructuredSemantics } from '../src/@shared/types/types.posts';
-import { logger } from '../src/instances/logger';
-import { servicesSource, servicesTarget } from './migrations.services';
+import { StructuredSemantics } from '../../src/@shared/types/types.posts';
+import { logger } from '../../src/instances/logger';
+import { servicesSource, servicesTarget } from '../migrations.services';
 
 const DEBUG = true;
 

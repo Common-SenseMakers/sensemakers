@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { services } from './scripts.services';
+import { services } from '../scripts.services';
 
 const FILENAME = `all.nanopubs.data`;
 

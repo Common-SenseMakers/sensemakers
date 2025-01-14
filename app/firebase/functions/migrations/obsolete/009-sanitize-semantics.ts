@@ -1,6 +1,6 @@
-import { AppPost } from '../src/@shared/types/types.posts';
-import { processInBatches } from '../src/db/db.utils';
-import { servicesSource } from './migrations.services';
+import { AppPost } from '../../src/@shared/types/types.posts';
+import { processInBatches } from '../../src/db/db.utils';
+import { servicesSource } from '../migrations.services';
 
 const DEBUG = true;
 

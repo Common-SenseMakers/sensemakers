@@ -1,8 +1,8 @@
 import { logger } from 'firebase-functions';
 
-import { AppPost } from '../../src/@shared/types/types.posts';
-import { Services } from '../../src/instances/services';
-import { getProfileId } from '../../src/profiles/profiles.repository';
+import { AppPost } from '../../../src/@shared/types/types.posts';
+import { Services } from '../../../src/instances/services';
+import { getProfileId } from '../../../src/profiles/profiles.repository';
 
 const DEBUG = true;
 

@@ -1,4 +1,4 @@
-import { app } from './scripts.services';
+import { app } from '../scripts.services';
 
 const mandatory = ['PLATFORM_ID', 'ACCOUNT_ID'];
 

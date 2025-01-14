@@ -1,9 +1,9 @@
-import { PLATFORM } from '../src/@shared/types/types.platforms';
-import { AppPost } from '../src/@shared/types/types.posts';
-import { logger } from '../src/instances/logger';
-import { PostsHelper } from '../src/posts/posts.helper';
-import { getProfileId } from '../src/profiles/profiles.repository';
-import { servicesSource, servicesTarget } from './migrations.services';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { AppPost } from '../../src/@shared/types/types.posts';
+import { logger } from '../../src/instances/logger';
+import { PostsHelper } from '../../src/posts/posts.helper';
+import { getProfileId } from '../../src/profiles/profiles.repository';
+import { servicesSource, servicesTarget } from '../migrations.services';
 
 const DEBUG = false;
 

@@ -1,4 +1,4 @@
-import { app } from './scripts.services';
+import { app } from '../scripts.services';
 
 const mandatory = ['USER_ID'];
 

@@ -1,7 +1,7 @@
-import { PLATFORM } from '../src/@shared/types/types.platforms';
-import { mapStoreElements, parseRDF } from '../src/@shared/utils/n3.utils';
-import { parseMastodonAccountURI } from '../src/platforms/mastodon/mastodon.utils';
-import { app } from './scripts.services';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { mapStoreElements, parseRDF } from '../../src/@shared/utils/n3.utils';
+import { parseMastodonAccountURI } from '../../src/platforms/mastodon/mastodon.utils';
+import { app } from '../scripts.services';
 
 const firestore = app.firestore();
 

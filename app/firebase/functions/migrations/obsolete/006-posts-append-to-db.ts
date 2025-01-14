@@ -1,10 +1,10 @@
-import { AppPost } from '../src/@shared/types/types.posts';
-import { AccountProfile } from '../src/@shared/types/types.profiles';
-import { getProfileId } from '../src/@shared/utils/profiles.utils';
-import { processInBatches } from '../src/db/db.utils';
-import { logger } from '../src/instances/logger';
-import { PostsHelper } from '../src/posts/posts.helper';
-import { servicesSource, servicesTarget } from './migrations.services';
+import { AppPost } from '../../src/@shared/types/types.posts';
+import { AccountProfile } from '../../src/@shared/types/types.profiles';
+import { getProfileId } from '../../src/@shared/utils/profiles.utils';
+import { processInBatches } from '../../src/db/db.utils';
+import { logger } from '../../src/instances/logger';
+import { PostsHelper } from '../../src/posts/posts.helper';
+import { servicesSource, servicesTarget } from '../migrations.services';
 
 const DEBUG = false;
 

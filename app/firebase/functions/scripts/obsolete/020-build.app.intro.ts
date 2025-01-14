@@ -1,17 +1,17 @@
 import { Nanopub } from '@nanopub/sign';
 
-import { RSAKeys } from '../src/@shared/types/types.nanopubs';
-import { PLATFORM } from '../src/@shared/types/types.platforms';
-import { HexStr } from '../src/@shared/types/types.user';
+import { RSAKeys } from '../../src/@shared/types/types.nanopubs';
+import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { HexStr } from '../../src/@shared/types/types.user';
+import { cleanPublicKey } from '../../src/@shared/utils/semantics.helper';
+import { services } from '../scripts.services';
 import { signNanopublication } from '../src/@shared/utils/nanopub.sign.util';
-import { cleanPublicKey } from '../src/@shared/utils/semantics.helper';
 import {
   buildAppIntroNp,
   buildLinkAccountsNanopub,
 } from '../src/platforms/nanopub/create.app.intro.nanopub';
 import { NanopubService } from '../src/platforms/nanopub/nanopub.service';
 import { getNanopubProfile } from '../test/utils/nanopub.profile';
-import { services } from './scripts.services';
 
 const mandatory = ['PRIVATE_KEY_ROOT', 'PRIVATE_KEY_APPROVED'];
 
