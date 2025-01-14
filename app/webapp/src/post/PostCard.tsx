@@ -1,4 +1,4 @@
-import { Box, Text, Button } from 'grommet';
+import { Box, Button, Text } from 'grommet';
 import { FormDown } from 'grommet-icons';
 import { MouseEventHandler, useState } from 'react';
 
@@ -105,6 +105,7 @@ export const PostCard = (props: {
   const post = updated.postMerged;
 
   const { constants } = useThemeContext();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const overlay = useOverlay();
 
@@ -137,10 +138,12 @@ export const PostCard = (props: {
     onPostClick();
   };
 
-  const [isExpanded, setIsExpanded] = useState(false);
   const postText = concatenateThread(post.generic);
-  const postTextTruncated = postText.slice(0, 700) + '...';
-  
+  const useTruncated = postText.length > 700;
+  const postTextTruncated = useTruncated
+    ? postText.slice(0, 700) + '...'
+    : postText;
+
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
       e.stopPropagation();
@@ -196,16 +199,24 @@ export const PostCard = (props: {
             truncate
             shade={shade}
             text={isExpanded ? postText : postTextTruncated}></PostTextStatic>
-          <Box align="center" margin={{ top: "small" }}>
-            <Button
-              plain
-              icon={<FormDown style={{ transform: isExpanded ? 'rotate(180deg)' : 'none' }} />}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
-            />
-          </Box>
+          {useTruncated && (
+            <Box align="end" margin={{ top: 'xxxsmall', right: 'xsmall' }}>
+              <Button
+                plain
+                icon={
+                  <FormDown
+                    style={{
+                      transform: isExpanded ? 'rotate(180deg)' : 'none',
+                    }}
+                  />
+                }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+              />
+            </Box>
+          )}
           {!hideSemantics && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
               <SemanticsEditor
