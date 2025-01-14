@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import { AppOptions } from 'firebase-admin';
+import readline from 'readline';
 
 import { AddProfilesPayload } from '../src/@shared/types/types.profiles';
 import { logger } from '../src/instances/logger';
@@ -35,7 +36,7 @@ export async function callAddProfiles(
 
     if (!response.ok) {
       const body = await response.json();
-      logger.error(`Error getting Orcid token ${JSON.stringify(body)}`);
+      logger.error(`Error calling addProfiles ${JSON.stringify(body)}`);
       throw new Error(`Error getting Orcid token: ${response.status}`);
     }
 
@@ -46,3 +47,17 @@ export async function callAddProfiles(
     console.error(error.response?.data || error.message);
   }
 }
+
+export const askForConfirmation = (message: string): Promise<boolean> => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) => {
+    rl.question(`${message} (yes/no): `, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === 'yes');
+    });
+  });
+};

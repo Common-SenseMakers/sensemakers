@@ -10,11 +10,10 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import readline from 'readline';
 
-import { callAddProfiles } from './scripts.utils';
+import { callAddProfiles } from '../scripts/scripts.utils';
 
-dotenv.config({ path: './scripts/.script.env' });
+dotenv.config({ path: './seed/.env.seed' });
 
 const FUNCTION_URL = process.env.FUNCTIONS_URL as string;
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY as string;
@@ -23,20 +22,6 @@ if (!ADMIN_API_KEY) {
   console.error('ADMIN_API_KEY environment variable is not set');
   process.exit(1);
 }
-
-const askForConfirmation = (message: string): Promise<boolean> => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(`${message} (yes/no): `, (answer) => {
-      rl.close();
-      resolve(answer.trim().toLowerCase() === 'yes');
-    });
-  });
-};
 
 async function processUserDataPayloads() {
   try {
@@ -58,9 +43,10 @@ async function processUserDataPayloads() {
 
       const clusterName = clusterFile.slice(0, -4);
 
-      const confirmed = await askForConfirmation(
-        `You will add ${profiles.length} to cluster ${clusterName}. Do you want to continue?`
-      );
+      const confirmed = true;
+      // const confirmed = await askForConfirmation(
+      //   `You will add ${profiles.length} profiles to cluster "${clusterName}". Do you want to continue?`
+      // );
 
       if (confirmed) {
         await callAddProfiles(
