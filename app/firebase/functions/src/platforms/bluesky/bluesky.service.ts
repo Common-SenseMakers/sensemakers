@@ -370,7 +370,7 @@ export class BlueskyService
             thread: [
               {
                 url: `https://bsky.app/profile/${post.author.handle}/post/${parseBlueskyURI(post.uri).rkey}`,
-                content: post.record.text,
+                content: cleanBlueskyContent(post.record),
               },
             ],
           },
