@@ -47,7 +47,7 @@ export interface PlatformProfile {
 }
 
 export type AccountProfileCreate<P extends PlatformProfile = PlatformProfile> =
-  Omit<AccountProfile<P>, 'id'>;
+  Omit<AccountProfile<P>, 'id' | 'clusters'>;
 
 export type AccountProfileBase<P extends PlatformProfile = PlatformProfile> =
   Omit<AccountProfile<P>, 'id' | 'platformId'>;

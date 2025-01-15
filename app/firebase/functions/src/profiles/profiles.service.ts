@@ -43,15 +43,21 @@ export class ProfilesService {
     return service;
   }
 
-  createProfile<P extends PlatformProfile = PlatformProfile>(
+  async createProfile<P extends PlatformProfile = PlatformProfile>(
     profileCreate: AccountProfileCreate,
-    manager: TransactionManager
+    manager: TransactionManager,
+    clusters?: string[]
   ) {
     const id = this.repo.create(profileCreate, manager);
     const profile = {
       id,
       ...profileCreate,
     } as AccountProfile<P>;
+
+    if (clusters) {
+      await this.addClusters(profile.id, clusters, manager);
+      profile.clusters = clusters;
+    }
 
     return profile;
   }
@@ -115,16 +121,22 @@ export class ProfilesService {
       ...profileBase,
       userId: null,
       platformId: platform,
-      clusters: clusters || [],
     };
 
-    return this.createProfile(profileCreate, manager);
+    const profile = await this.createProfile<P>(
+      profileCreate,
+      manager,
+      clusters
+    );
+
+    return profile;
   }
 
   /**  */
   async upsertProfile<P extends PlatformProfile = PlatformProfile>(
     profile: AccountProfileCreate,
-    manager: TransactionManager
+    manager: TransactionManager,
+    clusters?: string[]
   ) {
     const profileId = getProfileId(profile.platformId, profile.user_id);
     const exisiting = await this.repo.getByProfileId<false, P>(
@@ -133,7 +145,7 @@ export class ProfilesService {
     );
 
     if (!exisiting) {
-      return this.createProfile<P>(profile, manager);
+      return this.createProfile<P>(profile, manager, clusters);
     }
 
     return profile;
@@ -173,6 +185,18 @@ export class ProfilesService {
     throw new Error('Invalid profileIdentifier');
   }
 
+  async addClusters(
+    profileId: string,
+    clustersIds: string[],
+    manager: TransactionManager
+  ) {
+    await Promise.all(
+      clustersIds.map((clusterId) => {
+        this.repo.addCluster(profileId, clusterId, manager);
+      })
+    );
+  }
+
   /** Get or create an account profile */
   async getOrCreateProfile<P extends PlatformProfile = PlatformProfile>(
     profileIdentifier: ProfileIdentifier,
@@ -196,11 +220,7 @@ export class ProfilesService {
     } else {
       // add clusters
       if (clusters) {
-        await Promise.all(
-          clusters.map((cluster) => {
-            this.repo.addCluster(profile.id, cluster, manager);
-          })
-        );
+        await this.addClusters(profile.id, clusters, manager);
       }
     }
 

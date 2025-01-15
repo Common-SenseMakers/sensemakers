@@ -199,12 +199,11 @@ export class UsersService {
           manager
         );
 
-        /** create the profile when addint that account */
+        /** create the profile when adding that account */
         const profileCreate: AccountProfileCreate = {
           ...profile,
           userId: _userId,
           platformId: platform,
-          clusters: [],
         };
 
         await this.profiles.upsertProfile(profileCreate, manager);
@@ -250,7 +249,6 @@ export class UsersService {
             ...profile,
             userId,
             platformId: platform,
-            clusters: [],
           };
 
           await this.profiles.upsertProfile(profileCreate, manager);
@@ -289,7 +287,6 @@ export class UsersService {
           ...profile,
           userId,
           platformId: platform,
-          clusters: [],
         };
 
         await this.profiles.upsertProfile(profileCreate, manager);

@@ -31,7 +31,7 @@ export const createUsers = async (
           userId,
         };
 
-        const createdProfile = services.profiles.createProfile(
+        const createdProfile = await services.profiles.createProfile(
           profileCreate,
           manager
         );
@@ -64,7 +64,7 @@ export const createProfiles = async (
     testProfiles.map(async (profileData) => {
       const clustersIds = profileData.clustersIds;
 
-      const createdProfile = services.profiles.createProfile(
+      const createdProfile = await services.profiles.createProfile(
         profileData.profile,
         manager
       );
