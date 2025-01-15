@@ -1,6 +1,11 @@
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
-import { USE_REAL_PARSER, USE_REAL_TWITTER } from './setup';
+import {
+  USE_REAL_BLUESKY,
+  USE_REAL_MASTODON,
+  USE_REAL_PARSER,
+  USE_REAL_TWITTER,
+} from './setup';
 import { getTestServices } from './test.services';
 
 describe.only('100 add accounts', async () => {
@@ -10,6 +15,12 @@ describe.only('100 add accounts', async () => {
       ? undefined
       : { publish: true, signup: true, fetch: true, get: true },
     parser: USE_REAL_PARSER ? 'real' : 'mock',
+    bluesky: USE_REAL_BLUESKY
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
+    mastodon: USE_REAL_MASTODON
+      ? undefined
+      : { publish: true, signup: true, fetch: true, get: true },
   });
 
   before(async () => {
