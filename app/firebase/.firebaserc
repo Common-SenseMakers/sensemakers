@@ -1,9 +1,9 @@
 {
   "projects": {
     "dev": "sensenets-dev",
+    "dev2": "sensenets-dev2",
     "staging": "sensenets-staging",
     "prod": "sensenets-prod",
-    "dev-md": "sensenets-dev-md",
     "dataset": "sensenets-dataset"
   },
   "targets": {},
