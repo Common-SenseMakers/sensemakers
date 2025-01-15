@@ -38,15 +38,16 @@ if (process.env.FB_PROJECT === 'dev') {
           APP_URL: '"https://development--sensemakers.netlify.app/"',
           IFRAMELY_API_URL: '"https://iframe.ly/api"',
           IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
-          PUBLIC_POSTHOG_KEY: '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
-          PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"'
+          PUBLIC_POSTHOG_KEY:
+            '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
+          PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"',
         },
       },
     }),
   ];
 }
 
-if (process.env.FB_PROJECT === 'dev-md') {
+if (process.env.FB_PROJECT === 'dev2') {
   base.webpack.configure.plugins = [
     ...newPlugins,
     new webpack.DefinePlugin({
@@ -57,16 +58,19 @@ if (process.env.FB_PROJECT === 'dev-md') {
           ...definePlugin.definitions.process.env,
           NODE_ENV: '"development"',
           FUNCTIONS_BASE:
-            '"https://us-central1-sensenets-dev-md.cloudfunctions.net"',
-          FB_APIKEY: '"AIzaSyCTDgxBCPC-iiTwe2WgD6O0lsKcLrxdSf4"',
-          FB_AUTHDOMAIN: '"sensenets-dev-md.firebaseapp.com"',
-          FB_PROJECTID: '"sensenets-dev-md"',
-          FB_STORAGE_BUCKET: '"sensenets-dev-md.appspot.com"',
-          FB_MESSAGING_SENDER_ID: '"40268371653"',
-          FB_APPID: '"1:40268371653:web:442bb46707112b84b3c2ac"',
-          APP_URL: '"https://development-md--sensemakers.netlify.app/"',
+            '"https://us-central1-sensenets-dev2.cloudfunctions.net"',
+          FB_APIKEY: '"AIzaSyAKLtiyLuT2AmWdTmYCpEOzu_FvWXz-qN4"',
+          FB_AUTHDOMAIN: '"sensenets-dev2.firebaseapp.com"',
+          FB_PROJECTID: '"sensenets-dev2"',
+          FB_STORAGE_BUCKET: '"sensenets-dev2.firebasestorage.app"',
+          FB_MESSAGING_SENDER_ID: '"418506613529"',
+          FB_APPID: '"1:418506613529:web:aa3e658ac737a28a585b88"',
+          APP_URL: '"https://development--sensemakers.netlify.app/"',
           IFRAMELY_API_URL: '"https://iframe.ly/api"',
-          IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"'
+          IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
+          PUBLIC_POSTHOG_KEY:
+            '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
+          PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"',
         },
       },
     }),
@@ -93,7 +97,7 @@ if (process.env.FB_PROJECT === 'staging') {
           FB_APPID: '"1:999821808505:web:27c9f570bcd19f6e7755a8"',
           APP_URL: '"https://staging--sensemakers.netlify.app/"',
           IFRAMELY_API_URL: '"https://iframe.ly/api"',
-          IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"'
+          IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
         },
       },
     }),
@@ -121,8 +125,9 @@ if (process.env.FB_PROJECT === 'production') {
           APP_URL: '"https://app.sense-nets.xyz/"',
           IFRAMELY_API_URL: '"https://iframe.ly/api"',
           IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
-          PUBLIC_POSTHOG_KEY: '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
-          PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"'
+          PUBLIC_POSTHOG_KEY:
+            '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
+          PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"',
         },
       },
     }),
