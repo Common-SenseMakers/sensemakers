@@ -21,7 +21,6 @@ import {
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
-import { useBlueskyAdminCredentials } from '../platforms/bluesky/bluesky.utils';
 import { IdentityServicesMap } from '../platforms/platforms.service';
 import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks.config';
 import { chunkNumber, enqueueTask } from '../tasksUtils/tasks.support';
@@ -274,17 +273,10 @@ export class ProfilesService {
         username: parsedProfile.username,
       });
 
-    /** ? */
-    const credentials =
-      parsedProfile.platformId === PLATFORM.Bluesky
-        ? await useBlueskyAdminCredentials(this.db.firestore)
-        : undefined;
-
     const profile = await this.getOrCreateProfile(
       { platform: parsedProfile.platformId, username: parsedProfile.username },
       manager,
-      [cluster],
-      credentials?.read
+      [cluster]
     );
 
     if (DEBUG) logger.debug('Profile added', { profile });

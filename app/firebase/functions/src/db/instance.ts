@@ -30,6 +30,7 @@ export class DBInstance {
     links: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     ontologies: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     clusters: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    adminCredentials: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
   constructor(firestore: Firestore) {
@@ -47,6 +48,9 @@ export class DBInstance {
       links: this.firestore.collection(CollectionNames.Links),
       ontologies: this.firestore.collection(CollectionNames.Ontologies),
       clusters: this.firestore.collection(CollectionNames.Clusters),
+      adminCredentials: this.firestore.collection(
+        CollectionNames.AdminCredentials
+      ),
     };
   }
 

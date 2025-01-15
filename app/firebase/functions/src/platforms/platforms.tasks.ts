@@ -2,12 +2,9 @@ import { logger } from 'firebase-functions';
 import { Request } from 'firebase-functions/v2/tasks';
 
 import { FetchParams } from '../@shared/types/types.fetch';
-import { PLATFORM } from '../@shared/types/types.platforms';
 import { FetchPlatfomAccountTaskData } from '../@shared/types/types.profiles';
-import { AccountCredentials } from '../@shared/types/types.user';
 import { splitProfileId } from '../@shared/utils/profiles.utils';
 import { Services } from '../instances/services';
-import { useBlueskyAdminCredentials } from './bluesky/bluesky.utils';
 
 export const DEBUG = true;
 
@@ -45,19 +42,12 @@ export const fetchPlatformAccountTask = async (
 
   if (DEBUG) logger.debug('Fetching account with params', { fetchParams });
 
-  let credentials: AccountCredentials | undefined = undefined;
-
-  if (platform === PLATFORM.Bluesky) {
-    credentials = await useBlueskyAdminCredentials(services.db.firestore);
-  }
-
   await services.db.run(async (manager) => {
     return services.postsManager.fetchAccount(
       platform,
       profile?.user_id,
       fetchParams,
-      manager,
-      credentials
+      manager
     );
   });
 

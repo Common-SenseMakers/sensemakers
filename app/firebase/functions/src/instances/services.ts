@@ -4,6 +4,7 @@ import { OurTokenConfig } from '../@shared/types/types.fetch';
 import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
+import { AdminRepository } from '../admin/admin.repository';
 import { ClustersRepository } from '../clusters/clusters.repository';
 import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
@@ -98,6 +99,7 @@ export const createServices = (
   const linksRepo = new LinksRepository(db);
   const ontologiesRepo = new OntologiesRepository(db);
   const clustersRepo = new ClustersRepository(db);
+  const adminRepo = new AdminRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -127,7 +129,12 @@ export const createServices = (
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
-  const _bluesky = new BlueskyService(time, userRepo, config.bluesky);
+  const _bluesky = new BlueskyService(
+    time,
+    userRepo,
+    config.bluesky,
+    adminRepo
+  );
   const bluesky = getBlueskyMock(
     _bluesky,
     config.mock.USE_REAL_BLUESKY
