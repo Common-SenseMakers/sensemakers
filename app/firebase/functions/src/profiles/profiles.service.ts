@@ -193,6 +193,15 @@ export class ProfilesService {
         clusters,
         credentials
       );
+    } else {
+      // add clusters
+      if (clusters) {
+        await Promise.all(
+          clusters.map((cluster) => {
+            this.repo.addCluster(profile.id, cluster, manager);
+          })
+        );
+      }
     }
 
     return profile;
