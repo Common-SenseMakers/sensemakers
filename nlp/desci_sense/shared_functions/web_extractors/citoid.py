@@ -15,15 +15,15 @@ from tenacity import (
     wait_exponential,
 )
 from ..utils import identify_social_media
+from ..interface import PlatformType
 
 
-
-def citoid_social_media_post(target_url: str, platform_name:str) -> Dict:
+def citoid_social_media_post(target_url: str, platform_type:PlatformType) -> Dict:
     return {
         "itemType": "forumPost",
         "creators": [],
         "tags": [],
-        "title": f"{platform_name} post",
+        "title": f"{platform_type.value} post",
         "url": target_url,
     }
 def pre_check_target_url(target_url: str) -> Tuple[bool, Dict]:
@@ -39,7 +39,7 @@ def pre_check_target_url(target_url: str) -> Tuple[bool, Dict]:
     # check social media type
     social_type = identify_social_media(target_url)
 
-    if social_type == "Unknown":
+    if social_type == PlatformType.UNKNOWN:
         return False, None
     else:
         return True, citoid_social_media_post(target_url,social_type)

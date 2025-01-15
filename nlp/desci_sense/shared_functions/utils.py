@@ -8,7 +8,6 @@ from jsoncomment import JsonComment
 import html2text
 from loguru import logger
 from urllib.parse import urlparse
-
 from url_normalize import url_normalize
 
 
@@ -90,6 +89,8 @@ def identify_social_media(url):
     Returns:
         str: The identified social media platform ('Twitter', 'Mastodon'), or 'Unknown' if not identified.
     """
+    from .interface import PlatformType
+
     twitter_domains = ["twitter.com", "t.co", "x.com"]
     
     #mastodon_domains = ["mastodon.social", "fediscience.org","hachyderm.io"]  # Add Mastodon instance domains as needed
@@ -104,20 +105,20 @@ def identify_social_media(url):
             domain = domain[4:]
     except Exception:
         # for invalid urls
-        return "Unknown"
+        return PlatformType.UNKNOWN
 
     if domain in twitter_domains:
-        return "twitter"
+        return PlatformType.TWITTER
     
     elif domain == bluesky_domain:
-        return "bluesky"
+        return PlatformType.BLUESKY
 
     else:
         converted_masto = convert_masto_to_canonical_format(url)
         if converted_masto:
-            return "mastodon"
+            return PlatformType.MASTODON
         else:
-            return "Unknown"
+            return PlatformType.UNKNOWN
 
 
 def unshorten_url(url):
