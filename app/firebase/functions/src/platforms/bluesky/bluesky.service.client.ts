@@ -1,4 +1,4 @@
-import AtpAgent, { AtpSessionData } from '@atproto/api';
+import AtpAgent, { AtpAgentLoginOpts, AtpSessionData } from '@atproto/api';
 import * as jwt from 'jsonwebtoken';
 
 import {
@@ -55,41 +55,93 @@ export class BlueskyServiceClient {
   }
 
   /** calls login with admin password */
-  async adminLogin(agent: AtpAgent) {
-    await agent.login({
+  async login(agent: AtpAgent, credentials: AtpAgentLoginOpts) {
+    await agent.login(credentials);
+
+    if (!agent.session) {
+      throw new Error('Failed to login to Bluesky with admin credentials');
+    }
+  }
+
+  /**
+   * gets a session and credentials (username and pwd) and try to resume the session
+   * it also refresh it if in time,
+   * if it fails it forces a new login
+   *
+   * returns a new session object if updated
+   */
+  async resumeSession(
+    agent: AtpAgent,
+    session?: AtpSessionData,
+    credentials?: BlueskyCredentials['credentials']
+  ): Promise<AtpSessionData | undefined> {
+    if (!session) {
+      if (!credentials) {
+        throw new Error(
+          `Cannot resume session without a sesion or credentials`
+        );
+      }
+
+      await this.login(agent, credentials);
+      return agent.session;
+    } else {
+      try {
+        await agent.resumeSession(session);
+
+        if (!agent.session) {
+          throw new Error('Failed to login to Bluesky with admin credentials');
+        }
+
+        const decodedAccessJwt = jwt.decode(
+          agent.session.accessJwt
+        ) as AccessJwtPayload;
+
+        let newSession: AtpSessionData | undefined = undefined;
+
+        /** if the access token is under 1 hour from expiring, refresh it */
+        if (decodedAccessJwt.exp * 1000 - this.time.now() < 1000 * 60 * 60) {
+          await agent.sessionManager.refreshSession();
+          newSession = agent.session;
+        }
+
+        return newSession;
+      } catch (e) {
+        logger.error(
+          'Failed to resume Bluesky session with admin credentials, trying to login again'
+        );
+
+        if (!credentials) {
+          throw new Error(
+            `Cannot resume session without a sesion or credentials`
+          );
+        }
+
+        await this.login(agent, credentials);
+        return agent.session;
+      }
+    }
+  }
+
+  /** gets a valid AtpAgent client using the admin credentials or current session,
+   * it also persist the session in the admin DB
+   */
+  async getAdminClient(): Promise<AtpAgent> {
+    const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
+    const session = await this.getPersistedSession();
+
+    const newSession = await this.resumeSession(agent, session, {
       identifier: this.config.BLUESKY_USERNAME,
       password: this.config.BLUESKY_APP_PASSWORD,
     });
 
     if (!agent.session) {
-      throw new Error('Failed to login to Bluesky with admin credentials');
-    }
-
-    await this.persistSession(agent.session);
-  }
-
-  /** gets a valid AtpAgent client using the admin credentials or current session */
-  async getAdminClient(): Promise<AtpAgent> {
-    const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
-    const session = await this.getPersistedSession();
-    if (!session) {
-      await this.adminLogin(agent);
-    } else {
-      try {
-        await agent.resumeSession(session);
-        /** TODO: Should we check also the exp date of the admin session? */
-      } catch (e) {
-        logger.error(
-          'Failed to resume Bluesky session with admin credentials, trying to login again'
-        );
-        await this.adminLogin(agent);
-      }
-    }
-
-    if (!agent.session) {
       throw new Error(
         'Failed to resume Bluesky session with admin credentials'
       );
+    }
+
+    if (newSession) {
+      await this.persistSession(agent.session);
     }
 
     return agent;
@@ -100,23 +152,15 @@ export class BlueskyServiceClient {
     /** if credentials are provided (user-specific session) */
     const atpAgent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
 
-    await atpAgent.resumeSession(credentials);
+    const newSession = await atpAgent.resumeSession(credentials.session);
 
     if (!atpAgent.session) {
       throw new Error('Failed to initiate bluesky session');
     }
 
-    const decodedAccessJwt = jwt.decode(
-      atpAgent.session.accessJwt
-    ) as AccessJwtPayload;
-
-    let newCredentials: BlueskyCredentials | undefined = undefined;
-
-    /** if the access token is under 1 hour from expiring, refresh it */
-    if (decodedAccessJwt.exp * 1000 - this.time.now() < 1000 * 60 * 60) {
-      await atpAgent.sessionManager.refreshSession();
-      newCredentials = atpAgent.session;
-    }
+    const newCredentials = newSession
+      ? { session: atpAgent.session, credentials: credentials.credentials }
+      : undefined;
 
     return { client: atpAgent, credentials: newCredentials };
   };
@@ -139,10 +183,12 @@ export class BlueskyServiceClient {
 
     const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
 
-    await agent.login({
+    const credentials: AtpAgentLoginOpts = {
       identifier: signupData.username,
       password: signupData.appPassword,
-    });
+    };
+
+    await agent.login(credentials);
 
     if (!agent.session) {
       throw new Error('Failed to login to Bluesky');
@@ -156,7 +202,7 @@ export class BlueskyServiceClient {
       user_id: bskFullUser.data.did,
       signupDate: this.time.now(),
       credentials: {
-        read: sessionData,
+        read: { session: sessionData, credentials },
       },
     };
 
@@ -174,7 +220,7 @@ export class BlueskyServiceClient {
     };
 
     if (signupData.type === 'write') {
-      bluesky.credentials['write'] = sessionData;
+      bluesky.credentials['write'] = { session: sessionData, credentials };
     }
 
     if (DEBUG)
