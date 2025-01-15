@@ -1,12 +1,6 @@
-import AtpAgent, {
-  AppBskyFeedDefs,
-  AppBskyFeedPost,
-  RichText,
-} from '@atproto/api';
-import * as jwt from 'jsonwebtoken';
+import { AppBskyFeedDefs, AppBskyFeedPost, RichText } from '@atproto/api';
 
 import {
-  AccessJwtPayload,
   BlueskyAccountCredentials,
   BlueskyAccountDetails,
   BlueskyCredentials,
@@ -38,17 +32,16 @@ import {
   PlatformProfile,
 } from '../../@shared/types/types.profiles';
 import { parseBlueskyURI } from '../../@shared/utils/bluesky.utils';
-import { AdminRepository } from '../../admin/admin.repository';
+import { DBInstance } from '../../db/instance';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
-import { UsersRepository } from '../../users/users.repository';
 import { PlatformService, WithCredentials } from '../platforms.interface';
+import { BlueskyServiceClient } from './bluesky.service.client';
 import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
   extractPrimaryThread,
-  removeUndefinedFields,
 } from './bluesky.utils';
 
 const DEBUG = false;
@@ -61,6 +54,7 @@ export interface BlueskyServiceConfig {
 }
 
 export class BlueskyService
+  extends BlueskyServiceClient
   implements
     PlatformService<
       BlueskySignupContext,
@@ -69,97 +63,16 @@ export class BlueskyService
     >
 {
   constructor(
+    protected db: DBInstance,
     protected time: TimeService,
-    protected usersRepo: UsersRepository,
-    protected config: BlueskyServiceConfig,
-    protected adminRepository: AdminRepository
-  ) {}
-
-  private async getClient(
-    credentials?: BlueskyCredentials
-  ): Promise<{ client: AtpAgent; credentials?: BlueskyCredentials }> {
-    /** if no credentials are provided use the admin credentials for app-wide API calls */
-    if (!credentials) {
-      const adminSession =
-        await this.adminRepository.getBlueskyAdminCredentials(this.config);
-      const atpAgent = new AtpAgent({
-        service: this.config.BLUESKY_SERVICE_URL,
-      });
-      await atpAgent.resumeSession(adminSession);
-      return {
-        client: atpAgent,
-      };
-    }
-
-    const atpAgent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
-    await atpAgent.resumeSession(credentials);
-    if (!atpAgent.session) {
-      throw new Error('Failed to initiate bluesky session');
-    }
-    const decodedAccessJwt = jwt.decode(
-      atpAgent.session.accessJwt
-    ) as AccessJwtPayload;
-
-    let newCredentials: BlueskyCredentials | undefined = undefined;
-
-    /** if the access token is under 1 hour from expiring, refresh it */
-    if (decodedAccessJwt.exp * 1000 - this.time.now() < 1000 * 60 * 60) {
-      await atpAgent.sessionManager.refreshSession();
-      newCredentials = atpAgent.session;
-    }
-
-    return { client: atpAgent, credentials: newCredentials };
+    protected config: BlueskyServiceConfig
+  ) {
+    super(db, time, config);
   }
 
   public async getSignupContext(userId?: string, params?: any): Promise<any> {
     // Bluesky doesn't require a signup context when using app password
     return {};
-  }
-
-  public async handleSignupData(signupData: BlueskySignupData) {
-    if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
-    const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
-    await agent.login({
-      identifier: signupData.username,
-      password: signupData.appPassword,
-    });
-    if (!agent.session) {
-      throw new Error('Failed to login to Bluesky');
-    }
-    const bskFullUser = await agent.getProfile({
-      actor: agent.session.did,
-    });
-
-    const sessionData = removeUndefinedFields(agent.session);
-    const bluesky: BlueskyAccountDetails = {
-      user_id: bskFullUser.data.did,
-      signupDate: this.time.now(),
-      credentials: {
-        read: sessionData,
-      },
-    };
-
-    const bskSimpleUser: PlatformProfile = {
-      id: bskFullUser.data.did,
-      username: bskFullUser.data.handle,
-      displayName: bskFullUser.data.displayName || bskFullUser.data.handle,
-      avatar: bskFullUser.data.avatar || '',
-      description: bskFullUser.data.description || '',
-    };
-
-    const profile: PlatformAccountProfile = {
-      user_id: bskSimpleUser.id,
-      profile: bskSimpleUser,
-    };
-
-    if (signupData.type === 'write') {
-      bluesky.credentials['write'] = sessionData;
-    }
-
-    if (DEBUG)
-      logger.debug('handleSignupData result', { bluesky }, DEBUG_PREFIX);
-
-    return { accountDetails: bluesky, profile };
   }
 
   public async getProfileByUsername(
