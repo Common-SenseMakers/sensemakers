@@ -242,24 +242,12 @@ export class ProfilesService {
       parsedProfiles.map(async (parsedProfile) => {
         if (parsedProfile) {
           return this.db.run(async (manager) => {
-            return this.addAndTriggerFetch(
-              parsedProfile,
-              input.cluster,
-              manager
-            );
+            return this.addProfile(parsedProfile, input.cluster, manager);
           });
         }
+        return;
       })
     );
-  }
-
-  async addAndTriggerFetch(
-    parsedProfile: ParsedProfile,
-    cluster: string,
-    manager: TransactionManager
-  ) {
-    const profile = await this.addProfile(parsedProfile, cluster, manager);
-    await this.triggerProfileFetch(profile.id);
   }
 
   async addProfile(
@@ -295,7 +283,6 @@ export class ProfilesService {
 
       const taskData = {
         profileId,
-        platformId: platform,
         latest: false,
         amount: fetchAmountChunk,
       };
