@@ -9,16 +9,12 @@ import { Services } from '../instances/services';
 export const DEBUG = true;
 
 export const fetchPlatformAccountTask = async (
-  req: Request,
+  req: Request<FetchPlatfomAccountTaskData>,
   services: Services
 ) => {
-  if (DEBUG)
-    logger.debug('Starting fetchPlatformAccountTask', {
-      profileId: req.data.profileId,
-      platformId: req.data.platformId,
-    });
-
   const data = req.data as FetchPlatfomAccountTaskData;
+
+  if (DEBUG) logger.debug('Starting fetchPlatformAccountTask', data);
 
   const profileId = data.profileId as string;
   const platform = splitProfileId(profileId).platform;

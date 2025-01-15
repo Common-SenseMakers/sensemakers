@@ -405,12 +405,9 @@ export class BlueskyService
 
   public async getProfile(
     user_id: string,
-    credentials: any
+    credentials?: BlueskyCredentials
   ): Promise<PlatformAccountProfile | undefined> {
     try {
-      if (!credentials) {
-        throw new Error('Missing Bluesky user details');
-      }
       const { client: agent } = await this.getClient(credentials);
       const profile = await agent.getProfile({ actor: user_id });
 
