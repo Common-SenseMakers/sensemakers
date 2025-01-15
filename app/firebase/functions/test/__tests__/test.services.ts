@@ -4,7 +4,6 @@ import { spy, when } from 'ts-mockito';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { ActivityRepository } from '../../src/activity/activity.repository';
 import { ActivityService } from '../../src/activity/activity.service';
-import { AdminRepository } from '../../src/admin/admin.repository';
 import { ClustersRepository } from '../../src/clusters/clusters.repository';
 import { ClustersService } from '../../src/clusters/clusters.service';
 import {
@@ -102,7 +101,6 @@ export const getTestServices = (config: TestServicesConfig) => {
   const linksRepo = new LinksRepository(db);
   const ontologiesRepo = new OntologiesRepository(db);
   const clustersRepo = new ClustersRepository(db);
-  const adminRepo = new AdminRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
@@ -137,16 +135,11 @@ export const getTestServices = (config: TestServicesConfig) => {
   const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
   /** mocked mastodon */
-  const _bluesky = new BlueskyService(
-    time,
-    userRepo,
-    {
-      BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
-      BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
-      BLUESKY_SERVICE_URL,
-    },
-    adminRepo
-  );
+  const _bluesky = new BlueskyService(db, time, {
+    BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
+    BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
+    BLUESKY_SERVICE_URL,
+  });
   const bluesky = getBlueskyMock(_bluesky, config.bluesky, testUser);
 
   /** all identity services */

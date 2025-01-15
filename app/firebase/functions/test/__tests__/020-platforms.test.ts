@@ -300,8 +300,14 @@ describe('02-platforms', () => {
         password: blueskyAppPassword,
       });
 
+      if (!agent.session) {
+        throw new Error('Failed to login to Bluesky with admin credentials');
+      }
+
       const result = (
-        await blueskyService.getProfileByUsername(username, agent.session)
+        await blueskyService.getProfileByUsername(username, {
+          session: agent.session,
+        })
       )?.profile;
 
       expect(result).to.not.be.null;

@@ -22,9 +22,8 @@ describe('021-nonuser account tests', () => {
   describe('create a non user account with autofetch true', () => {
     it('gets all autofetched profiles', async () => {
       const nonUserProfile = await services.db.run(async (manager) =>
-        services.profiles.getOrCreateProfileByUsername(
-          PLATFORM.Bluesky,
-          'wesleyfinck.org',
+        services.profiles.getOrCreateProfile(
+          { platform: PLATFORM.Bluesky, username: 'wesleyfinck.org' },
           manager
         )
       );
