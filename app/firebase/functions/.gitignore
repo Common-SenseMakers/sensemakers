@@ -26,3 +26,5 @@ test.email.html
 *accounts*.json
 
 *-all.nanopubs.data
+
+/seed/output

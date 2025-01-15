@@ -1,5 +1,7 @@
 import { logger } from '../../src/instances/logger';
 import { Services } from '../../src/instances/services';
+import { fetchPlatformAccountTask } from '../../src/platforms/platforms.tasks';
+import { FETCH_ACCOUNT_TASKS } from '../../src/platforms/platforms.tasks.config';
 import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
@@ -41,6 +43,8 @@ export const enqueueTaskMockOnTests = async (
 
       /** should detect the parse and trigger the autopost if needed */
       await postUpdatedHookOnTest(postAfter, services, postBefore);
+
+      return;
     }
 
     if (name === AUTOFETCH_POSTS_TASK) {
@@ -59,6 +63,21 @@ export const enqueueTaskMockOnTests = async (
           postUpdatedHookOnTest(postCreated.post, services)
         )
       );
+
+      return;
     }
+
+    if (Object.values(FETCH_ACCOUNT_TASKS).includes(name)) {
+      await fetchPlatformAccountTask(
+        {
+          data: params,
+        } as any,
+        services
+      );
+
+      return;
+    }
+
+    throw new Error(`enqueueTaskStub - unknown task name: ${name}`);
   })();
 };

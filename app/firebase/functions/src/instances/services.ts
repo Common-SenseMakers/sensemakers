@@ -42,6 +42,7 @@ import { PostsManager } from '../posts/posts.manager';
 import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
 import { ProfilesRepository } from '../profiles/profiles.repository';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -51,6 +52,7 @@ const DEBUG = false;
 
 export interface Services {
   users: UsersService;
+  profiles: ProfilesService;
   postsManager: PostsManager;
   feed: FeedService;
   platforms: PlatformsService;
@@ -125,7 +127,7 @@ export const createServices = (
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
-  const _bluesky = new BlueskyService(time, userRepo, config.bluesky);
+  const _bluesky = new BlueskyService(db, time, config.bluesky);
   const bluesky = getBlueskyMock(
     _bluesky,
     config.mock.USE_REAL_BLUESKY
@@ -145,11 +147,18 @@ export const createServices = (
   platformsMap.set(PLATFORM.Mastodon, mastodon);
   platformsMap.set(PLATFORM.Bluesky, bluesky);
 
+  /** profiles service */
+  const profilesService = new ProfilesService(
+    profilesRepo,
+    identityPlatforms,
+    db
+  );
+
   /** users service */
   const usersService = new UsersService(
     db,
     userRepo,
-    profilesRepo,
+    profilesService,
     identityPlatforms,
     platformsMap,
     time,
@@ -198,6 +207,7 @@ export const createServices = (
   const postsManager = new PostsManager(
     db,
     usersService,
+    profilesService,
     postsProcessing,
     platformsService,
     parser,
@@ -223,6 +233,7 @@ export const createServices = (
     activity,
     links: linksService,
     ontology: ontologiesService,
+    profiles: profilesService,
   };
 
   if (DEBUG) {

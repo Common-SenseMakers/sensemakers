@@ -7,6 +7,7 @@ import {
   AppBskyFeedDefs,
   AppBskyFeedPost,
   AppBskyRichtextFacet,
+  AtpAgentLoginOpts,
   AtpSessionData,
 } from '@atproto/api';
 
@@ -20,7 +21,10 @@ export interface BlueskySigninCredentials {
   appPassword: string;
 }
 
-export type BlueskyCredentials = AtpSessionData;
+export type BlueskyCredentials = {
+  session: AtpSessionData;
+  credentials?: AtpAgentLoginOpts;
+};
 
 export interface BlueskyAccountCredentials {
   write?: BlueskyCredentials;

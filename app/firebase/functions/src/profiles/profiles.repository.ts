@@ -10,6 +10,7 @@ import {
   profileDefaults,
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
+import { CollectionNames } from '../@shared/utils/collectionNames';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import { DBInstance, Query } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
@@ -288,13 +289,24 @@ export class ProfilesRepository {
     return profile.clusters;
   }
 
+  getProfilesClustersCollection(clusterId: string) {
+    return this.db.collections.clusters
+      .doc(clusterId)
+      .collection(CollectionNames.ClusterProfiles);
+  }
+
   async addCluster(
     profileId: string,
     clusterId: string,
     manager: TransactionManager
   ) {
-    const ref = await this.getRef(profileId, manager, true);
-    manager.update(ref, { clusters: FieldValue.arrayUnion(clusterId) });
+    const profileRef = await this.getRef(profileId, manager);
+    manager.update(profileRef, { clusters: FieldValue.arrayUnion(clusterId) });
+
+    const clusterRef =
+      this.getProfilesClustersCollection(clusterId).doc(profileId);
+
+    manager.create(clusterRef, { profileId });
   }
 
   async removeCluster(
@@ -304,5 +316,10 @@ export class ProfilesRepository {
   ) {
     const ref = await this.getRef(profileId, manager, true);
     manager.update(ref, { clusters: FieldValue.arrayRemove(clusterId) });
+
+    const clusterRef =
+      this.getProfilesClustersCollection(clusterId).doc(profileId);
+
+    manager.delete(clusterRef);
   }
 }

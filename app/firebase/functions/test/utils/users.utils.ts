@@ -31,14 +31,14 @@ export const createUsers = async (
           userId,
         };
 
-        const createdProfile = await services.users.createProfile(
+        const createdProfile = await services.profiles.createProfile(
           profileCreate,
           manager
         );
 
         await Promise.all(
           userData.clustersIds.map((clusterId) => {
-            return services.users.profiles.addCluster(
+            return services.profiles.repo.addCluster(
               createdProfile.id,
               clusterId,
               manager
@@ -64,14 +64,14 @@ export const createProfiles = async (
     testProfiles.map(async (profileData) => {
       const clustersIds = profileData.clustersIds;
 
-      const createdProfile = await services.users.createProfile(
+      const createdProfile = await services.profiles.createProfile(
         profileData.profile,
         manager
       );
 
       await Promise.all(
         clustersIds.map((clusterId) => {
-          return services.users.profiles.addCluster(
+          return services.profiles.repo.addCluster(
             createdProfile.id,
             clusterId,
             manager

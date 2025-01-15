@@ -10,10 +10,8 @@ import {
   PLATFORM,
 } from '../@shared/types/types.platforms';
 import {
-  AccountProfile,
   AccountProfileCreate,
   AccountProfileRead,
-  PlatformProfile,
 } from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
@@ -24,7 +22,7 @@ import {
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
-import { getProfileId, splitProfileId } from '../@shared/utils/profiles.utils';
+import { getProfileId } from '../@shared/utils/profiles.utils';
 import { USER_INIT_SETTINGS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
@@ -34,13 +32,13 @@ import {
   IdentityServicesMap,
   PlatformsMap,
 } from '../platforms/platforms.service';
-import { ProfilesRepository } from '../profiles/profiles.repository';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from './users.helper';
 import { UsersRepository } from './users.repository';
 import { getPrefixedUserId } from './users.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 const DEBUG_PREFIX = 'UsersService';
 
 interface TokenData {
@@ -58,7 +56,7 @@ export class UsersService {
   constructor(
     public db: DBInstance,
     public repo: UsersRepository,
-    public profiles: ProfilesRepository,
+    public profiles: ProfilesService,
     public identityPlatforms: IdentityServicesMap,
     public platformServices: PlatformsMap,
     public time: TimeService,
@@ -201,15 +199,14 @@ export class UsersService {
           manager
         );
 
-        /** create the profile when addint that account */
+        /** create the profile when adding that account */
         const profileCreate: AccountProfileCreate = {
           ...profile,
           userId: _userId,
           platformId: platform,
-          clusters: [],
         };
 
-        await this.upsertProfile(profileCreate, manager);
+        await this.profiles.upsertProfile(profileCreate, manager);
 
         return {
           userId: _userId,
@@ -242,7 +239,7 @@ export class UsersService {
         );
 
         // patch to recover uncreated profiles
-        const existing = await this.profiles.getByProfileId(
+        const existing = await this.profiles.repo.getByProfileId(
           getProfileId(platform, authenticatedDetails.user_id),
           manager
         );
@@ -252,10 +249,9 @@ export class UsersService {
             ...profile,
             userId,
             platformId: platform,
-            clusters: [],
           };
 
-          await this.upsertProfile(profileCreate, manager);
+          await this.profiles.upsertProfile(profileCreate, manager);
         }
 
         return {
@@ -291,10 +287,9 @@ export class UsersService {
           ...profile,
           userId,
           platformId: platform,
-          clusters: [],
         };
 
-        await this.upsertProfile(profileCreate, manager);
+        await this.profiles.upsertProfile(profileCreate, manager);
 
         if (DEBUG)
           logger.debug(
@@ -384,7 +379,7 @@ export class UsersService {
 
         await Promise.all(
           accounts.map(async (account) => {
-            const profile = await this.profiles.getProfile(
+            const profile = await this.profiles.repo.getProfile(
               platform,
               account.user_id,
               manager
@@ -485,115 +480,6 @@ export class UsersService {
 
       await this.repo.setEmail(user.userId, emailDetails, manager);
     });
-  }
-
-  // TODO: looks redundant with readAndCreateProfile
-  public async getOrCreateProfileByUsername(
-    platformId: IDENTITY_PLATFORM,
-    username: string,
-    manager: TransactionManager,
-    credentials?: any
-  ) {
-    const profileId = await this.profiles.getByPlatformUsername(
-      platformId,
-      username,
-      manager
-    );
-
-    if (profileId) {
-      return await this.profiles.getByProfileId(profileId, manager);
-    }
-
-    const profile = await this.getIdentityService(
-      platformId
-    ).getProfileByUsername(username, credentials);
-
-    if (!profile) {
-      throw new Error('Profile not found');
-    }
-
-    const profileCreate: AccountProfileCreate = {
-      ...profile,
-      userId: null,
-      platformId,
-      clusters: [],
-    };
-    this.createProfile(profileCreate, manager);
-    return { user_id: profileCreate.user_id, profile: profileCreate.profile };
-  }
-
-  async createProfile<P extends PlatformProfile = PlatformProfile>(
-    profileCreate: AccountProfileCreate,
-    manager: TransactionManager
-  ) {
-    const id = this.profiles.create(profileCreate, manager);
-    const profile = {
-      id,
-      ...profileCreate,
-    } as AccountProfile<P>;
-
-    return profile;
-  }
-
-  async readAndCreateProfile<P extends PlatformProfile = PlatformProfile>(
-    profileId: string,
-    manager: TransactionManager,
-    credentials?: any
-  ): Promise<AccountProfile<P>> {
-    const { platform, user_id } = splitProfileId(profileId);
-
-    const profileBase = await this.getIdentityService(platform).getProfile(
-      user_id,
-      credentials
-    );
-
-    if (!profileBase) {
-      throw new Error(`Profile for user ${user_id} not found in ${platform}`);
-    }
-
-    const profileCreate: AccountProfileCreate = {
-      ...profileBase,
-      userId: null,
-      platformId: platform,
-      clusters: [],
-    };
-
-    return this.createProfile(profileCreate, manager);
-  }
-
-  /**  */
-  async upsertProfile<P extends PlatformProfile = PlatformProfile>(
-    profile: AccountProfileCreate,
-    manager: TransactionManager
-  ) {
-    const profileId = getProfileId(profile.platformId, profile.user_id);
-    const exisiting = await this.profiles.getByProfileId<false, P>(
-      profileId,
-      manager
-    );
-
-    if (!exisiting) {
-      return this.createProfile<P>(profile, manager);
-    }
-
-    return profile;
-  }
-
-  /** Get or create an account profile */
-  async getOrCreateProfile<P extends PlatformProfile = PlatformProfile>(
-    profileId: string,
-    manager: TransactionManager
-  ) {
-    const profile = await this.profiles.getByProfileId<false, P>(
-      profileId,
-      manager
-    );
-
-    if (!profile) {
-      return this.readAndCreateProfile<P>(profileId, manager);
-    }
-
-    return profile;
   }
 
   async setOnboarded(userId: string) {

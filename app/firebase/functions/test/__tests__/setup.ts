@@ -120,7 +120,7 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       await Promise.all(
         users.map(async (user) => {
           const profiles = await globalTestServices.db.run(async (manager) => {
-            return globalTestServices.users.profiles.getOfUser(
+            return globalTestServices.profiles.repo.getOfUser(
               user.userId,
               manager
             );

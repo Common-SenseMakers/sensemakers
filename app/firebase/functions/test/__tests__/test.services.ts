@@ -51,6 +51,7 @@ import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
 import { ProfilesRepository } from '../../src/profiles/profiles.repository';
+import { ProfilesService } from '../../src/profiles/profiles.service';
 import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
@@ -134,7 +135,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
   /** mocked mastodon */
-  const _bluesky = new BlueskyService(time, userRepo, {
+  const _bluesky = new BlueskyService(db, time, {
     BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
     BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
     BLUESKY_SERVICE_URL,
@@ -152,11 +153,18 @@ export const getTestServices = (config: TestServicesConfig) => {
   platformsMap.set(PLATFORM.Mastodon, mastodon);
   platformsMap.set(PLATFORM.Bluesky, bluesky);
 
+  /** profiles service */
+  const profilesService = new ProfilesService(
+    profilesRepo,
+    identityServices,
+    db
+  );
+
   /** users service */
   const usersService = new UsersService(
     db,
     userRepo,
-    profilesRepo,
+    profilesService,
     identityServices,
     platformsMap,
     time,
@@ -204,6 +212,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const postsManager = new PostsManager(
     db,
     usersService,
+    profilesService,
     postsProcessing,
     platformsService,
     parser,
@@ -226,6 +235,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     activity,
     links,
     ontology: ontologiesService,
+    profiles: profilesService,
   };
 
   return services;

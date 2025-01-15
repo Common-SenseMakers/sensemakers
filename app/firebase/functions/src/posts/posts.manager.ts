@@ -61,6 +61,7 @@ import { logger } from '../instances/logger';
 import { OntologiesService } from '../ontologies/ontologies.service';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
@@ -76,6 +77,7 @@ export class PostsManager {
   constructor(
     protected db: DBInstance,
     protected users: UsersService,
+    protected profiles: ProfilesService,
     public processing: PostsProcessing,
     protected platforms: PlatformsService,
     protected parserService: ParserService,
@@ -184,8 +186,8 @@ export class PostsManager {
     credentials?: AccountCredentials,
     userId?: string
   ) {
-    const profile = await this.users.getOrCreateProfile(
-      getProfileId(platformId, user_id),
+    const profile = await this.profiles.getOrCreateProfile(
+      { profileId: getProfileId(platformId, user_id) },
       manager
     );
 
@@ -226,7 +228,7 @@ export class PostsManager {
         fetchedPosts.fetched
       );
 
-      await this.users.profiles.setAccountProfileFetched(
+      await this.profiles.repo.setAccountProfileFetched(
         platformId,
         user_id,
         newFetchedDetails,
@@ -364,7 +366,7 @@ export class PostsManager {
       }
 
       const authorUserId =
-        await this.users.profiles.getUserIdWithPlatformAccount(
+        await this.profiles.repo.getUserIdWithPlatformAccount(
           platformId,
           user_id,
           manager
@@ -380,7 +382,7 @@ export class PostsManager {
       /** make sure the profiles of each post exist */
       const profileIds = new Set<string>();
 
-      /** get all unique profiles */
+      /** fetch all unique profiles presets in the platform posts */
       platformPostsCreated.forEach((posts) => {
         if (!profileIds.has(posts.post.authorProfileId)) {
           profileIds.add(posts.post.authorProfileId);
@@ -389,7 +391,7 @@ export class PostsManager {
 
       await Promise.all(
         Array.from(profileIds).map((profileId) => {
-          this.users.getOrCreateProfile(profileId, manager);
+          this.profiles.getOrCreateProfile({ profileId }, manager);
         })
       );
 
@@ -528,7 +530,7 @@ export class PostsManager {
       if (queryParams.userId === undefined) {
         throw new Error('userId is a required query parameter here');
       }
-      return this.users.profiles.getOfUser(queryParams.userId, manager);
+      return this.profiles.repo.getOfUser(queryParams.userId, manager);
     });
 
     const platformsWithoutFetch = profiles
@@ -943,7 +945,7 @@ export class PostsManager {
                 );
               }
 
-              const profile = await this.users.profiles.getByProfileId(
+              const profile = await this.profiles.repo.getByProfileId(
                 profileId,
                 manager,
                 true
@@ -952,7 +954,7 @@ export class PostsManager {
                 throw new Error('unexpected missing profile');
               }
 
-              await this.users.profiles.setUserId(profileId, userId, manager);
+              await this.profiles.repo.setUserId(profileId, userId, manager);
             })
           );
         })
@@ -1048,7 +1050,7 @@ export class PostsManager {
           manager
         );
       }
-      this.users.profiles.delete(profileId, manager);
+      this.profiles.repo.delete(profileId, manager);
     });
   }
 }

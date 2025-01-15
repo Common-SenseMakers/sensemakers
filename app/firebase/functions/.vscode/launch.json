@@ -28,14 +28,14 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "script: 020",
+      "name": "script",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "ts-node",
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./scripts/080-trigger-autofetch.ts"
+        "./scripts/01-add-accounts-data.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -49,7 +49,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./scripts/016-add-account-data.ts"
+        "./seed/add-accounts-data.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

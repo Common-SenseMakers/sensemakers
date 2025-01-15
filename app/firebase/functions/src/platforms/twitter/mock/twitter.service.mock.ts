@@ -6,7 +6,10 @@ import {
   PlatformPostPosted,
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
-import { PlatformAccountProfile } from '../../../@shared/types/types.profiles';
+import {
+  PlatformAccountProfile,
+  PlatformProfile,
+} from '../../../@shared/types/types.profiles';
 import {
   TwitterAccountCredentials,
   TwitterAccountDetails,
@@ -224,6 +227,40 @@ export const getTwitterMock = (
         return params.expectedAmount && threads.length > params.expectedAmount
           ? { threads: threads.slice(0, params.expectedAmount) }
           : { threads };
+      }
+    );
+
+    when(mocked.getProfile(anything(), anything())).thenCall(
+      async (user_id: string, credentials: TwitterCredentials) => {
+        const platformProfile: PlatformProfile = {
+          id: user_id,
+          displayName: `Name of ${user_id}`,
+          username: `username-${user_id}`,
+          avatar: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTePqvjrMR2bJt1B2e6bNQ6RS2n0q9ZN4e1UA&s`,
+          description: `a description`,
+        };
+
+        return {
+          user_id,
+          profile: platformProfile,
+        };
+      }
+    );
+
+    when(mocked.getProfileByUsername(anything(), anything())).thenCall(
+      async (username: string, credentials: TwitterCredentials) => {
+        const platformProfile: PlatformProfile = {
+          id: `${username}-id`,
+          displayName: `Name of ${username}`,
+          username: `${username}`,
+          avatar: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTePqvjrMR2bJt1B2e6bNQ6RS2n0q9ZN4e1UA&s`,
+          description: `a description`,
+        };
+
+        return {
+          user_id: `${username}-id`,
+          profile: platformProfile,
+        };
       }
     );
   }

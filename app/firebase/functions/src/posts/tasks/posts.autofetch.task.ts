@@ -4,6 +4,7 @@ import {
   ALL_SOURCE_PLATFORMS,
   IDENTITY_PLATFORM,
 } from '../../@shared/types/types.platforms';
+import { FetchPlatfomAccountTaskData } from '../../@shared/types/types.profiles';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 import {
@@ -22,7 +23,7 @@ const DEBUG_PREFIX = 'AUTOFETCH';
 export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
   if (DEBUG)
     logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
-  const { users, db } = services;
+  const { users, db, profiles } = services;
 
   ALL_SOURCE_PLATFORMS.forEach(async (platformId) => {
     if (DEBUG)
@@ -31,7 +32,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
         DEBUG_PREFIX
       );
 
-    const profilesIds = await users.profiles.getMany({
+    const profilesIds = await users.profiles.repo.getMany({
       autofetch: true,
       platformId: platformId as IDENTITY_PLATFORM,
       userIdDefined: false,
@@ -78,7 +79,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       for (const profileId of profilesIds) {
         // Skip profiles that belong to registered users
         const profile = await db.run((manager) =>
-          users.profiles.getByProfileId(profileId, manager, true)
+          profiles.repo.getByProfileId(profileId, manager, true)
         );
 
         if (profile.userId) {
@@ -87,9 +88,8 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
 
         const taskName = FETCH_ACCOUNT_TASKS[platformId];
 
-        const taskData = {
+        const taskData: FetchPlatfomAccountTaskData = {
           profileId,
-          platformId,
           amount: 50, // Fetch last 50 posts
           latest: true,
         };
