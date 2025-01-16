@@ -547,4 +547,7 @@ export class MastodonService
   ): PlatformPostPosted {
     return {} as PlatformPostPosted;
   }
+  isRootThread(post: PlatformPostCreate): boolean {
+    return true;
+  }
 }

@@ -677,4 +677,7 @@ export class TwitterService
   ): PlatformPostPosted {
     return {} as PlatformPostPosted;
   }
+  isRootThread(post: PlatformPostCreate): boolean {
+    return true;
+  }
 }

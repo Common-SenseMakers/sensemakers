@@ -96,4 +96,5 @@ export interface PlatformService<
     rootPost: PlatformPost,
     post: PlatformPostCreate
   ): PlatformPostPosted;
+  isRootThread(post: PlatformPostCreate): boolean;
 }

@@ -57,6 +57,7 @@ export class PostsProcessing {
     manager: TransactionManager,
     authorUserId?: string
   ): Promise<PlatformPostCreated | undefined> {
+    const platformService = this.platforms.get(platformPost.platformId);
     const existing = platformPost.posted
       ? await this.platformPosts.getFrom_post_id(
           platformPost.platformId,
@@ -71,9 +72,10 @@ export class PostsProcessing {
         manager,
         true
       );
-      const isPartOfThread = this.platforms
-        .get(platformPost.platformId)
-        .isPartOfMainThread(rootPlatformPost, platformPost);
+      const isPartOfThread = platformService.isPartOfMainThread(
+        rootPlatformPost,
+        platformPost
+      );
       if (isPartOfThread) {
         return await this.mergePlatformPosts(
           rootPlatformPost,
@@ -81,6 +83,9 @@ export class PostsProcessing {
           manager
         );
       }
+      return undefined;
+    }
+    if (!platformService.isRootThread(platformPost)) {
       return undefined;
     }
 

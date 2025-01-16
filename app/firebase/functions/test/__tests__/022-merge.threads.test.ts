@@ -4,7 +4,11 @@ import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
-import { brokenThreadPlatformPost, initialPlatformPost } from './022.test.data';
+import {
+  brokenThreadWithRoot,
+  brokenThreadWithoutRoot,
+  rootThread,
+} from './022.test.data';
 import {
   USE_REAL_BLUESKY,
   USE_REAL_MASTODON,
@@ -13,7 +17,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('022 Merge Broken Threads', () => {
+describe.only('022 Merge Broken Threads', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -35,7 +39,7 @@ describe('022 Merge Broken Threads', () => {
     /** ARRANGE the existing thread */
     const platformPostCreate: PlatformPostCreate = (
       services.postsManager as any
-    ).initPlatformPost(PLATFORM.Bluesky, initialPlatformPost);
+    ).initPlatformPost(PLATFORM.Bluesky, rootThread);
 
     const platformPostCreated = await services.db.run(async (manager) => {
       return services.postsManager.processing.createPlatformPost(
@@ -46,13 +50,13 @@ describe('022 Merge Broken Threads', () => {
     expect(platformPostCreated).to.exist;
   });
 
-  it.only('merges a broken thread with an existing thread', async () => {
+  it('merges a broken thread with an existing thread', async () => {
     const { postsManager } = services;
 
     /** ACT merge the broken thread into the existing thread */
     const brokenThreadPlatformPostCreate: PlatformPostCreate = (
       postsManager as any
-    ).initPlatformPost(PLATFORM.Bluesky, brokenThreadPlatformPost);
+    ).initPlatformPost(PLATFORM.Bluesky, brokenThreadWithRoot);
 
     const mergedPlatformPostCreated = await services.db.run(async (manager) => {
       return postsManager.processing.createPlatformPost(
@@ -64,5 +68,24 @@ describe('022 Merge Broken Threads', () => {
     /** ASSERT the broken thread has been merged into the existing thread */
     expect(mergedPlatformPostCreated).to.exist;
     expect(mergedPlatformPostCreated?.post.generic.thread.length).to.equal(4);
+  });
+
+  it('ignores a broken thread when the root thread is not found', async () => {
+    const { postsManager } = services;
+
+    /** ACT merge the broken thread into the existing thread */
+    const brokenThreadPlatformPostCreate: PlatformPostCreate = (
+      postsManager as any
+    ).initPlatformPost(PLATFORM.Bluesky, brokenThreadWithoutRoot);
+
+    const mergedPlatformPostCreated = await services.db.run(async (manager) => {
+      return postsManager.processing.createPlatformPost(
+        brokenThreadPlatformPostCreate,
+        manager
+      );
+    });
+
+    /** ASSERT the broken thread has been ignored */
+    expect(mergedPlatformPostCreated).to.not.exist;
   });
 });
