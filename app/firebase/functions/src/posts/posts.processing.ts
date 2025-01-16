@@ -238,7 +238,7 @@ export class PostsProcessing {
     const clustersIds: (string | undefined)[] =
       await this.users.profiles.repo.getClusters(post.authorProfileId, manager);
 
-    // undefined means the global root cluster where all posts are stored
+    // undefined in the loop below will syunc to the global root cluster where all posts are stored
     clustersIds.push(undefined);
 
     await Promise.all(

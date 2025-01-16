@@ -47,7 +47,7 @@ if (process.env.FB_PROJECT === 'dev') {
   ];
 }
 
-if (process.env.FB_PROJECT === 'dev2') {
+if (process.env.FB_PROJECT === 'clusters') {
   base.webpack.configure.plugins = [
     ...newPlugins,
     new webpack.DefinePlugin({
@@ -58,7 +58,7 @@ if (process.env.FB_PROJECT === 'dev2') {
           ...definePlugin.definitions.process.env,
           NODE_ENV: '"development"',
           FUNCTIONS_BASE:
-            '"https://us-central1-sensenets-dev2.cloudfunctions.net"',
+            '"https://us-central1-sensenets-clusters.cloudfunctions.net"',
           FB_APIKEY: '"AIzaSyAKLtiyLuT2AmWdTmYCpEOzu_FvWXz-qN4"',
           FB_AUTHDOMAIN: '"sensenets-dev2.firebaseapp.com"',
           FB_PROJECTID: '"sensenets-dev2"',

@@ -11,6 +11,7 @@ export const AppSelect = React.forwardRef<
       ref={ref}
       style={{
         border: 'none',
+        padding: '0',
         ...props.style,
       }}></Select>
   );

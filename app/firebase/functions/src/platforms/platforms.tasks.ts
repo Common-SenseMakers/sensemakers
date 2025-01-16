@@ -6,7 +6,7 @@ import { FetchPlatfomAccountTaskData } from '../@shared/types/types.profiles';
 import { splitProfileId } from '../@shared/utils/profiles.utils';
 import { Services } from '../instances/services';
 
-export const DEBUG = true;
+export const DEBUG = false;
 
 export const fetchPlatformAccountTask = async (
   req: Request<FetchPlatfomAccountTaskData>,

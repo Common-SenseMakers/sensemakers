@@ -26,7 +26,7 @@ export interface AccountProfile<P extends PlatformProfile = PlatformProfile> {
   profile?: P;
   fetched?: FetchedDetails;
   autofetch?: boolean;
-  clusters: string[];
+  clusters?: string[];
 }
 
 export const profileDefaults: Partial<AccountProfile> = {

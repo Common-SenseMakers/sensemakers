@@ -35,7 +35,6 @@ import {
   MastodonMockConfig,
   getMastodonMock,
 } from '../../src/platforms/mastodon/mock/mastodon.service.mock';
-import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
   PlatformsMap,
@@ -115,9 +114,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     Date.now() + 3 * 60 * 60 * 1000
   );
 
-  /** mocked orcid */
-  const orcid = new OrcidService();
-
+  
   /** mocked twitter */
   const _twitter = new TwitterService(time, userRepo, {
     clientId: process.env.TWITTER_CLIENT_ID as string,
@@ -143,7 +140,6 @@ export const getTestServices = (config: TestServicesConfig) => {
   const bluesky = getBlueskyMock(_bluesky, config.bluesky, testUser);
 
   /** all identity services */
-  identityServices.set(PLATFORM.Orcid, orcid);
   identityServices.set(PLATFORM.Twitter, twitter);
   identityServices.set(PLATFORM.Mastodon, mastodon);
   identityServices.set(PLATFORM.Bluesky, bluesky);
@@ -236,6 +232,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     links,
     ontology: ontologiesService,
     profiles: profilesService,
+    clusters
   };
 
   return services;

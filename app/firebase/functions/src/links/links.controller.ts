@@ -5,7 +5,7 @@ import { GetRefDisplayMeta } from '../@shared/types/types.references';
 import { getServices } from '../controllers.utils';
 import { logger } from '../instances/logger';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const getRefSchema = object({
   ref: string().required(),

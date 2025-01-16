@@ -1,4 +1,4 @@
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
 import { Location, useLocation, useSearchParams } from 'react-router-dom';
 
@@ -13,12 +13,14 @@ import {
   hasSearchParam,
   searchParamsKeyValueToEvent,
 } from '../overlays/overlay.utils';
+import { ALL_CLUSTER_NAME, useCluster } from '../posts.fetcher/cluster.context';
 import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { PostClickEvent } from '../semantics/patterns/patterns';
-import { FeedTabConfig, feedTabs } from '../shared/utils/feed.config';
+import { TabQuery, feedTabs } from '../shared/utils/feed.config';
+import { AppSelect } from '../ui-components';
 
 const DEBUG = false;
 
@@ -41,14 +43,15 @@ export const feedIndexToPathname = (ix: number) => {
 };
 
 const getFeedConfig = (
-  tab: FeedTabConfig,
+  tabQuery: TabQuery,
   DEBUG_PREFIX: string
 ): FetcherConfig => {
   return {
     endpoint: '/api/feed/get',
     queryParams: {
-      semantics: { tab: tab.index, topic: tab.topic },
+      semantics: { tab: tabQuery.tab, topic: tabQuery.topic },
       hydrateConfig: { addAggregatedLabels: true },
+      clusterId: tabQuery.clusterId,
     },
     DEBUG_PREFIX,
   };
@@ -123,6 +126,7 @@ export const PublicFeedPage = () => {
     syncQueryParams(overlay);
   };
 
+  /** keeps the url query params aligend with the current visible overlay */
   const syncQueryParams = (overlay: OverlayValue) => {
     if (Object.keys(overlay).length === 0) {
       searchParams.forEach((value, key) => {
@@ -175,25 +179,71 @@ export const PublicFeedPage = () => {
     }
   };
 
+  /**  */
+  const {
+    clustersIds,
+    selected: clusterSelected,
+    select: selectCluster,
+  } = useCluster();
+
+  const onClusterSelected = (value: string) => {
+    selectCluster(value);
+  };
+
   const feed0Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[0], '[FEED 0] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[0].index,
+        topic: feedTabs[0].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 0] '
+    );
+  }, [clusterSelected]);
 
   const feed1Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[1], '[FEED 1] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[1].index,
+        topic: feedTabs[1].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 1] '
+    );
+  }, [clusterSelected]);
 
   const feed2Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[2], '[FEED 2] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[2].index,
+        topic: feedTabs[2].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 2] '
+    );
+  }, [clusterSelected]);
 
   const feed3Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[3], '[FEED 3] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[3].index,
+        topic: feedTabs[3].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 3] '
+    );
+  }, [clusterSelected]);
 
   const feed4Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[4], '[FEED 4] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[4].index,
+        topic: feedTabs[4].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 4] '
+    );
+  }, [clusterSelected]);
 
   const feed0 = usePostsFetcher(feed0Config);
   const feed1 = usePostsFetcher(feed1Config);
@@ -207,7 +257,19 @@ export const PublicFeedPage = () => {
     <ViewportPage
       fixed
       content={
-        <Box style={{ position: 'relative', paddingTop: '16px' }}>
+        <Box style={{ position: 'relative' }}>
+          <Box
+            direction="row"
+            justify="center"
+            align="center"
+            gap="18px"
+            pad={{ vertical: '12px' }}>
+            <Text>cluster:</Text>
+            <AppSelect
+              options={[ALL_CLUSTER_NAME].concat(clustersIds || [])}
+              onChange={({ option }) => onClusterSelected(option as string)}
+              value={clusterSelected || ALL_CLUSTER_NAME}></AppSelect>
+          </Box>
           <PublicFeedContext isPublicFeed>
             {overlayInit !== undefined && (
               <OverlayContext

@@ -3,7 +3,7 @@
     "dev": "sensenets-dev",
     "staging": "sensenets-staging",
     "prod": "sensenets-prod",
-    "dev-md": "sensenets-dev-md",
+    "clusters": "sensenets-clusters",
     "dataset": "sensenets-dataset"
   }
 }
