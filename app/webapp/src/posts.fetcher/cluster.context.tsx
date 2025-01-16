@@ -15,6 +15,8 @@ export const ClusterContextValue = createContext<
   ClusterContextType | undefined
 >(undefined);
 
+export const ALL_CLUSTER_NAME = 'all';
+
 const DEBUG = false;
 
 /**
@@ -27,7 +29,11 @@ export const ClusterContext: React.FC<{
   const [selected, setSelected] = useState<string | undefined>();
 
   const select = (clusterId: string) => {
-    setSelected(clusterId);
+    if (clusterId === ALL_CLUSTER_NAME) {
+      setSelected(undefined);
+    } else {
+      setSelected(clusterId);
+    }
   };
 
   const appFetch = useAppFetch();

@@ -13,7 +13,7 @@ import {
   hasSearchParam,
   searchParamsKeyValueToEvent,
 } from '../overlays/overlay.utils';
-import { useCluster } from '../posts.fetcher/cluster.context';
+import { ALL_CLUSTER_NAME, useCluster } from '../posts.fetcher/cluster.context';
 import {
   FetcherConfig,
   usePostsFetcher,
@@ -261,9 +261,9 @@ export const PublicFeedPage = () => {
           <Box direction="row" justify="center">
             <Text>space:</Text>
             <AppSelect
-              options={clustersIds || []}
+              options={[ALL_CLUSTER_NAME].concat(clustersIds || [])}
               onChange={({ option }) => onClusterSelected(option as string)}
-              value={clusterSelected}></AppSelect>
+              value={clusterSelected || ALL_CLUSTER_NAME}></AppSelect>
           </Box>
           <PublicFeedContext isPublicFeed>
             {overlayInit !== undefined && (
