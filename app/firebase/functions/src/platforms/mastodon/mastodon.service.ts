@@ -12,6 +12,7 @@ import {
 } from '../../@shared/types/types.mastodon';
 import {
   FetchedResult,
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostDraftApproval,
@@ -533,5 +534,17 @@ export class MastodonService
     };
 
     return profile;
+  }
+  isPartOfMainThread(
+    rootPost: PlatformPost,
+    post: PlatformPostCreate
+  ): boolean {
+    return true;
+  }
+  mergeBrokenThreads(
+    rootPost: PlatformPost,
+    post: PlatformPostCreate
+  ): PlatformPostPosted {
+    return {} as PlatformPostPosted;
   }
 }

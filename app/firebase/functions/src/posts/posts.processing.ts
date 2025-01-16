@@ -49,6 +49,7 @@ export class PostsProcessing {
 
   /**
    * Checks if a PlatformPost exist and creates it if not.
+   * If the root thread exists and the post is part of it, it merges the post into the thread.
    * It also creates an AppPost for that PlatformPost
    * */
   async createPlatformPost(
@@ -65,6 +66,21 @@ export class PostsProcessing {
       : undefined;
 
     if (existing) {
+      const rootPlatformPost = await this.platformPosts.get(
+        existing,
+        manager,
+        true
+      );
+      const isPartOfThread = this.platforms
+        .get(platformPost.platformId)
+        .isPartOfMainThread(rootPlatformPost, platformPost);
+      if (isPartOfThread) {
+        return await this.mergePlatformPosts(
+          rootPlatformPost,
+          platformPost,
+          manager
+        );
+      }
       return undefined;
     }
 
@@ -108,6 +124,50 @@ export class PostsProcessing {
     this.platformPosts.setPostId(platformPostCreated.id, post.id, manager);
 
     return { post, platformPost: platformPostCreated };
+  }
+
+  async mergePlatformPosts(
+    rootThreadPlatformPost: PlatformPost,
+    partialThreadPlatformPost: PlatformPostCreate,
+    manager: TransactionManager
+  ) {
+    if (!rootThreadPlatformPost.postId) {
+      throw new Error(`Unexpected: rootPost.postId is not defined`);
+    }
+    const platformService = this.platforms.get(
+      rootThreadPlatformPost.platformId
+    );
+    const mergedPlatformPost = platformService.mergeBrokenThreads(
+      rootThreadPlatformPost,
+      partialThreadPlatformPost
+    );
+    const mergedAppPost = await platformService.convertToGeneric({
+      posted: mergedPlatformPost,
+    });
+
+    await this.platformPosts.update(
+      rootThreadPlatformPost.id,
+      { posted: mergedPlatformPost },
+      manager
+    );
+
+    await this.posts.update(
+      rootThreadPlatformPost.postId,
+      { generic: mergedAppPost },
+      manager
+    );
+
+    const platformPost = await this.platformPosts.get(
+      rootThreadPlatformPost.id,
+      manager,
+      true
+    );
+    const appPost = await this.posts.get(
+      rootThreadPlatformPost.postId,
+      manager,
+      true
+    );
+    return { platformPost, post: appPost };
   }
 
   /** Store all platform posts */

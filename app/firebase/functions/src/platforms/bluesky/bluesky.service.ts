@@ -19,6 +19,7 @@ import {
 import { PlatformFetchParams } from '../../@shared/types/types.fetch';
 import {
   FetchedResult,
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostDraftApproval,
@@ -641,5 +642,25 @@ export class BlueskyService
       }
     }
     return posts;
+  }
+  isPartOfMainThread(
+    rootPost: PlatformPost,
+    post: PlatformPostCreate
+  ): boolean {
+    return true;
+  }
+  mergeBrokenThreads(
+    rootPost: PlatformPost<BlueskyThread>,
+    post: PlatformPostCreate<BlueskyThread>
+  ): PlatformPostPosted {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    const mergedThread = [
+      ...rootPost.posted?.post.posts,
+      ...post.posted?.post.posts,
+    ];
+    rootPost.posted.post.posts = mergedThread;
+    return rootPost.posted;
   }
 }

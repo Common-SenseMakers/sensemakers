@@ -13,6 +13,7 @@ import {
 } from '../../@shared/types/types.fetch';
 import {
   FetchedResult,
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostDeleteDraft,
   PlatformPostDraft,
@@ -663,5 +664,17 @@ export class TwitterService
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
+  }
+  isPartOfMainThread(
+    rootPost: PlatformPost,
+    post: PlatformPostCreate
+  ): boolean {
+    return true;
+  }
+  mergeBrokenThreads(
+    rootPost: PlatformPost,
+    post: PlatformPostCreate
+  ): PlatformPostPosted {
+    return {} as PlatformPostPosted;
   }
 }

@@ -28,45 +28,41 @@ describe('022 Merge Broken Threads', () => {
     parser: USE_REAL_PARSER ? 'real' : 'mock',
   });
 
-  before(async () => {
+  beforeEach(async () => {
     logger.debug('resetting DB');
     await resetDB();
-  });
-
-  it.only('merges a broken thread with an existing thread', async () => {
-    const { postsManager } = services;
 
     /** ARRANGE the existing thread */
     const platformPostCreate: PlatformPostCreate = (
-      postsManager as any
+      services.postsManager as any
     ).initPlatformPost(PLATFORM.Bluesky, initialPlatformPost);
 
     const platformPostCreated = await services.db.run(async (manager) => {
-      return postsManager.processing.createPlatformPost(
+      return services.postsManager.processing.createPlatformPost(
         platformPostCreate,
         manager
       );
     });
     expect(platformPostCreated).to.exist;
+  });
+
+  it.only('merges a broken thread with an existing thread', async () => {
+    const { postsManager } = services;
 
     /** ACT merge the broken thread into the existing thread */
     const brokenThreadPlatformPostCreate: PlatformPostCreate = (
       postsManager as any
     ).initPlatformPost(PLATFORM.Bluesky, brokenThreadPlatformPost);
 
-    const brokenThreadPlatformPostCreated = await services.db.run(
-      async (manager) => {
-        return postsManager.processing.createPlatformPost(
-          brokenThreadPlatformPostCreate,
-          manager
-        );
-      }
-    );
+    const mergedPlatformPostCreated = await services.db.run(async (manager) => {
+      return postsManager.processing.createPlatformPost(
+        brokenThreadPlatformPostCreate,
+        manager
+      );
+    });
 
     /** ASSERT the broken thread has been merged into the existing thread */
-    expect(brokenThreadPlatformPostCreated).to.exist;
-    expect(
-      brokenThreadPlatformPostCreated?.post.generic.thread.length
-    ).to.equal(4);
+    expect(mergedPlatformPostCreated).to.exist;
+    expect(mergedPlatformPostCreated?.post.generic.thread.length).to.equal(4);
   });
 });
