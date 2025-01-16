@@ -6,6 +6,7 @@ import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import {
   brokenThreadWithRoot,
+  brokenThreadWithRootNotPartOfMain,
   brokenThreadWithoutRoot,
   rootThread,
 } from './022.test.data';
@@ -77,6 +78,24 @@ describe.only('022 Merge Broken Threads', () => {
     const brokenThreadPlatformPostCreate: PlatformPostCreate = (
       postsManager as any
     ).initPlatformPost(PLATFORM.Bluesky, brokenThreadWithoutRoot);
+
+    const mergedPlatformPostCreated = await services.db.run(async (manager) => {
+      return postsManager.processing.createPlatformPost(
+        brokenThreadPlatformPostCreate,
+        manager
+      );
+    });
+
+    /** ASSERT the broken thread has been ignored */
+    expect(mergedPlatformPostCreated).to.not.exist;
+  });
+  it("ignores a broken thread with existing root thead but isn't part of the roots main thread", async () => {
+    const { postsManager } = services;
+
+    /** ACT merge the broken thread into the existing thread */
+    const brokenThreadPlatformPostCreate: PlatformPostCreate = (
+      postsManager as any
+    ).initPlatformPost(PLATFORM.Bluesky, brokenThreadWithRootNotPartOfMain);
 
     const mergedPlatformPostCreated = await services.db.run(async (manager) => {
       return postsManager.processing.createPlatformPost(

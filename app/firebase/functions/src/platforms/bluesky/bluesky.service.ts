@@ -644,10 +644,22 @@ export class BlueskyService
     return posts;
   }
   isPartOfMainThread(
-    rootPost: PlatformPost,
-    post: PlatformPostCreate
+    rootPost: PlatformPost<BlueskyThread>,
+    post: PlatformPostCreate<BlueskyThread>
   ): boolean {
-    return true;
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (rootPost.posted.post_id !== post.posted.post_id) return false;
+    const rootThreadPosts = rootPost.posted.post.posts;
+    const lastRootThreadPost = rootThreadPosts[rootThreadPosts.length - 1];
+    const newThreadPosts = post.posted.post.posts;
+    const firstNewThreadPost = newThreadPosts[0];
+
+    if (firstNewThreadPost.record.reply?.parent.uri === lastRootThreadPost.uri)
+      return true;
+
+    return false;
   }
   mergeBrokenThreads(
     rootPost: PlatformPost<BlueskyThread>,
