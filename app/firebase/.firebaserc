@@ -1,7 +1,7 @@
 {
   "projects": {
     "dev": "sensenets-dev",
-    "dev2": "sensenets-dev2",
+    "clusters": "sensenets-clusters",
     "staging": "sensenets-staging",
     "prod": "sensenets-prod",
     "dataset": "sensenets-dataset"
