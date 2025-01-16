@@ -257,9 +257,14 @@ export const PublicFeedPage = () => {
     <ViewportPage
       fixed
       content={
-        <Box style={{ position: 'relative', paddingTop: '16px' }}>
-          <Box direction="row" justify="center">
-            <Text>space:</Text>
+        <Box style={{ position: 'relative' }}>
+          <Box
+            direction="row"
+            justify="center"
+            align="center"
+            gap="18px"
+            pad={{ vertical: '12px' }}>
+            <Text>cluster:</Text>
             <AppSelect
               options={[ALL_CLUSTER_NAME].concat(clustersIds || [])}
               onChange={({ option }) => onClusterSelected(option as string)}
