@@ -141,3 +141,21 @@ export const deleteProfilesController: RequestHandler = async (
     response.status(500).send({ success: false, error });
   }
 };
+
+export const getClustersController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const { clusters } = getServices(request);
+
+    const clustersIds = await clusters.getClustersIds();
+
+    if (DEBUG) logger.debug(`${request.path}: profile`, { clustersIds });
+
+    response.status(200).send({ success: true, data: clustersIds });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
+  }
+};

@@ -4,7 +4,7 @@ import { AppPost } from '../../../src/@shared/types/types.posts';
 import { Services } from '../../../src/instances/services';
 import { getProfileId } from '../../../src/profiles/profiles.repository';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const processPost = async (
   sourcePost: AppPost,

@@ -6,8 +6,16 @@ export interface FeedTabConfig {
   id: string;
   title: string;
   tooltip: string;
+  /** "labels" is used in the backend for indexing the tabs,
+   * it cannot be modified once the app was deployed */
   labels: string[];
   topic?: string;
+}
+
+export interface TabQuery {
+  tab: number;
+  topic?: string;
+  clusterId?: string;
 }
 
 export const feedTabs: FeedTabConfig[] = [

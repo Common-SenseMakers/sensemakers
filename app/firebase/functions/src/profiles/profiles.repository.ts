@@ -289,10 +289,18 @@ export class ProfilesRepository {
     return profile.clusters || [];
   }
 
-  getProfilesClustersCollection(clusterId: string) {
-    return this.db.collections.clusters
-      .doc(clusterId)
-      .collection(CollectionNames.ClusterProfiles);
+  getClusterRef(clusterId: string) {
+    return this.db.collections.clusters.doc(clusterId);
+  }
+
+  getClusterProfilesCollection(clusterId: string) {
+    return this.getClusterRef(clusterId).collection(
+      CollectionNames.ClusterProfiles
+    );
+  }
+
+  getClusterProfile(clusterId: string, profileId: string) {
+    return this.getClusterProfilesCollection(clusterId).doc(profileId);
   }
 
   async addCluster(
@@ -303,10 +311,13 @@ export class ProfilesRepository {
     const profileRef = await this.getRef(profileId, manager);
     manager.update(profileRef, { clusters: FieldValue.arrayUnion(clusterId) });
 
-    const clusterRef =
-      this.getProfilesClustersCollection(clusterId).doc(profileId);
+    const clusterRef = this.getClusterRef(clusterId);
+    const clusterProfileRef = this.getClusterProfile(clusterId, profileId);
 
-    manager.create(clusterRef, { profileId });
+    manager.create(clusterProfileRef, { profileId });
+
+    /** set clusterId as property of all clusters */
+    manager.set(clusterRef, { clusterId });
   }
 
   async removeCluster(
@@ -317,8 +328,7 @@ export class ProfilesRepository {
     const ref = await this.getRef(profileId, manager, true);
     manager.update(ref, { clusters: FieldValue.arrayRemove(clusterId) });
 
-    const clusterRef =
-      this.getProfilesClustersCollection(clusterId).doc(profileId);
+    const clusterRef = this.getClusterRef(clusterId);
 
     manager.delete(clusterRef);
   }

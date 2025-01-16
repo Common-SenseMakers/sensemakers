@@ -19,4 +19,5 @@ export const queryParamsSchema = object({
   profileIds: array(string()).optional(),
   origins: array(string()).optional(),
   semantics: smeanticsQueryParamsSchema.optional(),
+  clusterId: string().optional(),
 });

@@ -61,6 +61,7 @@ export interface Services {
   activity: ActivityService;
   links: LinksService;
   ontology: OntologiesService;
+  clusters: ClustersService;
 }
 
 export interface ServicesConfig {
@@ -234,6 +235,7 @@ export const createServices = (
     links: linksService,
     ontology: ontologiesService,
     profiles: profilesService,
+    clusters,
   };
 
   if (DEBUG) {

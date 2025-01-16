@@ -8,6 +8,8 @@ import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
 import { PostsManager } from '../posts/posts.manager';
 
+const DEBUG = true;
+
 export class FeedService {
   constructor(
     protected db: DBInstance,
@@ -38,6 +40,8 @@ export class FeedService {
       addAggregatedLabels,
       addMirrors,
     };
+
+    if (DEBUG) console.log('getFeed', { queryParams });
 
     const cluster = this.clusters.getInstance(queryParams.clusterId);
 
