@@ -286,7 +286,7 @@ export class ProfilesRepository {
 
   async getClusters(profileId: string, manager: TransactionManager) {
     const profile = await this.getByProfileId(profileId, manager, true);
-    return profile.clusters;
+    return profile.clusters || [];
   }
 
   getProfilesClustersCollection(clusterId: string) {
