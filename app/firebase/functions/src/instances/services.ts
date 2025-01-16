@@ -26,7 +26,6 @@ import {
 } from '../platforms/mastodon/mastodon.service';
 import { getMastodonMock } from '../platforms/mastodon/mock/mastodon.service.mock';
 import { getTestCredentials } from '../platforms/mock/test.users';
-import { OrcidService } from '../platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
   PlatformsMap,
@@ -106,7 +105,6 @@ export const createServices = (
   const ontologiesService = new OntologiesService(ontologiesRepo);
   const clusters = new ClustersService(clustersRepo);
 
-  const orcid = new OrcidService();
   const _twitter = new TwitterService(time, userRepo, config.twitter);
 
   const testCredentials = getTestCredentials(config.testCredentials);
@@ -138,7 +136,6 @@ export const createServices = (
   );
 
   /** all identity services */
-  identityPlatforms.set(PLATFORM.Orcid, orcid);
   identityPlatforms.set(PLATFORM.Twitter, twitter);
   identityPlatforms.set(PLATFORM.Mastodon, mastodon);
   identityPlatforms.set(PLATFORM.Bluesky, bluesky);

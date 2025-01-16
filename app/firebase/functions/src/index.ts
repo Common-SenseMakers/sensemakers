@@ -50,15 +50,11 @@ import { getConfig } from './services.config';
 
 // all secrets are available to all functions
 const secrets: SecretParam[] = [
-  envRuntime.ORCID_SECRET,
   envRuntime.OUR_TOKEN_SECRET,
   envRuntime.TWITTER_CLIENT_SECRET,
   envRuntime.TWITTER_BEARER_TOKEN,
   envRuntime.MASTODON_ACCESS_TOKENS,
   envRuntime.BLUESKY_APP_PASSWORD,
-  envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-  envRuntime.EMAIL_CLIENT_SECRET,
-  envRuntime.MAGIC_ADMIN_SECRET,
   envRuntime.IFRAMELY_API_KEY,
 ];
 
