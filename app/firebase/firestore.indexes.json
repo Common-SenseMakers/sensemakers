@@ -10,6 +10,20 @@
         },
         {
           "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "indexedPosts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
           "order": "DESCENDING"
         }
       ]
@@ -20,6 +34,24 @@
       "fields": [
         {
           "fieldPath": "authorProfileId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "authorProfileId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
           "order": "ASCENDING"
         },
         {

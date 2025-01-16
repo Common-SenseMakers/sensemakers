@@ -8,7 +8,7 @@ import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
 import { PostsManager } from '../posts/posts.manager';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export class FeedService {
   constructor(

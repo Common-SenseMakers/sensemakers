@@ -2,7 +2,7 @@ import { AppPost } from '../../src/@shared/types/types.posts';
 import { processInBatches } from '../../src/db/db.utils';
 import { servicesSource } from '../migrations.services';
 
-const DEBUG = true;
+const DEBUG = false;
 
 // Read posts from a source and create them in the target (uses new ids and creates the platform posts and profiles)
 (async () => {

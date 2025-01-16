@@ -2,7 +2,7 @@ import * as readline from 'readline';
 
 // Import readline module
 
-// const DEBUG = true;
+// const DEBUG = false;
 
 // Function to prompt user for database deletion
 export async function promptUser(
