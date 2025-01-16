@@ -131,6 +131,96 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.tabs.isTab01",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.tabs.isTab02",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.tabs.isTab03",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.tabs.isTab04",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.tabs.isTab05",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []
