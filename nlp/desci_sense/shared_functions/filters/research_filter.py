@@ -11,6 +11,8 @@ item_types_whitelist = [
     "presentation",
     "conferencePaper",
     "report",
+    "encyclopediaArticle",
+    "software",
 ]
 
 
