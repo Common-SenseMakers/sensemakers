@@ -596,9 +596,10 @@ def combine_from_raw_results(
 
         default_label = ontology.default_label(no_ref=no_ref)
         for pred_labels in combined.multi_reference_tagger:
-            if len(pred_labels) == 0:
-                logger.debug(f"Empty prediction replaced by {default_label}")
-                pred_labels.append(default_label)
+            # Prevent duplicates: convert to set
+            label_set = set(pred_labels)
+            label_set.add(default_label)
+            pred_labels[:] = list(label_set)  # write back to the same list object
 
     return combined
 
