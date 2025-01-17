@@ -62,6 +62,7 @@ def test_combined_pp():
     assert len(res.metadata_list) == 1
     assert res.filter_classification == SciFilterClassfication.CITOID_DETECTED_RESEARCH
     assert res.metadata_list[0].order == 1
+    assert "default" in res.multi_reference_tagger[0]
     
 
 def test_combined_2_pp():
@@ -75,8 +76,11 @@ def test_combined_2_pp():
     assert res.filter_classification == SciFilterClassfication.CITOID_DETECTED_RESEARCH
     assert res.metadata_list[0].order == 1
     assert res.metadata_list[0].url == "https://arxiv.org/abs/2402.04607"
+    assert "default" in res.multi_reference_tagger[0]
     assert res.metadata_list[1].order == 2
     assert res.metadata_list[1].url == "https://arxiv.org/abs/2401.14000"
+    assert "default" in res.multi_reference_tagger[1]
+
 
 def test_firebase_pp():
     multi_config = create_multi_config_for_tests()
@@ -91,6 +95,11 @@ def test_firebase_pp():
             subject=URIRef("https://arxiv.org/abs/2402.04607"),
             predicate=URIRef(ZoteroItemTypeDefinition().uri),
             object=Literal("preprint"),
+        ),
+         RDFTriplet(
+            subject=URIRef('https://sense-nets.xyz/mySemanticPost'),
+            predicate=URIRef("http://purl.org/spar/cito/linksTo"),
+            object=Literal("https://arxiv.org/abs/2402.04607"),
         ),
     ]
     for triplet in expected:
