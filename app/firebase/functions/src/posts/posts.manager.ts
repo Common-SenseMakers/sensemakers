@@ -954,7 +954,7 @@ export class PostsManager {
                 throw new Error('unexpected missing profile');
               }
 
-              await this.profiles.repo.setUserId(profileId, userId, manager);
+              await this.profiles.repo.update(profileId, { userId }, manager);
             })
           );
         })

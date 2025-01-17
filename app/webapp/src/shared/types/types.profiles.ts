@@ -29,6 +29,10 @@ export interface AccountProfile<P extends PlatformProfile = PlatformProfile> {
   clusters?: string[];
 }
 
+export type ProfileUpdate = Partial<
+  Pick<AccountProfile, 'autofetch' | 'userId'>
+>;
+
 export const profileDefaults: Partial<AccountProfile> = {
   autofetch: true,
 };

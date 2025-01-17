@@ -6,6 +6,7 @@ import {
   AccountProfileCreate,
   FetchedDetails,
   PlatformProfile,
+  ProfileUpdate,
   ProfilesQueryParams,
   profileDefaults,
 } from '../@shared/types/types.profiles';
@@ -219,13 +220,13 @@ export class ProfilesRepository {
     manager.update(profileRef, { fetched: newFetched });
   }
 
-  async setUserId(
+  async update(
     profileId: string,
-    userId: string,
+    update: ProfileUpdate,
     manager: TransactionManager
   ) {
     const profileRef = await this.getRef(profileId, manager, true);
-    manager.update(profileRef, { userId });
+    manager.update(profileRef, update);
   }
 
   delete(profileId: string, manager: TransactionManager) {
