@@ -192,7 +192,7 @@ export class ProfilesService {
   ) {
     await Promise.all(
       clustersIds.map((clusterId) => {
-        this.repo.addCluster(profileId, clusterId, manager);
+        this.repo.addClusterToProfile(profileId, clusterId, manager);
       })
     );
   }

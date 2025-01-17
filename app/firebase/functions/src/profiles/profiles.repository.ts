@@ -299,11 +299,11 @@ export class ProfilesRepository {
     );
   }
 
-  getClusterProfile(clusterId: string, profileId: string) {
+  getClusterProfileRef(clusterId: string, profileId: string) {
     return this.getClusterProfilesCollection(clusterId).doc(profileId);
   }
 
-  async addCluster(
+  async addClusterToProfile(
     profileId: string,
     clusterId: string,
     manager: TransactionManager
@@ -312,9 +312,9 @@ export class ProfilesRepository {
     manager.update(profileRef, { clusters: FieldValue.arrayUnion(clusterId) });
 
     const clusterRef = this.getClusterRef(clusterId);
-    const clusterProfileRef = this.getClusterProfile(clusterId, profileId);
+    const clusterProfileRef = this.getClusterProfileRef(clusterId, profileId);
 
-    manager.create(clusterProfileRef, { profileId });
+    manager.set(clusterProfileRef, { profileId });
 
     /** set clusterId as property of all clusters */
     manager.set(clusterRef, { clusterId });
