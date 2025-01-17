@@ -13,7 +13,7 @@ import {
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { AutofetchNonUserPostsJobMeta } from './types.posts.tasks';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export const AUTOFETCH_POSTS_TASK = 'autofetchPosts';
 

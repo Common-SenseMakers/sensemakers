@@ -7,7 +7,7 @@ import { AccountCredentials } from '../@shared/types/types.user';
 import { Services } from '../instances/services';
 import { useBlueskyAdminCredentials } from './bluesky/bluesky.utils';
 
-export const DEBUG = true;
+export const DEBUG = false;
 
 export const fetchPlatformAccountTask = async (
   req: Request,

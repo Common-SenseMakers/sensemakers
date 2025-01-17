@@ -16,7 +16,7 @@ import { logger } from '../instances/logger';
 import { ProfilesRepository } from '../profiles/profiles.repository';
 import { UsersHelper } from './users.helper';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export class UsersRepository {
   constructor(
