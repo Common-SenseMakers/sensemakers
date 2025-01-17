@@ -26,6 +26,8 @@ export interface FetchParams {
 export interface PlatformFetchParams {
   since_id?: string;
   until_id?: string;
+  since_timestamp?: number;
+  until_timestamp?: number;
   expectedAmount: number;
 }
 

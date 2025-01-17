@@ -7,6 +7,7 @@ import { Link } from '@atproto/api/dist/client/types/app/bsky/richtext/facet';
 import { Firestore } from 'firebase-admin/firestore';
 
 import {
+  BLUESKY_REPOST_URI_PARAM,
   BlueskyPost,
   BlueskyThread,
   QuotedBlueskyPost,
@@ -61,7 +62,25 @@ export const convertBlueskyPostsToThreads = (
       },
     };
   });
-  return threads;
+  const repostedThreads: BlueskyThread[] = posts
+    .filter((post) => post.repostedBy)
+    .map((post) => {
+      if (!post.repostedBy) {
+        throw new Error('reposted by info not present');
+      }
+      return {
+        thread_id:
+          post.uri + `?${BLUESKY_REPOST_URI_PARAM}=${post.repostedBy.by.did}`,
+        posts: [cleanBlueskyPost(post)],
+        author: {
+          id: post.repostedBy.by.did,
+          username: post.repostedBy.by.handle,
+          avatar: post.repostedBy.by.avatar,
+          displayName: post.repostedBy.by.displayName,
+        },
+      };
+    });
+  return [...threads, ...repostedThreads];
 };
 
 const findRootId = (post: BlueskyPost, posts: BlueskyPost[]): string => {

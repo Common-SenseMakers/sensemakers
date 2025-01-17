@@ -16,7 +16,11 @@ import {
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { AppUser } from '../../src/@shared/types/types.user';
-import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.utils';
+import {
+  parseMastodonGlobalUsername,
+  parseMastodonPostURI,
+} from '../../src/@shared/utils/mastodon.utils';
+import { getProfileId } from '../../src/@shared/utils/profiles.utils';
 import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
@@ -213,6 +217,65 @@ describe('02-platforms', () => {
         expect(result.platformPosts.length).to.be.greaterThan(0);
       }
     });
+    it('it can use repost post ids in fetch params', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const userDetails = allUserDetails[0];
+      if (userDetails.credentials.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      const mastodonService = services.platforms.get(PLATFORM.Mastodon);
+      const fetchParams: PlatformFetchParams = {
+        expectedAmount: 5,
+        until_id:
+          'https://cosocial.ca/users/weswalla/statuses/113801618847445543/activity',
+      };
+
+      const result = await mastodonService.fetch(
+        userDetails.user_id,
+        fetchParams,
+        userDetails.credentials
+      );
+
+      if (USE_REAL_MASTODON) {
+        expect(result).to.not.be.undefined;
+        expect(result.platformPosts.length).to.be.greaterThan(0);
+        result.platformPosts.forEach((post) => {
+          expect(
+            BigInt('113801618847445543') -
+              BigInt(parseMastodonPostURI(post.post_id).postId) >
+              0
+          ).to.be.true;
+        });
+      }
+
+      const fetchParams2: PlatformFetchParams = {
+        expectedAmount: 5,
+        since_id:
+          'https://cosocial.ca/users/weswalla/statuses/113430780810995021/activity',
+      };
+
+      const result2 = await mastodonService.fetch(
+        userDetails.user_id,
+        fetchParams2,
+        userDetails.credentials
+      );
+
+      if (USE_REAL_MASTODON) {
+        expect(result2).to.not.be.undefined;
+        expect(result2.platformPosts.length).to.be.greaterThan(0);
+        result2.platformPosts.forEach((post) => {
+          const postId = parseMastodonPostURI(post.post_id).postId;
+          expect(BigInt('113430780810995021') - BigInt(postId) < 0).to.be.true;
+        });
+      }
+    });
 
     it('gets account by username', async () => {
       // https://fediscience.org/@petergleick
@@ -242,7 +305,7 @@ describe('02-platforms', () => {
         expect(result.avatar).to.be.a('string');
       }
     });
-    it.only('handles newlines in the content html', async () => {
+    it('handles newlines in the content html', async () => {
       const post_id =
         'https://w3c.social/users/w3c/statuses/113561528162272973';
       const result = await mastodonService.get(
@@ -359,6 +422,145 @@ describe('02-platforms', () => {
         }
       }
     );
+
+    it.only('can fetch since and until with dates instead of post_ids', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+
+      const untilPost_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3ldc6uw4czr2y?reposted_by=did:plc:xq36vykdkrzknmcxo3jnn5wq';
+      const sincePost_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcwqe3td4d2m?reposted_by=did:plc:xq36vykdkrzknmcxo3jnn5wq';
+
+      const fetchParams: FetchParams = {
+        expectedAmount: 1,
+      };
+
+      await services.postsManager.fetchUser({
+        userId: user!.userId,
+        params: fetchParams,
+        platformIds: [PLATFORM.Bluesky],
+      });
+
+      const sinceAndUntilPosts = await services.db.run(async (manager) => {
+        const sincePlatformPostId =
+          await services.postsManager.processing.platformPosts.getFrom_post_id(
+            PLATFORM.Bluesky,
+            sincePost_id,
+            manager,
+            true
+          );
+        const sincePlatformPost =
+          await services.postsManager.processing.platformPosts.get(
+            sincePlatformPostId,
+            manager,
+            true
+          );
+        const sincePost = await services.postsManager.processing.posts.get(
+          sincePlatformPost.postId!,
+          manager,
+          true
+        );
+        const untilPlatformPostId =
+          await services.postsManager.processing.platformPosts.getFrom_post_id(
+            PLATFORM.Bluesky,
+            untilPost_id,
+            manager,
+            true
+          );
+        const untilPlatformPost =
+          await services.postsManager.processing.platformPosts.get(
+            untilPlatformPostId,
+            manager,
+            true
+          );
+        const untilPost = await services.postsManager.processing.posts.get(
+          untilPlatformPost.postId!,
+          manager,
+          true
+        );
+        return {
+          sincePost,
+          untilPost,
+        };
+      });
+      if (!sinceAndUntilPosts.sincePost || !sinceAndUntilPosts.untilPost) {
+        throw new Error('since and until posts should exists');
+      }
+
+      const allProfilePosts =
+        await services.postsManager.processing.posts.getAllOfQuery({
+          profileId: getProfileId(PLATFORM.Bluesky, userDetails.user_id),
+          fetchParams: { expectedAmount: 100 },
+        });
+      await services.db.run(async (manager) => {
+        allProfilePosts.forEach(async (post) => {
+          if (
+            post.id !== sinceAndUntilPosts.sincePost.id &&
+            post.id !== sinceAndUntilPosts.untilPost.id
+          ) {
+            // NOTE: something in this method calls seems to leave an unresolved async call
+            await services.postsManager.processing.deletePostFull(
+              post.id,
+              manager
+            );
+          }
+        });
+      });
+
+      const fetchParamsSince: FetchParams = {
+        expectedAmount: 1,
+        sinceId: sinceAndUntilPosts.sincePost.id,
+      };
+
+      const fetchParamsUntil: FetchParams = {
+        expectedAmount: 1,
+        untilId: sinceAndUntilPosts.untilPost.id,
+      };
+      await services.db.run(async (manager) => {
+        await services.users.profiles.setAccountProfileFetched(
+          PLATFORM.Bluesky,
+          userDetails.user_id,
+          { newest_id: sincePost_id, oldest_id: untilPost_id },
+          manager
+        );
+      });
+
+      const sincePlatformPosts = await services.postsManager.fetchUser({
+        userId: user!.userId,
+        params: fetchParamsSince,
+        platformIds: [PLATFORM.Bluesky],
+      });
+
+      await services.db.run(async (manager) => {
+        await services.users.profiles.setAccountProfileFetched(
+          PLATFORM.Bluesky,
+          userDetails.user_id,
+          { newest_id: sincePost_id, oldest_id: untilPost_id },
+          manager
+        );
+      });
+      const untilPlatformPosts = await services.postsManager.fetchUser({
+        userId: user!.userId,
+        params: fetchParamsUntil,
+        platformIds: [PLATFORM.Bluesky],
+      });
+      expect(untilPlatformPosts.length).to.not.be.equal(0);
+      expect(sincePlatformPosts.length).to.not.be.equal(0);
+
+      sincePlatformPosts.forEach((platformPost) => {
+        expect(platformPost.post.createdAtMs).to.be.greaterThan(
+          sinceAndUntilPosts.sincePost.createdAtMs
+        );
+      });
+
+      untilPlatformPosts.forEach((platformPost) => {
+        expect(platformPost.post.createdAtMs).to.be.lessThan(
+          sinceAndUntilPosts.untilPost.createdAtMs
+        );
+      });
+    });
 
     it('fetches the latest posts without since_id or until_id', async () => {
       const fetchParams: PlatformFetchParams = {
