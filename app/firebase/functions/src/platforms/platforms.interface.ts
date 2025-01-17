@@ -82,6 +82,11 @@ export interface PlatformService<
   ): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 
+  mergePosts(
+    original: PlatformPostPosted,
+    newPost: PlatformPostPosted
+  ): Promise<PlatformPostPosted>;
+
   signDraft?(post: PlatformPostDraft): Promise<DraftType>;
   /** for signature based platforms, this creates the draft that represents
    * a delete of a post. The draft is then signed by the user */
