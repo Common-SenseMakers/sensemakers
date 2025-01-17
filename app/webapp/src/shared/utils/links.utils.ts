@@ -51,3 +51,30 @@ export function handleQuotePostReference(reference: string, post: AppPost) {
   }
   return reference;
 }
+
+export function isPlatformPost(ref: string) {
+  // make a url object then check if the hostname matches a known list
+  const urlObj = new URL(ref);
+  const host = urlObj.hostname;
+  return KNOWN_PLATFORM_URLS.includes(host);
+}
+
+export const KNOWN_PLATFORM_URLS = [
+  /** TWITTER/X */
+  'twitter.com',
+  'x.com',
+  /** BLUESKY */
+  'bsky.app',
+  /** MASTODON */
+  'mastodon.social',
+  'mastodon.online',
+  'fosstodon.org',
+  'mstdn.social',
+  'mastodon.art',
+  'techhub.social',
+  'mas.to',
+  'mastodon.lol',
+  'mastodon.green',
+  'mastodon.world',
+  'cosocial.ca',
+];
