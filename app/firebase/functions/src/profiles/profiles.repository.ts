@@ -240,7 +240,7 @@ export class ProfilesRepository {
     const userId_property: keyof ProfilesQueryParams = 'userId';
 
     let baseQuery = ((_base: Query) => {
-      if (queryParams.autofetch) {
+      if (queryParams.autofetch !== undefined) {
         return _base.where(autofetch_property, '==', queryParams.autofetch);
       }
       return _base;
