@@ -666,18 +666,43 @@ export class TwitterService
     }
   }
   isPartOfMainThread(
-    rootPost: PlatformPost,
-    post: PlatformPostCreate
+    rootPost: PlatformPost<TwitterThread>,
+    post: PlatformPostCreate<TwitterThread>
   ): boolean {
-    return true;
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (rootPost.posted.post_id !== post.posted.post_id) return false;
+    const rootThreadPosts = rootPost.posted.post.tweets;
+    const lastRootThreadPost = rootThreadPosts[rootThreadPosts.length - 1];
+    const newThreadPosts = post.posted.post.tweets;
+    const firstNewThreadPost = newThreadPosts[0];
+    const replyToId = firstNewThreadPost.referenced_tweets?.find(
+      (referencedTweet) => referencedTweet.type === 'replied_to'
+    )?.id;
+    if (replyToId === lastRootThreadPost.id) return true;
+
+    return false;
   }
   mergeBrokenThreads(
-    rootPost: PlatformPost,
-    post: PlatformPostCreate
-  ): PlatformPostPosted {
-    return {} as PlatformPostPosted;
+    rootPost: PlatformPost<TwitterThread>,
+    post: PlatformPostCreate<TwitterThread>
+  ): PlatformPostPosted | undefined {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (!this.isPartOfMainThread(rootPost, post)) {
+      return undefined;
+    }
+
+    const mergedThread = [
+      ...rootPost.posted?.post.tweets,
+      ...post.posted?.post.tweets,
+    ];
+    rootPost.posted.post.tweets = mergedThread;
+    return rootPost.posted;
   }
-  isRootThread(post: PlatformPostCreate): boolean {
-    return true;
+  isRootThread(post: PlatformPostCreate<TwitterThread>): boolean {
+    return post.posted?.post.tweets[0].id === post.posted?.post_id;
   }
 }
