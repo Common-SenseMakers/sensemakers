@@ -679,7 +679,7 @@ export class BlueskyService
     rootPost.posted.post.posts = mergedThread;
     return rootPost.posted;
   }
-  isRootThread(post: PlatformPostCreate): boolean {
+  isRootThread(post: PlatformPostCreate<BlueskyThread>): boolean {
     return post.posted?.post.posts[0].uri === post.posted?.post_id;
   }
 }

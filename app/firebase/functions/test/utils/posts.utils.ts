@@ -265,6 +265,7 @@ export const getMockPost = (
               author_id: '123456',
               conversation_id: '123456',
               text: 'test content',
+              edit_history_tweet_ids: ['123456'],
             },
           ],
           author: {
