@@ -664,10 +664,14 @@ export class BlueskyService
   mergeBrokenThreads(
     rootPost: PlatformPost<BlueskyThread>,
     post: PlatformPostCreate<BlueskyThread>
-  ): PlatformPostPosted {
+  ): PlatformPostPosted | undefined {
     if (!rootPost.posted || !post.posted) {
       throw new Error('Unexpected undefined posted');
     }
+    if (!this.isPartOfMainThread(rootPost, post)) {
+      return undefined;
+    }
+
     const mergedThread = [
       ...rootPost.posted?.post.posts,
       ...post.posted?.post.posts,
