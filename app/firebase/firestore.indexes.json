@@ -101,15 +101,25 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "structuredSemantics.keywords",
-          "arrayConfig": "CONTAINS"
-        },
-        {
-          "fieldPath": "structuredSemantics.topic",
+          "fieldPath": "originalParsed.filter_classification",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "createdAtMs",
+          "fieldPath": "authorUserId",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "parsedStatus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "authorUserId",
           "order": "ASCENDING"
         }
       ]
@@ -128,6 +138,24 @@
         },
         {
           "fieldPath": "createdAtMs",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.keywords",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAtMs",
           "order": "DESCENDING"
         }
       ]
@@ -243,6 +271,20 @@
         {
           "fieldPath": "createdAtMs",
           "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "structuredSemantics.topic",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "authorUserId",
+          "order": "ASCENDING"
         }
       ]
     },

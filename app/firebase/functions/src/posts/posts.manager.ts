@@ -1,5 +1,6 @@
 import { DataFactory } from 'n3';
 
+import { BlueskyThread } from '../@shared/types/types.bluesky';
 import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PARSER_MODE,
@@ -9,6 +10,7 @@ import {
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
   PlatformPostPosted,
@@ -63,7 +65,7 @@ import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
@@ -191,6 +193,40 @@ export class PostsManager {
 
     if (DEBUG) logger.debug(`Platform Service - fetch ${platformId}`);
     try {
+      if (platformId === PLATFORM.Bluesky) {
+        if (platformParams.since_id) {
+          const platformPostDocId =
+            await this.processing.platformPosts.getFrom_post_id(
+              platformId,
+              platformParams.since_id,
+              manager
+            );
+          const platformPost: PlatformPost<BlueskyThread> | undefined =
+            platformPostDocId
+              ? await this.processing.platformPosts.get(
+                  platformPostDocId,
+                  manager
+                )
+              : undefined;
+          platformParams.since_timestamp = platformPost?.posted?.timestampMs;
+        }
+        if (platformParams.until_id) {
+          const platformPostDocId =
+            await this.processing.platformPosts.getFrom_post_id(
+              platformId,
+              platformParams.until_id,
+              manager
+            );
+          const platformPost: PlatformPost<BlueskyThread> | undefined =
+            platformPostDocId
+              ? await this.processing.platformPosts.get(
+                  platformPostDocId,
+                  manager
+                )
+              : undefined;
+          platformParams.until_timestamp = platformPost?.posted?.timestampMs;
+        }
+      }
       const fetchedPosts = await this.platforms.fetch(
         user_id,
         platformId,

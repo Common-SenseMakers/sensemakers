@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet';
-import { MouseEventHandler } from 'react';
+import { MouseEventHandler, useState } from 'react';
 
 import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
@@ -7,6 +7,7 @@ import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
+import { ChevronButton } from '../ui-components/ChevronButton';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PublishButtons } from './PostPublishButtons';
@@ -104,6 +105,7 @@ export const PostCard = (props: {
   const post = updated.postMerged;
 
   const { constants } = useThemeContext();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const overlay = useOverlay();
 
@@ -137,6 +139,10 @@ export const PostCard = (props: {
   };
 
   const postText = concatenateThread(post.generic);
+  const useTruncated = postText.length > 700;
+  const postTextTruncated = useTruncated
+    ? postText.slice(0, 700) + '...'
+    : postText;
 
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
@@ -188,11 +194,28 @@ export const PostCard = (props: {
                 }}></SemanticsEditor>
             </Box>
           )}
-          <PostTextStatic
-            onClick={handleInternalClick}
-            truncate
-            shade={shade}
-            text={postText}></PostTextStatic>
+          <div
+            style={{
+              overflow: 'hidden',
+              transition: 'height 0.3s ease-in-out',
+              height: 'auto',
+            }}>
+            <PostTextStatic
+              onClick={handleInternalClick}
+              truncate
+              shade={shade}
+              text={isExpanded ? postText : postTextTruncated}></PostTextStatic>
+          </div>
+          {useTruncated && (
+            <Box align="end" margin={{ top: 'xxxsmall', right: 'xsmall' }}>
+              <ChevronButton
+                isExpanded={isExpanded}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}></ChevronButton>
+            </Box>
+          )}
           {!hideSemantics && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
               <SemanticsEditor

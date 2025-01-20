@@ -4,6 +4,7 @@ import {
   AccountProfileCreate,
   FetchedDetails,
   PlatformProfile,
+  ProfileUpdate,
   ProfilesQueryParams,
   profileDefaults,
 } from '../@shared/types/types.profiles';
@@ -225,6 +226,15 @@ export class ProfilesRepository {
     manager.update(profileRef, { userId });
   }
 
+  async update(
+    profileId: string,
+    update: ProfileUpdate,
+    manager: TransactionManager
+  ) {
+    const profileRef = await this.getRef(profileId, manager, true);
+    manager.update(profileRef, update);
+  }
+
   delete(profileId: string, manager: TransactionManager) {
     const ref = this.db.collections.profiles.doc(profileId);
     manager.delete(ref);
@@ -236,7 +246,7 @@ export class ProfilesRepository {
     const userId_property: keyof ProfilesQueryParams = 'userId';
 
     let baseQuery = ((_base: Query) => {
-      if (queryParams.autofetch) {
+      if (queryParams.autofetch !== undefined) {
         return _base.where(autofetch_property, '==', queryParams.autofetch);
       }
       return _base;
