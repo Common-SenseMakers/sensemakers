@@ -162,7 +162,11 @@ export class PostsProcessing {
 
     await this.posts.update(
       rootThreadPlatformPost.postId,
-      { generic: mergedAppPost },
+      {
+        generic: mergedAppPost,
+        parsedStatus: AppPostParsedStatus.UNPROCESSED,
+        parsingStatus: AppPostParsingStatus.IDLE,
+      },
       manager
     );
 
