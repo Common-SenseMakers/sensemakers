@@ -43,7 +43,7 @@ describe.only('022 Merge Broken Threads', () => {
     ).initPlatformPost(PLATFORM.Bluesky, rootThread);
 
     const platformPostCreated = await services.db.run(async (manager) => {
-      return services.postsManager.processing.createPlatformPost(
+      return services.postsManager.processing.createOrMergePlatformPost(
         platformPostCreate,
         manager
       );
@@ -60,7 +60,7 @@ describe.only('022 Merge Broken Threads', () => {
     ).initPlatformPost(PLATFORM.Bluesky, brokenThreadWithRoot);
 
     const mergedPlatformPostCreated = await services.db.run(async (manager) => {
-      return postsManager.processing.createPlatformPost(
+      return postsManager.processing.createOrMergePlatformPost(
         brokenThreadPlatformPostCreate,
         manager
       );
@@ -80,7 +80,7 @@ describe.only('022 Merge Broken Threads', () => {
     ).initPlatformPost(PLATFORM.Bluesky, brokenThreadWithoutRoot);
 
     const mergedPlatformPostCreated = await services.db.run(async (manager) => {
-      return postsManager.processing.createPlatformPost(
+      return postsManager.processing.createOrMergePlatformPost(
         brokenThreadPlatformPostCreate,
         manager
       );
@@ -98,7 +98,7 @@ describe.only('022 Merge Broken Threads', () => {
     ).initPlatformPost(PLATFORM.Bluesky, brokenThreadWithRootNotPartOfMain);
 
     const mergedPlatformPostCreated = await services.db.run(async (manager) => {
-      return postsManager.processing.createPlatformPost(
+      return postsManager.processing.createOrMergePlatformPost(
         brokenThreadPlatformPostCreate,
         manager
       );

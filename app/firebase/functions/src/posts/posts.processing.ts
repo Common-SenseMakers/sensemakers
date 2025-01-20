@@ -52,13 +52,11 @@ export class PostsProcessing {
    * If the root thread exists and the post is part of it, it merges the post into the thread.
    * It also creates an AppPost for that PlatformPost
    * */
-  async createPlatformPost(
+  async createOrMergePlatformPost(
     platformPost: PlatformPostCreate,
     manager: TransactionManager,
     authorUserId?: string
   ): Promise<PlatformPostCreated | undefined> {
-    const platformService = this.platforms.get(platformPost.platformId);
-
     const existing = platformPost.posted
       ? await this.platformPosts.getFrom_post_id(
           platformPost.platformId,
@@ -67,78 +65,71 @@ export class PostsProcessing {
         )
       : undefined;
 
-    let updated = false;
-
+    /** if the root post exists, try merging them if part of the main thread */
     if (existing) {
       const rootPlatformPost = await this.platformPosts.get(
         existing,
         manager,
         true
       );
-
-      const { newPlatformPost, updated } = platformService.mergePosts(
+      return await this.mergePlatformPosts(
         rootPlatformPost,
-        platformPost
+        platformPost,
+        manager
       );
     }
 
-    if (!updated) {
+    /** if the root doesn't exist, create the thread */
+    return await this.createPlatformPost(platformPost, manager, authorUserId);
+  }
+  async createPlatformPost(
+    platformPost: PlatformPostCreate,
+    manager: TransactionManager,
+    authorUserId?: string
+  ): Promise<PlatformPostCreated | undefined> {
+    if (
+      !this.platforms.get(platformPost.platformId).isRootThread(platformPost)
+    ) {
       return undefined;
-    } else {
-      platformPost = newPlatformPost;
     }
-
-    // platformPost should be the original or updated one
-
-    /** if a platformPost does not exist (most likely scenario) then create a new AppPost for this PlatformPost */
     const genericPostData = await this.platforms.convertToGeneric(platformPost);
+    /** user_id might be defined or the intended one */
+    const user_id = platformPost.posted
+      ? platformPost.posted.user_id
+      : platformPost.draft?.user_id;
 
-    if (updated) {
-      const platformPostCreated = this.platformPosts.update(
-        platformPost,
-        manager
+    if (!user_id) {
+      throw new Error(
+        `Cannot create a post associated to a PlatformPost that does not have a draft or a posted`
       );
-      // update appPost set not parsed 
-      return ... 
-    } else {
-      /** user_id might be defined or the intended one */
-      const user_id = platformPost.posted
-        ? platformPost.posted.user_id
-        : platformPost.draft?.user_id;
-
-      if (!user_id) {
-        throw new Error(
-          `Cannot create a post associated to a PlatformPost that does not have a draft or a posted`
-        );
-      }
-
-      const platformPostCreated = this.platformPosts.create(
-        platformPost,
-        manager
-      );
-
-      /** the profile may not exist in the Profiles collection */
-      const authorProfileId = getProfileId(platformPost.platformId, user_id);
-
-      /** create AppPost */
-      const post = await this.createAppPost(
-        {
-          generic: genericPostData,
-          origin: platformPost.platformId,
-          authorProfileId,
-          authorUserId,
-          mirrorsIds: [platformPostCreated.id],
-          createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
-          editStatus: AppPostEditStatus.PENDING,
-        },
-        manager
-      );
-
-      /** set the postId of the platformPost */
-      this.platformPosts.setPostId(platformPostCreated.id, post.id, manager);
-      
-      return { post, platformPost: platformPostCreated };
     }
+
+    const platformPostCreated = this.platformPosts.create(
+      platformPost,
+      manager
+    );
+
+    /** the profile may not exist in the Profiles collection */
+    const authorProfileId = getProfileId(platformPost.platformId, user_id);
+
+    /** create AppPost */
+    const post = await this.createAppPost(
+      {
+        generic: genericPostData,
+        origin: platformPost.platformId,
+        authorProfileId,
+        authorUserId,
+        mirrorsIds: [platformPostCreated.id],
+        createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
+        editStatus: AppPostEditStatus.PENDING,
+      },
+      manager
+    );
+
+    /** set the postId of the platformPost */
+    this.platformPosts.setPostId(platformPostCreated.id, post.id, manager);
+
+    return { post, platformPost: platformPostCreated };
   }
 
   async mergePlatformPosts(
@@ -156,6 +147,9 @@ export class PostsProcessing {
       rootThreadPlatformPost,
       partialThreadPlatformPost
     );
+    if (!mergedPlatformPost) {
+      return undefined;
+    }
     const mergedAppPost = await platformService.convertToGeneric({
       posted: mergedPlatformPost,
     });
@@ -186,14 +180,14 @@ export class PostsProcessing {
   }
 
   /** Store all platform posts */
-  async createPlatformPosts(
+  async createOrMergePlatformPosts(
     platformPosts: PlatformPostCreate[],
     manager: TransactionManager,
     authorUserId?: string
   ) {
     const postsCreated = await Promise.all(
       platformPosts.map(async (platformPost) => {
-        return await this.createPlatformPost(
+        return await this.createOrMergePlatformPost(
           platformPost,
           manager,
           authorUserId

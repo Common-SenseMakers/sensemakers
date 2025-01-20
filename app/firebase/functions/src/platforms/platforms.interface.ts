@@ -82,11 +82,6 @@ export interface PlatformService<
   ): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 
-  mergePosts(
-    original: PlatformPostPosted,
-    newPost: PlatformPostPosted
-  ): Promise<PlatformPostPosted>;
-
   signDraft?(post: PlatformPostDraft): Promise<DraftType>;
   /** for signature based platforms, this creates the draft that represents
    * a delete of a post. The draft is then signed by the user */
@@ -96,10 +91,9 @@ export interface PlatformService<
     author: AppUserRead
   ): Promise<PlatformPostDeleteDraft | undefined>;
 
-  isPartOfMainThread(rootPost: PlatformPost, post: PlatformPostCreate): boolean;
   mergeBrokenThreads(
     rootPost: PlatformPost,
     post: PlatformPostCreate
-  ): PlatformPostPosted;
+  ): PlatformPostPosted | undefined;
   isRootThread(post: PlatformPostCreate): boolean;
 }
