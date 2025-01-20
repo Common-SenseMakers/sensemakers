@@ -63,3 +63,11 @@ export function parseMastodonPostURI(uri: string) {
     throw new Error(`Error parsing mastodon uri ${uri}`);
   }
 }
+
+export const buildMastodonPostUri = (
+  username: string,
+  server: string,
+  postId: string
+) => {
+  return `https://${server}/users/${username}/statuses/${postId}`;
+};
