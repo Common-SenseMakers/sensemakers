@@ -1,5 +1,3 @@
-import { Request } from 'firebase-functions/v2/tasks';
-
 import {
   ALL_SOURCE_PLATFORMS,
   IDENTITY_PLATFORM,
@@ -149,7 +147,10 @@ export const triggerAutofetchPosts = async (services: Services) => {
   );
 };
 
-export const autofetchUserPosts = async (req: Request, services: Services) => {
+export const autofetchUserPosts = async (
+  req: { data: { userId: string } },
+  services: Services
+) => {
   if (DEBUG) logger.debug(`autofetchUserPosts: userId: ${req.data.userId}`);
 
   const userId = req.data.userId as string;
@@ -175,6 +176,7 @@ export const autofetchUserPosts = async (req: Request, services: Services) => {
     if (!error.message.includes('code: 429')) {
       throw error;
     }
+    logger.warn(`Rate limit hit for user ${userId}`);
     return undefined;
   }
 };

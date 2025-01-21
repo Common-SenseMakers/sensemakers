@@ -37,6 +37,7 @@ import {
   PlatformAccountProfile,
   PlatformProfile,
 } from '../../@shared/types/types.profiles';
+import { AccountCredentials } from '../../@shared/types/types.user';
 import { parseBlueskyURI } from '../../@shared/utils/bluesky.utils';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -519,7 +520,55 @@ export class BlueskyService
     }
   }
 
-  public async get(
+  async getSinglePost(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+    const { client: agent, credentials: newSession } = await this.getClient(
+      credentials?.read
+    );
+
+    let newCredentials: AccountCredentials | undefined = undefined;
+
+    if (newSession) {
+      newCredentials = { read: newSession };
+    }
+
+    const result = await agent.getPostThread({
+      uri: post_id,
+      depth: 0,
+      parentHeight: 0,
+    });
+
+    const thread = result.data.thread as AppBskyFeedDefs.ThreadViewPost;
+    const bskAuthor = thread.post.author;
+    const post = {
+      ...thread.post,
+      record: thread.post.record as AppBskyFeedPost.Record,
+    } as BlueskyPost;
+
+    const blueskyThread: BlueskyThread = {
+      thread_id: thread.post.uri,
+      posts: [post],
+      author: {
+        id: bskAuthor.did,
+        username: bskAuthor.handle,
+        avatar: bskAuthor.avatar || '',
+        displayName: bskAuthor.displayName || bskAuthor.handle,
+      },
+    };
+
+    const platformPost = {
+      post_id: blueskyThread.thread_id,
+      user_id: blueskyThread.author.id,
+      timestampMs: new Date(blueskyThread.posts[0].record.createdAt).getTime(),
+      post: blueskyThread,
+    };
+
+    return { credentials: newCredentials, platformPost };
+  }
+
+  public async getThread(
     post_id: string,
     credentials: BlueskyAccountCredentials
   ): Promise<

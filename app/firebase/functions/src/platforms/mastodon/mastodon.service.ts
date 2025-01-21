@@ -41,7 +41,7 @@ import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
-import { PlatformService } from '../platforms.interface';
+import { PlatformService, WithCredentials } from '../platforms.interface';
 import {
   cleanMastodonContent,
   convertMastodonPostsToThreads,
@@ -378,8 +378,8 @@ export class MastodonService
         };
       }
       return {
-      url: status.url ? status.url : undefined,
-      content: cleanMastodonContent(status.content),
+        url: status.url ? status.url : undefined,
+        content: cleanMastodonContent(status.content),
       };
     });
 
@@ -436,7 +436,14 @@ export class MastodonService
     };
   }
 
-  public async get(
+  getSinglePost(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+    throw new Error('Method not implemented.');
+  }
+
+  public async getThread(
     post_id: string,
     credentials: AccountCredentials<
       MastodonAccountCredentials,
