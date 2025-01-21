@@ -13,7 +13,7 @@ import {
 import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { AutofetchNonUserPostsJobMeta } from './types.posts.tasks';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export const AUTOFETCH_POSTS_TASK = 'autofetchPosts';
 
@@ -36,6 +36,9 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       platformId: platformId as IDENTITY_PLATFORM,
       userIdDefined: false,
     });
+
+    if (DEBUG)
+      logger.debug(`Profiles found: ${profilesIds.length}`, DEBUG_PREFIX);
 
     const fetchPlatformMinPeriod =
       (profilesIds.length / FETCH_TASK_DISPATCH_RATES[platformId]) * 1000; // in ms
@@ -61,6 +64,13 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
     })();
 
     const now = services.time.now();
+
+    if (DEBUG)
+      logger.debug(
+        `Checking rate limit for ${platformId}`,
+        { now, jobLastRun, fetchPlatformMinPeriod },
+        DEBUG_PREFIX
+      );
 
     if (now - jobLastRun > fetchPlatformMinPeriod) {
       if (DEBUG)
@@ -100,7 +110,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
             { taskName, taskData },
             DEBUG_PREFIX
           );
-        await enqueueTask(taskName, taskData);
+        await enqueueTask(taskName, taskData, services);
       }
     } else {
       if (DEBUG)

@@ -32,6 +32,9 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "ts-node",
+      "env": {
+        "NODE_ENV": "local"
+      },
       "args": [
         "--project",
         "./tsconfig.scripts.json",

@@ -2,6 +2,7 @@ import { DataFactory } from 'n3';
 
 import { BlueskyThread } from '../@shared/types/types.bluesky';
 import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
+import { MastodonThread } from '../@shared/types/types.mastodon';
 import {
   PARSER_MODE,
   ParsePostRequest,
@@ -33,6 +34,7 @@ import {
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
 import { FetchedDetails } from '../@shared/types/types.profiles';
+import { TwitterThread } from '../@shared/types/types.twitter';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
 import {
   handleQuotePostReference,
@@ -65,7 +67,7 @@ import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
@@ -168,6 +170,62 @@ export class PostsManager {
     }
   }
 
+  private async getPlatformPostTimestamp(
+    platformId: PLATFORM,
+    post_id: string,
+    manager: TransactionManager
+  ) {
+    const platformPostId = await this.processing.platformPosts.getFrom_post_id(
+      platformId,
+      post_id,
+      manager,
+      true
+    );
+
+    const platformPost = await this.processing.platformPosts.get<
+      true,
+      PlatformPost
+    >(platformPostId, manager, true);
+
+    if (platformPost.platformId === PLATFORM.Bluesky) {
+      return (platformPost as PlatformPost<BlueskyThread>).posted?.timestampMs;
+    }
+
+    if (platformPost.platformId === PLATFORM.Twitter) {
+      return (platformPost as PlatformPost<TwitterThread>).posted?.timestampMs;
+    }
+
+    if (platformPost.platformId === PLATFORM.Mastodon) {
+      return (platformPost as PlatformPost<MastodonThread>).posted?.timestampMs;
+    }
+
+    throw new Error(`Platform ${platformId} not supported`);
+  }
+
+  private async appendTimestamps(
+    platformId: PLATFORM,
+    params: PlatformFetchParams,
+    manager: TransactionManager
+  ) {
+    if (params.since_id) {
+      params.since_timestamp = await this.getPlatformPostTimestamp(
+        platformId,
+        params.since_id,
+        manager
+      );
+    }
+
+    if (params.until_id) {
+      params.until_timestamp = await this.getPlatformPostTimestamp(
+        platformId,
+        params.until_id,
+        manager
+      );
+    }
+
+    return params;
+  }
+
   /**
    * Read the platformPosts from a platform,
    * Manages the fetched property of the Profile keeping the oldest and newest fetched posts ids.
@@ -191,46 +249,19 @@ export class PostsManager {
       profile.fetched
     );
 
+    /** just add timestamps to bksy fethes for now */
+    const newParams =
+      platformId === PLATFORM.Bluesky
+        ? await this.appendTimestamps(platformId, platformParams, manager)
+        : platformParams;
+
     if (DEBUG) logger.debug(`Platform Service - fetch ${platformId}`);
+
     try {
-      if (platformId === PLATFORM.Bluesky) {
-        if (platformParams.since_id) {
-          const platformPostDocId =
-            await this.processing.platformPosts.getFrom_post_id(
-              platformId,
-              platformParams.since_id,
-              manager
-            );
-          const platformPost: PlatformPost<BlueskyThread> | undefined =
-            platformPostDocId
-              ? await this.processing.platformPosts.get(
-                  platformPostDocId,
-                  manager
-                )
-              : undefined;
-          platformParams.since_timestamp = platformPost?.posted?.timestampMs;
-        }
-        if (platformParams.until_id) {
-          const platformPostDocId =
-            await this.processing.platformPosts.getFrom_post_id(
-              platformId,
-              platformParams.until_id,
-              manager
-            );
-          const platformPost: PlatformPost<BlueskyThread> | undefined =
-            platformPostDocId
-              ? await this.processing.platformPosts.get(
-                  platformPostDocId,
-                  manager
-                )
-              : undefined;
-          platformParams.until_timestamp = platformPost?.posted?.timestampMs;
-        }
-      }
       const fetchedPosts = await this.platforms.fetch(
         user_id,
         platformId,
-        platformParams,
+        newParams,
         credentials
       );
 

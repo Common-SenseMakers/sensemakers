@@ -1,26 +1,31 @@
 import { logger } from 'firebase-functions';
-import { Request } from 'firebase-functions/v2/tasks';
 
 import { FetchParams } from '../@shared/types/types.fetch';
 import { PLATFORM } from '../@shared/types/types.platforms';
 import { AccountCredentials } from '../@shared/types/types.user';
+import { splitProfileId } from '../@shared/utils/profiles.utils';
 import { Services } from '../instances/services';
 import { useBlueskyAdminCredentials } from './bluesky/bluesky.utils';
 
-export const DEBUG = false;
+export const DEBUG = true;
 
 export const fetchPlatformAccountTask = async (
-  req: Request,
+  req: {
+    data: {
+      profileId: string;
+      amount: number;
+      latest: boolean;
+    };
+  },
   services: Services
 ) => {
   if (DEBUG)
     logger.debug('Starting fetchPlatformAccountTask', {
       profileId: req.data.profileId,
-      platformId: req.data.platformId,
     });
 
   const profileId = req.data.profileId as string;
-  const platformId = req.data.platformId as PLATFORM;
+  const { platform: platformId } = splitProfileId(profileId);
 
   if (DEBUG) logger.debug('Fetching profile');
   const profile = await services.db.run(async (manager) => {
@@ -36,8 +41,8 @@ export const fetchPlatformAccountTask = async (
   if (DEBUG) logger.debug('Profile found', { profile });
   /** the value of sinceId or untilId doesn't matter, as long as it exists, then it will be converted to appropriate fetch params */
   const fetchParams: FetchParams = req.data.latest
-    ? { expectedAmount: req.data.amount, sinceId: profile.user_id }
-    : { expectedAmount: req.data.amount, untilId: profile.user_id };
+    ? { expectedAmount: req.data.amount, sinceId: 'dummy' }
+    : { expectedAmount: req.data.amount, untilId: 'dummy' };
 
   if (DEBUG) logger.debug('Fetching account with params', { fetchParams });
 
