@@ -542,10 +542,14 @@ export class BlueskyService
 
     const thread = result.data.thread as AppBskyFeedDefs.ThreadViewPost;
     const bskAuthor = thread.post.author;
+    const post = {
+      ...thread.post,
+      record: thread.post.record as AppBskyFeedPost.Record,
+    } as BlueskyPost;
 
     const blueskyThread: BlueskyThread = {
-      thread_id: 'a',
-      posts: [],
+      thread_id: thread.post.uri,
+      posts: [post],
       author: {
         id: bskAuthor.did,
         username: bskAuthor.handle,

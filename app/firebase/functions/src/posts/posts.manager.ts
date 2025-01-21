@@ -173,8 +173,7 @@ export class PostsManager {
     const platformPostId = await this.processing.platformPosts.getFrom_post_id(
       platformId,
       post_id,
-      manager,
-      true
+      manager
     );
 
     const platformPostPosted = await (async () => {
