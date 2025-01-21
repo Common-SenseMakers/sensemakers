@@ -1,3 +1,4 @@
+import fs from 'fs';
 import * as util from 'util';
 
 export enum LogLevel {
@@ -38,16 +39,32 @@ export class LocalLogger {
   public ctxLevel: LogLevel;
   public filters: string[];
   public muted: boolean;
+  public outputFile?: string;
 
   constructor(
     _msgLevel?: LogLevel,
     _ctxLevel?: LogLevel,
-    _filters: string[] = []
+    _filters: string[] = [],
+    outputFile?: string
   ) {
     this.msgLevel = _msgLevel || LogLevel.info;
     this.ctxLevel = _ctxLevel || LogLevel.warn;
     this.filters = _filters;
     this.muted = false;
+    this.outputFile = outputFile;
+    if (this.outputFile) {
+      console.info('Logging to file:', this.outputFile);
+    }
+  }
+
+  private writeToFile(logMessage: string) {
+    if (this.outputFile) {
+      fs.appendFile(this.outputFile, logMessage + '\n', (err) => {
+        if (err) {
+          console.error('Failed to write to log file:', err);
+        }
+      });
+    }
   }
 
   mute() {
@@ -90,13 +107,20 @@ export class LocalLogger {
 
     const marker = `[${level.tag}]${prefix ? `[${prefix}]` : ''}`;
 
-    if (showCtx) {
-      console[method](
-        `${marker}: ${msg}`,
-        util.inspect(obj, { depth: 6, colors: true }) || ''
-      );
+    if (this.outputFile) {
+      this.writeToFile(`[${method}]: ${marker}: ${msg}`);
+      if (showCtx && obj) {
+        this.writeToFile(`[${method}]: object: ${JSON.stringify(obj)}`);
+      }
     } else {
-      console[method](`${marker}: ${msg}`);
+      if (showCtx) {
+        console[method](
+          `${marker}: ${msg}`,
+          util.inspect(obj, { depth: 6, colors: true }) || ''
+        );
+      } else {
+        console[method](`${marker}: ${msg}`);
+      }
     }
   }
 

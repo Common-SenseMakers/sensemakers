@@ -1,8 +1,6 @@
 import { DataFactory } from 'n3';
 
-import { BlueskyThread } from '../@shared/types/types.bluesky';
 import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
-import { MastodonThread } from '../@shared/types/types.mastodon';
 import {
   PARSER_MODE,
   ParsePostRequest,
@@ -34,7 +32,6 @@ import {
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
 import { FetchedDetails } from '../@shared/types/types.profiles';
-import { TwitterThread } from '../@shared/types/types.twitter';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
 import {
   handleQuotePostReference,
@@ -130,10 +127,8 @@ export class PostsManager {
     }
 
     try {
-      const { platformPost, credentials: newCredentials } = await platform.get(
-        post_id,
-        account.credentials
-      );
+      const { platformPost, credentials: newCredentials } =
+        await platform.getThread(post_id, account.credentials);
 
       if (newCredentials) {
         await this.users.updateAccountCredentials(
@@ -182,24 +177,27 @@ export class PostsManager {
       true
     );
 
-    const platformPost = await this.processing.platformPosts.get<
-      true,
-      PlatformPost
-    >(platformPostId, manager, true);
+    const platformPostPosted = await (async () => {
+      if (platformPostId) {
+        const post = await this.processing.platformPosts.get<
+          true,
+          PlatformPost
+        >(platformPostId, manager, true);
+        return post.posted;
+      } else {
+        const result = await this.platforms
+          .get(platformId)
+          .getSinglePost(post_id);
 
-    if (platformPost.platformId === PLATFORM.Bluesky) {
-      return (platformPost as PlatformPost<BlueskyThread>).posted?.timestampMs;
+        return result.platformPost;
+      }
+    })();
+
+    if (!platformPostPosted) {
+      throw new Error('PlatformPost not found');
     }
 
-    if (platformPost.platformId === PLATFORM.Twitter) {
-      return (platformPost as PlatformPost<TwitterThread>).posted?.timestampMs;
-    }
-
-    if (platformPost.platformId === PLATFORM.Mastodon) {
-      return (platformPost as PlatformPost<MastodonThread>).posted?.timestampMs;
-    }
-
-    throw new Error(`Platform ${platformId} not supported`);
+    return platformPostPosted.timestampMs;
   }
 
   private async appendTimestamps(

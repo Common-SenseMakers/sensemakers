@@ -47,7 +47,10 @@ import {
   TwitterThread,
   TwitterUser,
 } from '../../@shared/types/types.twitter';
-import { AppUserRead } from '../../@shared/types/types.user';
+import {
+  AccountCredentials,
+  AppUserRead,
+} from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -101,8 +104,14 @@ export class TwitterService
       this.cache = {};
     }
   }
+  getSinglePost(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+    throw new Error('Method not implemented.');
+  }
 
-  async get(
+  async getThread(
     post_id: string,
     credentials?: TwitterAccountCredentials
   ): Promise<{
