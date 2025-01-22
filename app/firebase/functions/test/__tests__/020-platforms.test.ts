@@ -591,5 +591,16 @@ describe('02-platforms', () => {
 
       expect(genericPost.thread[0].quotedThread).to.not.be.undefined;
     });
+
+    it.only('it can fetch a single post', async () => {
+      const post_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcmhumbudk2m';
+      const result = await blueskyService.getSinglePost(
+        post_id,
+        userDetails.credentials
+      );
+
+      expect(result.platformPost.post.posts).to.have.length(1);
+    });
   });
 });
