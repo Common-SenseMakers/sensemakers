@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PostEditKeys } from '../../../i18n/i18n.edit.post';
+import { useOverlay } from '../../../overlays/OverlayContext';
 import { ParserOntology } from '../../../shared/types/types.parser';
 import { OEmbed, RefLabel } from '../../../shared/types/types.references';
 import { LINKS_TO_URI } from '../../../shared/utils/semantics.helper';
@@ -27,7 +28,7 @@ export const RefWithLabels = (props: {
 }) => {
   const { t } = useTranslation();
   const labelsOntology = props.ontology?.semantic_predicates;
-
+  const overlayContext = useOverlay();
   /** display names for selected labels */
   let labelsDisplayNames = useMemo(
     () =>
@@ -81,6 +82,18 @@ export const RefWithLabels = (props: {
     props.addLabel(getLabelFromDisplayName(label).uri);
   };
 
+  const currOverlay = overlayContext?.overlay || {};
+  const isRefPage =
+    overlayContext?.overlay.ref ||
+    (Object.keys(currOverlay).length === 0 &&
+      overlayContext?.parentOverlay?.overlay.ref);
+
+  const showAggregateLabels =
+    !!props.showAggregatedLabels &&
+    !!props.aggregatedLabels &&
+    props.aggregatedLabels.length > 0 &&
+    !isRefPage;
+
   return (
     <>
       {props.oembed ? (
@@ -108,18 +121,16 @@ export const RefWithLabels = (props: {
         </Box>
       )}
 
-      {props.showAggregatedLabels !== false &&
-      props.aggregatedLabels &&
-      props.aggregatedLabels.length > 0 ? (
+      {showAggregateLabels && (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
-            refLabels={props.aggregatedLabels.filter(
-              (refLabel) => refLabel.label !== LINKS_TO_URI
-            )}
+            refLabels={
+              props.aggregatedLabels?.filter(
+                (refLabel) => refLabel.label !== LINKS_TO_URI
+              ) || []
+            }
             ontology={props.ontology}></AggregatedRefLabels>
         </Box>
-      ) : (
-        <></>
       )}
 
       <Box margin={{ top: '16px' }}>
