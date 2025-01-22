@@ -1,6 +1,7 @@
 import { PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   FetchedResult,
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostDeleteDraft,
   PlatformPostDraft,
@@ -87,7 +88,9 @@ export interface PlatformService<
     platformPost: PlatformPostUpdate
   ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials>;
 
-  convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
+  convertToGeneric(
+    platformPost: Pick<PlatformPostCreate, 'posted'>
+  ): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 
   signDraft?(post: PlatformPostDraft): Promise<DraftType>;
@@ -98,4 +101,10 @@ export interface PlatformService<
     post: AppPostFull,
     author: AppUserRead
   ): Promise<PlatformPostDeleteDraft | undefined>;
+
+  mergeBrokenThreads(
+    rootPost: PlatformPost,
+    post: PlatformPostCreate
+  ): PlatformPostPosted | undefined;
+  isRootThread(post: PlatformPostCreate): boolean;
 }

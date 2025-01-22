@@ -434,11 +434,12 @@ export class PostsManager {
         );
 
       /** Create the PlatformPosts and AppPosts */
-      const platformPostsCreated = await this.processing.createPlatformPosts(
-        platformPostsCreate,
-        manager,
-        authorUserId
-      );
+      const platformPostsCreated =
+        await this.processing.createOrMergePlatformPosts(
+          platformPostsCreate,
+          manager,
+          authorUserId
+        );
 
       /** make sure the profiles of each post exist */
       const profileIds = new Set<string>();

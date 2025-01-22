@@ -42,7 +42,7 @@ export type MastodonSignupData =
 
 export interface MastodonThread {
   thread_id: string;
-  posts: mastodon.v1.Status[];
+  posts: MastodonPost[];
   author: MastodonAccount;
 }
 

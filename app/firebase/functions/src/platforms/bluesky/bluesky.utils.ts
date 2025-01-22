@@ -24,7 +24,7 @@ export const convertBlueskyPostsToThreads = (
   posts
     .filter((post) => post.author.did === authorId)
     .forEach((post) => {
-      const rootId = findRootId(post, posts);
+      const rootId = findRootId(post);
       if (!postThreadsMap.has(rootId)) {
         postThreadsMap.set(rootId, []);
       }
@@ -52,7 +52,7 @@ export const convertBlueskyPostsToThreads = (
     const bskAuthor = sortedPosts[0].author;
 
     return {
-      thread_id: sortedPosts[0].uri,
+      thread_id: findRootId(sortedPosts[0]),
       posts: primaryThread,
       author: {
         id: bskAuthor.did,
@@ -83,21 +83,12 @@ export const convertBlueskyPostsToThreads = (
   return [...threads, ...repostedThreads];
 };
 
-const findRootId = (post: BlueskyPost, posts: BlueskyPost[]): string => {
-  let currentPost = post;
-
-  while (currentPost.record.reply) {
-    const parentPost = posts.find(
-      (p) => p.uri === currentPost.record.reply?.parent.uri
-    );
-    if (!parentPost) {
-      // If we don't have the parent in the list, treat the current post as root
-      return currentPost.uri;
-    }
-    currentPost = parentPost;
+const findRootId = (post: BlueskyPost): string => {
+  const rootUri = post.record.reply?.root.uri;
+  if (rootUri) {
+    return rootUri;
   }
-
-  return currentPost.uri; // Return the true root (post without reply)
+  return post.uri;
 };
 
 export const extractPrimaryThread = (

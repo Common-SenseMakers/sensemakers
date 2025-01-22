@@ -61,6 +61,9 @@ export const convertMastodonPostsToThreads = (
 };
 
 const findRootId = (post: MastodonPost, posts: MastodonPost[]): string => {
+  if (!post.inReplyToId) {
+    return post.id;
+  }
   let currentPost = post;
 
   while (currentPost.inReplyToId) {
