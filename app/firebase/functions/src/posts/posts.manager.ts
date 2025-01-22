@@ -82,7 +82,7 @@ export class PostsManager {
     protected platforms: PlatformsService,
     protected parserService: ParserService,
     protected time: TimeService,
-    protected ontologies: OntologiesService,
+    public ontologies: OntologiesService,
     protected clusters: ClustersService
   ) {}
 
