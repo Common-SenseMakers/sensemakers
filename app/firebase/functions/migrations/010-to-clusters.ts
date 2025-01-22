@@ -13,6 +13,7 @@ const LIMIT = undefined;
 
   /** copy links collection */
   let links = await servicesSource.links.links.getAll();
+  if (DEBUG) console.log(`Got ${links.length} links`);
 
   if (LIMIT) {
     links = links.slice(0, LIMIT);
@@ -34,7 +35,7 @@ const LIMIT = undefined;
             });
 
             await servicesTarget.db.run(async (managerTarget) => {
-              servicesTarget.links.links.create(link, managerTarget);
+              servicesTarget.links.links.create(link, managerTarget, linkId);
             });
           } catch (error) {
             console.error(`Error processing ${linkId}`, error);
@@ -45,6 +46,7 @@ const LIMIT = undefined;
   );
 
   let postsIds = await servicesTarget.postsManager.processing.posts.getAll();
+  if (DEBUG) console.log(`Got ${postsIds.length} posts`);
 
   if (LIMIT) {
     postsIds = postsIds.slice(0, LIMIT);

@@ -49,8 +49,7 @@ export const appSource = initApp(
         credential: admin.credential.cert(serviceAccountSource),
       }
     : { projectId: projectIdSource },
-  'source',
-  'localhost:8081'
+  'source'
 );
 export const appTarget = initApp(
   serviceAccountTarget

@@ -1,4 +1,4 @@
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
 import { Location, useLocation, useSearchParams } from 'react-router-dom';
 
@@ -13,14 +13,12 @@ import {
   hasSearchParam,
   searchParamsKeyValueToEvent,
 } from '../overlays/overlay.utils';
-import { ALL_CLUSTER_NAME, useCluster } from '../posts.fetcher/cluster.context';
 import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { PostClickEvent } from '../semantics/patterns/patterns';
 import { TabQuery, feedTabs } from '../shared/utils/feed.config';
-import { AppSelect } from '../ui-components';
 
 const DEBUG = false;
 
@@ -179,16 +177,17 @@ export const PublicFeedPage = () => {
     }
   };
 
+  const clusterSelected = undefined;
   /**  */
-  const {
-    clustersIds,
-    selected: clusterSelected,
-    select: selectCluster,
-  } = useCluster();
+  // const {
+  //   clustersIds,
+  //   selected: clusterSelected,
+  //   select: selectCluster,
+  // } = useCluster();
 
-  const onClusterSelected = (value: string) => {
-    selectCluster(value);
-  };
+  // const onClusterSelected = (value: string) => {
+  //   selectCluster(value);
+  // };
 
   const feed0Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -257,8 +256,8 @@ export const PublicFeedPage = () => {
     <ViewportPage
       fixed
       content={
-        <Box style={{ position: 'relative' }}>
-          <Box
+        <Box style={{ position: 'relative', paddingTop: '16px' }}>
+          {/* <Box
             direction="row"
             justify="center"
             align="center"
@@ -269,7 +268,7 @@ export const PublicFeedPage = () => {
               options={[ALL_CLUSTER_NAME].concat(clustersIds || [])}
               onChange={({ option }) => onClusterSelected(option as string)}
               value={clusterSelected || ALL_CLUSTER_NAME}></AppSelect>
-          </Box>
+          </Box> */}
           <PublicFeedContext isPublicFeed>
             {overlayInit !== undefined && (
               <OverlayContext

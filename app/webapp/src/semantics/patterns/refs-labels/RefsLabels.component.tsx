@@ -146,7 +146,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
               return (
                 refDisplayMeta?.oembed && (
-                  <>
+                  <div key={index}>
                     {isQuotedPost && (
                       <QuotedPostLabel
                         color={constants.colors.textLight2}
@@ -154,7 +154,6 @@ export const RefLabelsComponent = (props: PatternProps) => {
                       />
                     )}
                     <Box
-                      key={index}
                       style={{
                         borderRadius: '12px',
                         border: '1.6px solid #D1D5DB',
@@ -182,7 +181,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                           addLabel(ref, labelUri).catch(console.error);
                         }}></RefWithLabels>
                     </Box>
-                  </>
+                  </div>
                 )
               );
             })}
