@@ -8,6 +8,7 @@ import { Firestore } from 'firebase-admin/firestore';
 
 import {
   BLUESKY_REPOST_URI_PARAM,
+  BLUESKY_REPOST_URI_QUERY,
   BlueskyPost,
   BlueskyThread,
   QuotedBlueskyPost,
@@ -69,8 +70,7 @@ export const convertBlueskyPostsToThreads = (
         throw new Error('reposted by info not present');
       }
       return {
-        thread_id:
-          post.uri + `?${BLUESKY_REPOST_URI_PARAM}=${post.repostedBy.by.did}`,
+        thread_id: post.uri + BLUESKY_REPOST_URI_QUERY,
         posts: [cleanBlueskyPost(post)],
         author: {
           id: post.repostedBy.by.did,

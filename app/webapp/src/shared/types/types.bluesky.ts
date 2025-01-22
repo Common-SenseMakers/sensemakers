@@ -98,3 +98,4 @@ export interface AccessJwtPayload {
 }
 
 export const BLUESKY_REPOST_URI_PARAM = 'reposted_by';
+export const BLUESKY_REPOST_URI_QUERY = `?${BLUESKY_REPOST_URI_PARAM}=`;
