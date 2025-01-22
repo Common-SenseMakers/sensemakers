@@ -10,6 +10,7 @@ import {
   AtpAgentLoginOpts,
   AtpSessionData,
 } from '@atproto/api';
+import { ReasonRepost } from '@atproto/api/dist/client/types/app/bsky/feed/defs';
 
 import { PlatformProfile } from './types.profiles';
 import { AccountDetailsBase } from './types.user';
@@ -89,6 +90,7 @@ export type BlueskyPost = AppBskyFeedDefs.PostView & {
         $type: 'app.bsky.embed.recordWithMedia#view';
         record: { record: QuotedBlueskyPost };
       };
+  repostedBy?: ReasonRepost;
 };
 
 export interface AccessJwtPayload {
@@ -98,3 +100,5 @@ export interface AccessJwtPayload {
   exp: number;
   aud: string;
 }
+
+export const BLUESKY_REPOST_URI_PARAM = 'reposted_by';

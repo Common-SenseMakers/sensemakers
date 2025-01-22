@@ -266,7 +266,7 @@ export const getTwitterMock = (
   }
 
   if (type.get) {
-    when(mocked.get(anything(), anything())).thenCall(
+    when(mocked.getThread(anything(), anything())).thenCall(
       async (
         post_id: string,
         credentials?: TwitterAccountCredentials

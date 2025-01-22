@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
 
-
+from desci_sense.shared_functions.interface import PlatformType
 from desci_sense.shared_functions.utils import (
     identify_social_media,
     find_last_occurence_of_any,
@@ -72,19 +72,19 @@ def test_identify_twitter():
 
 
 def test_identify_unknown():
-    assert identify_social_media("http://www.expert.com") == "Unknown"
-    assert identify_social_media("https://facebook.com") == "Unknown"
-    assert identify_social_media("http://www.linkedin.com") == "Unknown"
-    assert identify_social_media("https://example.com") == "Unknown"
-    assert identify_social_media("http://some.random.site") == "Unknown"
-    assert identify_social_media("https://notwitter.t.com") == "Unknown"
+    assert identify_social_media("http://www.expert.com") == PlatformType.UNKNOWN.value
+    assert identify_social_media("https://facebook.com") == PlatformType.UNKNOWN.value
+    assert identify_social_media("http://www.linkedin.com") == PlatformType.UNKNOWN.value
+    assert identify_social_media("https://example.com") == PlatformType.UNKNOWN.value
+    assert identify_social_media("http://some.random.site") == PlatformType.UNKNOWN.value
+    assert identify_social_media("https://notwitter.t.com") == PlatformType.UNKNOWN.value
 
 
 def test_edge_cases():
-    assert identify_social_media("http://") == "Unknown"
-    assert identify_social_media("not a url") == "Unknown"
-    assert identify_social_media("") == "Unknown"
-    assert identify_social_media(None) == "Unknown"
+    assert identify_social_media("http://") == PlatformType.UNKNOWN.value
+    assert identify_social_media("not a url") == PlatformType.UNKNOWN.value
+    assert identify_social_media("") == PlatformType.UNKNOWN.value
+    assert identify_social_media(None) == PlatformType.UNKNOWN.value
 
 
 def test_find_last_occurence_of_any():

@@ -27,6 +27,10 @@ export const RefWithLabels = (props: {
 }) => {
   const { t } = useTranslation();
   const ontology = props.ontology;
+  const showAggregatedLabels =
+    props.showAggregatedLabels !== undefined
+      ? props.showAggregatedLabels
+      : false;
 
   /** display names for selected labels */
   let labelsDisplayNames = useMemo(
@@ -108,7 +112,7 @@ export const RefWithLabels = (props: {
         </Box>
       )}
 
-      {props.showAggregatedLabels !== false &&
+      {showAggregatedLabels &&
       props.aggregatedLabels &&
       props.aggregatedLabels.length > 0 ? (
         <Box margin={{ top: '22px' }}>

@@ -4,7 +4,11 @@ import {
   ActivityType,
   PostActData,
 } from '../../@shared/types/types.activity';
-import { AppPost, AppPostParsedStatus } from '../../@shared/types/types.posts';
+import {
+  AppPost,
+  AppPostParsedStatus,
+  AppPostParsingStatus,
+} from '../../@shared/types/types.posts';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
@@ -44,8 +48,15 @@ export const postUpdatedHook = async (
     // trigger parsePostTask
     if (DEBUG) logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
     if (post.parsedStatus !== AppPostParsedStatus.PROCESSED) {
-      await enqueueTask(PARSE_POST_TASK, { postId });
+      await enqueueTask(PARSE_POST_TASK, { postId }, services);
     }
+  } else if (
+    /** Handle post merged */
+    post.parsedStatus !== AppPostParsedStatus.PROCESSED &&
+    postBefore?.parsingStatus === AppPostParsingStatus.IDLE
+  ) {
+    if (DEBUG) logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
+    await enqueueTask(PARSE_POST_TASK, { postId }, services);
   }
 
   const activitiesCreated: ActivityEventBase[] = [];

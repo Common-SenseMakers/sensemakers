@@ -96,6 +96,7 @@ export const RefOverlay = (props: { refUrl: string }) => {
               oembed={refDisplayMeta.oembed}
               authorLabels={authorLabels}
               aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+              showAggregatedLabels={true}
               showDescription={true}
               editable={false}
               ontology={refDisplayMeta?.ontology}

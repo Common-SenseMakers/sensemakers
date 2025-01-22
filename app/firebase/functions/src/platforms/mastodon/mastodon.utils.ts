@@ -12,6 +12,7 @@ export const convertMastodonPostsToThreads = (
 
   posts
     .filter((post) => post.account.id === author.id)
+    .filter((post) => !post.reblog)
     .forEach((post) => {
       const rootId = findRootId(post, posts); // Find the true root by following the chain
       if (!postThreadsMap.has(rootId)) {
@@ -45,10 +46,24 @@ export const convertMastodonPostsToThreads = (
       author,
     };
   });
-  return threads;
+
+  const rebloggedThreads = posts
+    .filter((post) => post.account.id === author.id)
+    .filter((post) => post.reblog)
+    .map((post) => {
+      return {
+        thread_id: post.uri,
+        posts: [post],
+        author,
+      };
+    });
+  return [...threads, ...rebloggedThreads];
 };
 
 const findRootId = (post: MastodonPost, posts: MastodonPost[]): string => {
+  if (!post.inReplyToId) {
+    return post.id;
+  }
   let currentPost = post;
 
   while (currentPost.inReplyToId) {

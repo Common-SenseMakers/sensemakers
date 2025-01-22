@@ -57,9 +57,10 @@ export class PostsProcessing {
 
   /**
    * Checks if a PlatformPost exist and creates it if not.
+   * If the root thread exists and the post is part of it, it merges the post into the thread.
    * It also creates an AppPost for that PlatformPost
    * */
-  async createPlatformPost(
+  async createOrMergePlatformPost(
     platformPost: PlatformPostCreate,
     manager: TransactionManager,
     authorUserId?: string
@@ -72,13 +73,34 @@ export class PostsProcessing {
         )
       : undefined;
 
+    /** if the root post exists, try merging them if part of the main thread */
     if (existing) {
-      return undefined;
+      const rootPlatformPost = await this.platformPosts.get(
+        existing,
+        manager,
+        true
+      );
+      return await this.mergePlatformPosts(
+        rootPlatformPost,
+        platformPost,
+        manager
+      );
     }
 
-    /** if a platformPost does not exist (most likely scenario) then create a new AppPost for this PlatformPost */
+    /** if the root doesn't exist, create the thread */
+    return await this.createPlatformPost(platformPost, manager, authorUserId);
+  }
+  async createPlatformPost(
+    platformPost: PlatformPostCreate,
+    manager: TransactionManager,
+    authorUserId?: string
+  ): Promise<PlatformPostCreated | undefined> {
+    if (
+      !this.platforms.get(platformPost.platformId).isRootThread(platformPost)
+    ) {
+      return undefined;
+    }
     const genericPostData = await this.platforms.convertToGeneric(platformPost);
-
     /** user_id might be defined or the intended one */
     const user_id = platformPost.posted
       ? platformPost.posted.user_id
@@ -118,15 +140,66 @@ export class PostsProcessing {
     return { post, platformPost: platformPostCreated };
   }
 
+  async mergePlatformPosts(
+    rootThreadPlatformPost: PlatformPost,
+    partialThreadPlatformPost: PlatformPostCreate,
+    manager: TransactionManager
+  ) {
+    if (!rootThreadPlatformPost.postId) {
+      throw new Error(`Unexpected: rootPost.postId is not defined`);
+    }
+    const platformService = this.platforms.get(
+      rootThreadPlatformPost.platformId
+    );
+    const mergedPlatformPost = platformService.mergeBrokenThreads(
+      rootThreadPlatformPost,
+      partialThreadPlatformPost
+    );
+    if (!mergedPlatformPost) {
+      return undefined;
+    }
+    const mergedAppPost = await platformService.convertToGeneric({
+      posted: mergedPlatformPost,
+    });
+
+    await this.platformPosts.update(
+      rootThreadPlatformPost.id,
+      { posted: mergedPlatformPost },
+      manager
+    );
+
+    await this.posts.update(
+      rootThreadPlatformPost.postId,
+      {
+        generic: mergedAppPost,
+        parsedStatus: AppPostParsedStatus.UNPROCESSED,
+        parsingStatus: AppPostParsingStatus.IDLE,
+      },
+      manager
+    );
+
+    const platformPost = await this.platformPosts.get(
+      rootThreadPlatformPost.id,
+      manager,
+      true
+    );
+    const appPost = await this.posts.get(
+      rootThreadPlatformPost.postId,
+      manager,
+      true
+    );
+    return { platformPost, post: appPost };
+  }
+
   /** Store all platform posts */
-  async createPlatformPosts(
+  async createOrMergePlatformPosts(
     platformPosts: PlatformPostCreate[],
     manager: TransactionManager,
     authorUserId?: string
   ) {
     const postsCreated = await Promise.all(
       platformPosts.map(async (platformPost) => {
-        return await this.createPlatformPost(
+        return await this.createOrMergePlatformPost(
           platformPost,
           manager,
           authorUserId

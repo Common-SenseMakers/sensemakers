@@ -69,7 +69,7 @@ RENDER_QT_MD_1_TARGET = """- References:
 <ref_1> 
 url: https://x.com/biorxiv_neursci/status/1798962015148576815
 item_type: forumPost
-title: Twitter post
+title: twitter post
 summary: None
 ==========
 <ref_2> 
@@ -113,7 +113,7 @@ Eg folks who were paid by the sponsor (big pharma) to speak on behalf of the pro
 <ref_1> 
 url: https://x.com/FDAadcomms/status/1798104612635070611
 item_type: forumPost
-title: Twitter post
+title: twitter post
 summary: None
 ==========
 <ref_2> 
@@ -131,7 +131,7 @@ summary: In this lecture, I summarize promises and pitfalls of psychedelic treat
 <ref_4> 
 url: https://x.com/FDAadcomms/status/1798107142219796794
 item_type: forumPost
-title: Twitter post
+title: twitter post
 summary: None
 =========="""
 
@@ -165,7 +165,7 @@ Eg folks who were paid by the sponsor (big pharma) to speak on behalf of the pro
 <ref_1> 
 url: https://x.com/FDAadcomms/status/1798104612635070611
 item_type: forumPost
-title: Twitter post
+title: twitter post
 summary: None
 ==========
 <ref_2> 
@@ -183,7 +183,7 @@ summary: In this lecture, I summarize promises and pitfalls of psychedelic treat
 <ref_4> 
 url: https://x.com/FDAadcomms/status/1798107142219796794
 item_type: forumPost
-title: Twitter post
+title: twitter post
 summary: None
 ==========
 """

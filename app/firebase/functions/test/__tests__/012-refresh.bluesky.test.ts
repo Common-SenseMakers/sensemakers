@@ -83,7 +83,10 @@ describe('011-bluesky refresh', () => {
       /** credentials should be valid */
       const post_id =
         'at://did:plc:44ybard66vv44zksje25o7dz/app.bsky.feed.post/3l4z5c5ziuk2b';
-      const post = await blueskyService.get(post_id, account1.credentials);
+      const post = await blueskyService.getThread(
+        post_id,
+        account1.credentials
+      );
       expect(post).to.not.be.undefined;
 
       /** set the mock time service time to that value */
@@ -128,7 +131,10 @@ describe('011-bluesky refresh', () => {
       });
 
       /** same credentials should be valid */
-      const post2 = await blueskyService.get(post_id, account2.credentials);
+      const post2 = await blueskyService.getThread(
+        post_id,
+        account2.credentials
+      );
       expect(post2).to.not.be.undefined;
 
       expect(account1.credentials.read?.accessJwt).to.equal(
@@ -168,7 +174,10 @@ describe('011-bluesky refresh', () => {
         );
       });
 
-      const post3 = await blueskyService.get(post_id, account3.credentials);
+      const post3 = await blueskyService.getThread(
+        post_id,
+        account3.credentials
+      );
       expect(post3).to.not.be.undefined;
 
       expect(account2.credentials.read?.accessJwt).to.not.equal(

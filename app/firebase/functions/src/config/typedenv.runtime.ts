@@ -46,6 +46,7 @@ const IFRAMELY_API_KEY = defineSecret('IFRAMELY_API_KEY');
 export const envRuntime = {
   NODE_ENV: process.env.NODE_ENV,
   REGION: process.env.FUNCTION_REGION,
+  OUTPUT_LOG_FILE: process.env.OUTPUT_LOG_FILE,
   LOG_LEVEL_MSG: LOG_LEVEL_MSG,
   LOG_LEVEL_OBJ: LOG_LEVEL_OBJ,
   PROJECT_ID: PROJECT_ID,

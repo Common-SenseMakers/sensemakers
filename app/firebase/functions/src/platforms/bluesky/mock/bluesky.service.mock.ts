@@ -2183,7 +2183,7 @@ export const getBlueskyMock = (
   }
 
   if (type.get) {
-    when(mocked.get(anything(), anything())).thenCall(
+    when(mocked.getThread(anything(), anything())).thenCall(
       async (
         post_id: string,
         userDetails: AccountDetailsBase,

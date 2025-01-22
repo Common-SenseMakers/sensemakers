@@ -1,5 +1,3 @@
-import { Request } from 'firebase-functions/v2/tasks';
-
 import {
   ALL_SOURCE_PLATFORMS,
   IDENTITY_PLATFORM,
@@ -38,6 +36,9 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       userIdDefined: false,
     });
 
+    if (DEBUG)
+      logger.debug(`Profiles found: ${profilesIds.length}`, DEBUG_PREFIX);
+
     const fetchPlatformMinPeriod =
       (profilesIds.length / FETCH_TASK_DISPATCH_RATES[platformId]) * 1000; // in ms
 
@@ -62,6 +63,13 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
     })();
 
     const now = services.time.now();
+
+    if (DEBUG)
+      logger.debug(
+        `Checking rate limit for ${platformId}`,
+        { now, jobLastRun, fetchPlatformMinPeriod },
+        DEBUG_PREFIX
+      );
 
     if (now - jobLastRun > fetchPlatformMinPeriod) {
       if (DEBUG)
@@ -100,7 +108,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
             { taskName, taskData },
             DEBUG_PREFIX
           );
-        await enqueueTask(taskName, taskData);
+        await enqueueTask(taskName, taskData, services);
       }
     } else {
       if (DEBUG)
@@ -139,7 +147,10 @@ export const triggerAutofetchPosts = async (services: Services) => {
   );
 };
 
-export const autofetchUserPosts = async (req: Request, services: Services) => {
+export const autofetchUserPosts = async (
+  req: { data: { userId: string } },
+  services: Services
+) => {
   if (DEBUG) logger.debug(`autofetchUserPosts: userId: ${req.data.userId}`);
 
   const userId = req.data.userId as string;
@@ -165,6 +176,7 @@ export const autofetchUserPosts = async (req: Request, services: Services) => {
     if (!error.message.includes('code: 429')) {
       throw error;
     }
+    logger.warn(`Rate limit hit for user ${userId}`);
     return undefined;
   }
 };

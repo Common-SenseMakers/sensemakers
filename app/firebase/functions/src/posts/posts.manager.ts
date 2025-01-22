@@ -10,6 +10,7 @@ import {
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
   PlatformPostPosted,
@@ -133,10 +134,8 @@ export class PostsManager {
     }
 
     try {
-      const { platformPost, credentials: newCredentials } = await platform.get(
-        post_id,
-        account.credentials
-      );
+      const { platformPost, credentials: newCredentials } =
+        await platform.getThread(post_id, account.credentials);
 
       if (newCredentials) {
         await this.users.updateAccountCredentials(
@@ -173,6 +172,68 @@ export class PostsManager {
     }
   }
 
+  private async getPlatformPostTimestamp(
+    platformId: PLATFORM,
+    post_id: string,
+    manager: TransactionManager
+  ) {
+    const platformPostId = await this.processing.platformPosts.getFrom_post_id(
+      platformId,
+      post_id,
+      manager
+    );
+
+    const platformPostPosted = await (async () => {
+      if (platformPostId) {
+        const post = await this.processing.platformPosts.get<
+          true,
+          PlatformPost
+        >(platformPostId, manager, true);
+        return post.posted;
+      } else {
+        throw new Error(
+          `Platform post not found on ${platformId} post_id: ${post_id}. 
+           We should not have unavailable posts yet as we are not merging threads`
+        );
+        const result = await this.platforms
+          .get(platformId)
+          .getSinglePost(post_id);
+
+        return result.platformPost;
+      }
+    })();
+
+    if (!platformPostPosted) {
+      throw new Error('PlatformPost not found');
+    }
+
+    return platformPostPosted.timestampMs;
+  }
+
+  private async appendTimestamps(
+    platformId: PLATFORM,
+    params: PlatformFetchParams,
+    manager: TransactionManager
+  ) {
+    if (params.since_id) {
+      params.since_timestamp = await this.getPlatformPostTimestamp(
+        platformId,
+        params.since_id,
+        manager
+      );
+    }
+
+    if (params.until_id) {
+      params.until_timestamp = await this.getPlatformPostTimestamp(
+        platformId,
+        params.until_id,
+        manager
+      );
+    }
+
+    return params;
+  }
+
   /**
    * Read the platformPosts from a platform,
    * Manages the fetched property of the Profile keeping the oldest and newest fetched posts ids.
@@ -196,12 +257,19 @@ export class PostsManager {
       profile.fetched
     );
 
+    /** just add timestamps to bksy fethes for now */
+    const newParams =
+      platformId === PLATFORM.Bluesky
+        ? await this.appendTimestamps(platformId, platformParams, manager)
+        : platformParams;
+
     if (DEBUG) logger.debug(`Platform Service - fetch ${platformId}`);
+
     try {
       const fetchedPosts = await this.platforms.fetch(
         user_id,
         platformId,
-        platformParams,
+        newParams,
         credentials
       );
 
@@ -373,11 +441,12 @@ export class PostsManager {
         );
 
       /** Create the PlatformPosts and AppPosts */
-      const platformPostsCreated = await this.processing.createPlatformPosts(
-        platformPostsCreate,
-        manager,
-        authorUserId
-      );
+      const platformPostsCreated =
+        await this.processing.createOrMergePlatformPosts(
+          platformPostsCreate,
+          manager,
+          authorUserId
+        );
 
       /** make sure the profiles of each post exist */
       const profileIds = new Set<string>();
