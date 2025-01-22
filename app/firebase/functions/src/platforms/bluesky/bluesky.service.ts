@@ -721,6 +721,7 @@ export class BlueskyService
     return rootPost.posted;
   }
   isRootThread(post: PlatformPostCreate<BlueskyThread>): boolean {
+    if (post.posted?.post.posts[0].repostedBy) return true; // a repost is always a root "thread" and should not be ignored
     return post.posted?.post.posts[0].uri === post.posted?.post_id;
   }
 }
