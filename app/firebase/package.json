@@ -8,6 +8,7 @@
     "emulate": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets emulators:start",
     "emulate-prod": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project sensenets-prod emulators:start --import ",
     "emulate-prod-db": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --only firestore --project sensenets-prod emulators:start --import ",
+    "emulate-prod-db-81": "NODE_ENV=development FIRESTORE_EMULATOR_HOST=127.0.0.1:8081 firebase --only firestore --project sensenets-prod emulators:start --import ",
     "emulate-verbose": "NODE_ENV=local FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 firebase --project demo-sensenets --debug emulators:start",
     "emulate-debug": "yarn emulate --inspect-functions",
     "emulate-test": "yarn emulate-debug --only firestore",
