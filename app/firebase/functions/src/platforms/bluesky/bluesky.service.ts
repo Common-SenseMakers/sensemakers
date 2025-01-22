@@ -534,28 +534,25 @@ export class BlueskyService
     if (newSession) {
       newCredentials = { read: newSession };
     }
-
-    const result = await agent.getPostThread({
-      uri: post_id,
-      depth: 0,
-      parentHeight: 0,
-    });
-
-    const thread = result.data.thread as AppBskyFeedDefs.ThreadViewPost;
-    const bskAuthor = thread.post.author;
-    const post = {
-      ...thread.post,
-      record: thread.post.record as AppBskyFeedPost.Record,
-    } as BlueskyPost;
+    const { did, rkey } = parseBlueskyURI(post_id);
+    const result = await agent.getPost({ repo: did, rkey });
+    const author = await agent.getProfile({ actor: did });
+    const bskyPost: BlueskyPost = {
+      cid: result.cid,
+      uri: result.uri,
+      record: result.value,
+      author: author.data,
+      indexedAt: result.value.createdAt,
+    };
 
     const blueskyThread: BlueskyThread = {
-      thread_id: thread.post.uri,
-      posts: [post],
+      thread_id: bskyPost.uri,
+      posts: [bskyPost],
       author: {
-        id: bskAuthor.did,
-        username: bskAuthor.handle,
-        avatar: bskAuthor.avatar || '',
-        displayName: bskAuthor.displayName || bskAuthor.handle,
+        id: author.data.did,
+        username: author.data.handle,
+        avatar: author.data.avatar || '',
+        displayName: author.data.displayName || author.data.handle,
       },
     };
 
@@ -571,17 +568,14 @@ export class BlueskyService
 
   public async getThread(
     post_id: string,
-    credentials: BlueskyAccountCredentials
+    credentials?: BlueskyAccountCredentials
   ): Promise<
     { platformPost: PlatformPostPosted<BlueskyThread> } & WithCredentials
   > {
     if (DEBUG) logger.debug('get', { post_id, credentials }, DEBUG_PREFIX);
 
-    if (!credentials.read) {
-      throw new Error('Missing Bluesky user details');
-    }
     const { client: agent, credentials: newCredentials } = await this.getClient(
-      credentials.read
+      credentials?.read
     );
     const newAccountCredentials: BlueskyAccountCredentials | undefined =
       newCredentials ? { read: newCredentials } : undefined;
