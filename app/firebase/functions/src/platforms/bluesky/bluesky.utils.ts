@@ -69,7 +69,7 @@ export const convertBlueskyPostsToThreads = (
         throw new Error('reposted by info not present');
       }
       return {
-        thread_id: post.uri + BLUESKY_REPOST_URI_QUERY,
+        thread_id: post.uri + BLUESKY_REPOST_URI_QUERY + post.repostedBy.by.did,
         posts: [cleanBlueskyPost(post)],
         author: {
           id: post.repostedBy.by.did,
