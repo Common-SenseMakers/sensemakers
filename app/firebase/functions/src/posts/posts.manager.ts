@@ -184,10 +184,6 @@ export class PostsManager {
         >(platformPostId, manager, true);
         return post.posted;
       } else {
-        throw new Error(
-          `Platform post not found on ${platformId} post_id: ${post_id}. 
-           We should not have unavailable posts yet as we are not merging threads`
-        );
         const result = await this.platforms
           .get(platformId)
           .getSinglePost(post_id);
