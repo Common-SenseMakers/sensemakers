@@ -9,6 +9,7 @@
     "build:watch": "rm -rf ./lib & tsc --watch",
     "build:watch-test": "rm -rf ./lib-test & tsc --watch -p ./tsconfig.test.json",
     "build:watch-scripts": "tsc --watch -p ./tsconfig.scripts.json",
+    "build:watch-migration": "tsc --watch -p ./tsconfig.migration.json",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",

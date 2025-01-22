@@ -5,13 +5,17 @@ import readline from 'readline';
 import { AddProfilesPayload } from '../src/@shared/types/types.profiles';
 import { logger } from '../src/instances/logger';
 
-export const initApp = (config: AppOptions, name: string) => {
+export const initApp = (
+  config: AppOptions,
+  name: string,
+  host: string = 'localhost:8080'
+) => {
   const app = admin.initializeApp(config, name);
 
   if (config.projectId?.startsWith('demo-')) {
     logger.info(`Connecting to emualtor - ${config.projectId}`);
     app.firestore().settings({
-      host: 'localhost:8080',
+      host,
       ssl: false,
     });
   }
