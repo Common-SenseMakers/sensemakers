@@ -7,7 +7,6 @@ import { Link } from '@atproto/api/dist/client/types/app/bsky/richtext/facet';
 import { Firestore } from 'firebase-admin/firestore';
 
 import {
-  BLUESKY_REPOST_URI_PARAM,
   BLUESKY_REPOST_URI_QUERY,
   BlueskyPost,
   BlueskyThread,
