@@ -51,13 +51,12 @@ export const postUpdatedHook = async (
       await enqueueTask(PARSE_POST_TASK, { postId }, services);
     }
   } else if (
-
-  /** Handle post merged */
+    /** Handle post merged */
     post.parsedStatus !== AppPostParsedStatus.PROCESSED &&
     postBefore?.parsingStatus === AppPostParsingStatus.IDLE
   ) {
     if (DEBUG) logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
-    await enqueueTask(PARSE_POST_TASK, { postId });
+    await enqueueTask(PARSE_POST_TASK, { postId }, services);
   }
 
   const activitiesCreated: ActivityEventBase[] = [];

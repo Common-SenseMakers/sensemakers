@@ -308,7 +308,7 @@ describe('02-platforms', () => {
     it('handles newlines in the content html', async () => {
       const post_id =
         'https://w3c.social/users/w3c/statuses/113561528162272973';
-      const result = await mastodonService.get(
+      const result = await mastodonService.getThread(
         post_id,
         userDetails.credentials
       );
@@ -384,7 +384,7 @@ describe('02-platforms', () => {
 
         const result = (
           await services.db.run((manager) =>
-            blueskyService.get(postId, userDetails.credentials)
+            blueskyService.getThread(postId, userDetails.credentials)
           )
         ).platformPost;
         const expectedThreadIds = [
@@ -423,7 +423,7 @@ describe('02-platforms', () => {
       }
     );
 
-    it.only('can fetch since and until with dates instead of post_ids', async () => {
+    it('can fetch since and until with dates instead of post_ids', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -581,7 +581,10 @@ describe('02-platforms', () => {
     it('includes quoted posts in the thread when the embed is of type app.bsky.embed.recordWithMedia#view', async () => {
       const post_id =
         'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcmhumbudk2m';
-      const result = await blueskyService.get(post_id, userDetails.credentials);
+      const result = await blueskyService.getThread(
+        post_id,
+        userDetails.credentials
+      );
 
       const genericPost = await blueskyService.convertToGeneric({
         posted: result.platformPost,

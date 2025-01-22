@@ -26,7 +26,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe('023 Platform Thread Merging', () => {
+describe.only('023 Platform Thread Merging', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -224,7 +224,7 @@ describe('023 Platform Thread Merging', () => {
       expect(mergedPlatformPostCreated).to.not.exist;
     });
   });
-  describe.only('Mastodon Thread Merging', () => {
+  describe('Mastodon Thread Merging', () => {
     beforeEach(async () => {
       logger.debug('resetting DB');
       await resetDB();
