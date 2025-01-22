@@ -21,6 +21,7 @@ import {
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { Services } from '../instances/services';
 import { IdentityServicesMap } from '../platforms/platforms.service';
 import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks.config';
 import { chunkNumber, enqueueTask } from '../tasksUtils/tasks.support';
@@ -300,7 +301,7 @@ export class ProfilesService {
     return profile;
   }
 
-  async triggerProfileFetch(profileId: string) {
+  async triggerProfileFetch(profileId: string, services: Services) {
     const { platform } = splitProfileId(profileId);
 
     const chunkSize = 50;
@@ -317,7 +318,7 @@ export class ProfilesService {
       };
 
       if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
-      await enqueueTask(taskName, taskData);
+      await enqueueTask(taskName, taskData, services);
     }
   }
 }
