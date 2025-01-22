@@ -26,6 +26,7 @@ export const EMAIL_SENDER_FROM = process.env.EMAIL_SENDER_FROM as string;
 export const TEST_EMAIL = process.env.TEST_EMAIL as string;
 export const INCLUDE_TEST_PLATFORMS_STR = process.env
   .INCLUDE_TEST_PLATFORMS_STR as string;
+export const TWITTER_BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN as string;
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
