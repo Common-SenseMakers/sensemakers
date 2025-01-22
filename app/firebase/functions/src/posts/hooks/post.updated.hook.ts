@@ -48,7 +48,7 @@ export const postUpdatedHook = async (
     // trigger parsePostTask
     if (DEBUG) logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
     if (post.parsedStatus !== AppPostParsedStatus.PROCESSED) {
-      await enqueueTask(PARSE_POST_TASK, { postId });
+      await enqueueTask(PARSE_POST_TASK, { postId }, services);
     }
   } else if (
 

@@ -176,7 +176,7 @@ export const addNonUserProfilesController: RequestHandler = async (
         };
 
         if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
-        await enqueueTask(taskName, taskData);
+        await enqueueTask(taskName, taskData, services);
       }
     }
 

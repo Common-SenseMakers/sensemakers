@@ -48,7 +48,10 @@ import {
   TwitterThread,
   TwitterUser,
 } from '../../@shared/types/types.twitter';
-import { AppUserRead } from '../../@shared/types/types.user';
+import {
+  AccountCredentials,
+  AppUserRead,
+} from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -65,6 +68,7 @@ import {
   getTweetTextWithUrls,
   getTweetUrl,
   handleTwitterError,
+  startsWithRetweetPattern,
 } from './twitter.utils';
 
 export interface TwitterApiCredentials {
@@ -101,8 +105,14 @@ export class TwitterService
       this.cache = {};
     }
   }
+  getSinglePost(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+    throw new Error('Method not implemented.');
+  }
 
-  async get(
+  async getThread(
     post_id: string,
     credentials?: TwitterAccountCredentials
   ): Promise<{
@@ -284,7 +294,7 @@ export class TwitterService
         expansions,
         'tweet.fields': tweetFields,
         'user.fields': userFields,
-        exclude: ['retweets', 'replies'],
+        exclude: ['replies'],
       };
 
       let nextToken: string | undefined = undefined;
@@ -453,7 +463,7 @@ export class TwitterService
     const genericThread: GenericPost[] = twitterThread.tweets.map((tweet) => {
       const genericPost: GenericPost = {
         url: getTweetUrl(twitterThread.author.username, tweet.id),
-        content: tweet.text,
+        content: startsWithRetweetPattern(tweet.text) ? '' : tweet.text, // if it is a retweet, make content an empty string
       };
 
       if (tweet.quoted_tweet) {

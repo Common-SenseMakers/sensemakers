@@ -79,7 +79,7 @@ export class PlatformPostsRepository extends BaseRepository<
     manager.update(ref, removeUndefined(postUpdate));
   }
 
-  /** Get the platform post from the published post_id */
+  /** Get the platform post document id from the published post_id */
   public async getFrom_post_id<T extends boolean, R = string>(
     platform: PLATFORM,
     post_id: string,
@@ -98,7 +98,7 @@ export class PlatformPostsRepository extends BaseRepository<
     );
 
     if (posts.empty) {
-      if (_shouldThrow) throw new Error(`User ${post_id} not found`);
+      if (_shouldThrow) throw new Error(`Post ${post_id} not found`);
       else return undefined as DefinedIfTrue<T, R>;
     }
 

@@ -57,7 +57,7 @@ export interface PlatformService<
   UserDetails extends AccountDetailsBase = AccountDetailsBase,
   DraftType = any,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
-  get(
+  getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
   ): Promise<
@@ -65,11 +65,22 @@ export interface PlatformService<
       platformPost: PlatformPostPosted;
     } & WithCredentials
   >;
+
+  getThread(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<
+    {
+      platformPost: PlatformPostPosted;
+    } & WithCredentials
+  >;
+
   fetch(
     user_id: string,
     params: PlatformFetchParams,
     credentials?: AccountCredentials
   ): Promise<FetchedResult>;
+
   publish(
     platformPost: PlatformPostPublish
   ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials>;

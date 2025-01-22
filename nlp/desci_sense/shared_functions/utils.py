@@ -8,7 +8,6 @@ from jsoncomment import JsonComment
 import html2text
 from loguru import logger
 from urllib.parse import urlparse
-
 from url_normalize import url_normalize
 
 
@@ -82,7 +81,7 @@ def convert_masto_to_canonical_format(url):
 
 def identify_social_media(url):
     """
-    Identify whether a given URL is from Twitter or Mastodon.
+    Identify whether a given URL is from Twitter, Mastodon or Bluesky.
 
     Parameters:
         url (str): The URL to be identified.
@@ -90,8 +89,12 @@ def identify_social_media(url):
     Returns:
         str: The identified social media platform ('Twitter', 'Mastodon'), or 'Unknown' if not identified.
     """
+    from .interface import PlatformType
+
     twitter_domains = ["twitter.com", "t.co", "x.com"]
-    # mastodon_domains = ["mastodon.social", "examplemastodoninstance.com"]  # Add Mastodon instance domains as needed
+    
+    #mastodon_domains = ["mastodon.social", "fediscience.org","hachyderm.io"]  # Add Mastodon instance domains as needed
+    bluesky_domain = "bsky.app"
 
     parsed_url = urlparse(url)
     domain = parsed_url.netloc.lower()
@@ -102,17 +105,20 @@ def identify_social_media(url):
             domain = domain[4:]
     except Exception:
         # for invalid urls
-        return "Unknown"
+        return PlatformType.UNKNOWN
 
     if domain in twitter_domains:
-        return "twitter"
+        return PlatformType.TWITTER
+    
+    elif domain == bluesky_domain:
+        return PlatformType.BLUESKY
 
     else:
         converted_masto = convert_masto_to_canonical_format(url)
         if converted_masto:
-            return "mastodon"
+            return PlatformType.MASTODON
         else:
-            return "Unknown"
+            return PlatformType.UNKNOWN
 
 
 def unshorten_url(url):

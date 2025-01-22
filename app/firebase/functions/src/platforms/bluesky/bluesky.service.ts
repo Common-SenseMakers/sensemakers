@@ -38,6 +38,7 @@ import {
   PlatformAccountProfile,
   PlatformProfile,
 } from '../../@shared/types/types.profiles';
+import { AccountCredentials } from '../../@shared/types/types.user';
 import { parseBlueskyURI } from '../../@shared/utils/bluesky.utils';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
@@ -223,16 +224,9 @@ export class BlueskyService
     let oldestId: string | undefined;
     let cursor: string | undefined;
 
-    const sincePost = params.since_id
-      ? await this.getPost(params.since_id, credentials?.read)
-      : undefined;
-    const untilPost = params.until_id
-      ? await this.getPost(params.until_id, credentials?.read)
-      : undefined;
-
-    // If until_id is provided, use its createdAt as the initial cursor
-    if (untilPost) {
-      cursor = new Date(untilPost.value.createdAt).toISOString();
+    // If until_timestamp is provided, use it as the cursor
+    if (params.until_timestamp) {
+      cursor = new Date(params.until_timestamp).toISOString();
     }
 
     let shouldBreak = false;
@@ -244,9 +238,15 @@ export class BlueskyService
         filter: 'posts_and_author_threads',
       });
 
-      const posts = response.data.feed
-        .map((item) => item.post)
-        .filter((post) => post.author.did === user_id) as BlueskyPost[];
+      const posts = response.data.feed.map((item) => {
+        if (item.reason?.$type === 'app.bsky.feed.defs#reasonRepost') {
+          return {
+            ...item.post,
+            repostedBy: item.reason,
+          };
+        }
+        return item.post;
+      }) as BlueskyPost[];
       if (posts.length === 0) break;
 
       allPosts.push(...posts);
@@ -269,23 +269,21 @@ export class BlueskyService
           DEBUG_PREFIX
         );
 
-      // Case 1: No since_id or until_id
-      if (!params.since_id && !params.until_id) {
+      // Case 1: No since_timestamp or until_timestamp
+      if (!params.since_timestamp && !params.until_timestamp) {
         if (threads.length >= params.expectedAmount || !response.data.cursor) {
           shouldBreak = true;
         }
       }
-      // Case 2: until_id is provided
-      else if (params.until_id) {
+      // Case 2: until_timestamp is provided
+      else if (params.until_timestamp) {
         if (threads.length >= params.expectedAmount || !response.data.cursor) {
           shouldBreak = true;
         }
       }
-      // Case 3: since_id is provided
-      else if (params.since_id) {
-        const sinceDate = sincePost
-          ? new Date(sincePost.value.createdAt).getTime()
-          : Infinity;
+      // Case 3: since_timestamp is provided
+      else if (params.since_timestamp) {
+        const sinceDate = params.since_timestamp;
         const hasOlderPost = posts.some(
           (post) => new Date(post.record.createdAt).getTime() <= sinceDate
         );
@@ -297,18 +295,12 @@ export class BlueskyService
       cursor = response.data.cursor;
     }
 
-    // Filter posts based on since_id and until_id
+    // Filter posts based on since_timestamp and until_timestamp
     allPosts = allPosts.filter((post) => {
       const postDate = new Date(post.record.createdAt).getTime();
-      if (
-        sincePost &&
-        postDate <= new Date(sincePost.value.createdAt).getTime()
-      )
+      if (params.since_timestamp && postDate <= params.since_timestamp)
         return false;
-      if (
-        untilPost &&
-        postDate >= new Date(untilPost.value.createdAt).getTime()
-      )
+      if (params.until_timestamp && postDate >= params.until_timestamp)
         return false;
       return true;
     });
@@ -318,7 +310,11 @@ export class BlueskyService
     const platformPosts = threads.map((thread) => ({
       post_id: thread.thread_id,
       user_id: thread.author.id,
-      timestampMs: new Date(thread.posts[0].record.createdAt).getTime(),
+      timestampMs: new Date(
+        thread.posts[0].repostedBy
+          ? thread.posts[0].repostedBy.indexedAt
+          : thread.posts[0].record.createdAt
+      ).getTime(),
       post: thread,
     }));
 
@@ -345,29 +341,6 @@ export class BlueskyService
     return result;
   }
 
-  private async getPost(
-    postId: string,
-    credentials?: BlueskyCredentials
-  ): Promise<
-    { uri: string; cid: string; value: AppBskyFeedPost.Record } | undefined
-  > {
-    const { client: agent } = await this.getClient(credentials);
-    const { did, rkey } = parseBlueskyURI(postId);
-    if (!rkey) {
-      throw new Error('Invalid post ID');
-    }
-    try {
-      const response = await agent.getPost({
-        repo: did,
-        rkey,
-      });
-      return response;
-    } catch (error) {
-      logger.error('Error fetching post', { postId, error }, DEBUG_PREFIX);
-      return undefined;
-    }
-  }
-
   public async convertToGeneric(
     platformPost: PlatformPostCreate<BlueskyThread>
   ): Promise<GenericThread> {
@@ -386,6 +359,26 @@ export class BlueskyService
     };
 
     const genericPosts: GenericPost[] = thread.posts.map((post) => {
+      if (post.repostedBy) {
+        const genericRePost: GenericPost = {
+          content: '',
+          quotedThread: {
+            author: {
+              platformId: PLATFORM.Bluesky,
+              id: post.repostedBy.by.did,
+              username: post.repostedBy.by.handle,
+              name: post.repostedBy.by.displayName || post.repostedBy.by.handle,
+            },
+            thread: [
+              {
+                url: `https://bsky.app/profile/${post.author.handle}/post/${parseBlueskyURI(post.uri).rkey}`,
+                content: cleanBlueskyContent(post.record),
+              },
+            ],
+          },
+        };
+        return genericRePost;
+      }
       const genericPost: GenericPost = {
         url: `https://bsky.app/profile/${post.author.handle}/post/${parseBlueskyURI(post.uri).rkey}`,
         content: cleanBlueskyContent(post.record),
@@ -528,7 +521,55 @@ export class BlueskyService
     }
   }
 
-  public async get(
+  async getSinglePost(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+    const { client: agent, credentials: newSession } = await this.getClient(
+      credentials?.read
+    );
+
+    let newCredentials: AccountCredentials | undefined = undefined;
+
+    if (newSession) {
+      newCredentials = { read: newSession };
+    }
+
+    const result = await agent.getPostThread({
+      uri: post_id,
+      depth: 0,
+      parentHeight: 0,
+    });
+
+    const thread = result.data.thread as AppBskyFeedDefs.ThreadViewPost;
+    const bskAuthor = thread.post.author;
+    const post = {
+      ...thread.post,
+      record: thread.post.record as AppBskyFeedPost.Record,
+    } as BlueskyPost;
+
+    const blueskyThread: BlueskyThread = {
+      thread_id: thread.post.uri,
+      posts: [post],
+      author: {
+        id: bskAuthor.did,
+        username: bskAuthor.handle,
+        avatar: bskAuthor.avatar || '',
+        displayName: bskAuthor.displayName || bskAuthor.handle,
+      },
+    };
+
+    const platformPost = {
+      post_id: blueskyThread.thread_id,
+      user_id: blueskyThread.author.id,
+      timestampMs: new Date(blueskyThread.posts[0].record.createdAt).getTime(),
+      post: blueskyThread,
+    };
+
+    return { credentials: newCredentials, platformPost };
+  }
+
+  public async getThread(
     post_id: string,
     credentials: BlueskyAccountCredentials
   ): Promise<

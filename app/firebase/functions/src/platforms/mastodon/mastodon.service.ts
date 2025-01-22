@@ -43,7 +43,7 @@ import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
-import { PlatformService } from '../platforms.interface';
+import { PlatformService, WithCredentials } from '../platforms.interface';
 import {
   cleanMastodonContent,
   convertMastodonPostsToThreads,
@@ -368,10 +368,33 @@ export class MastodonService
       avatarUrl: thread.author.avatar,
     };
 
-    const genericPosts: GenericPost[] = thread.posts.map((status) => ({
-      url: status.url ? status.url : undefined,
-      content: cleanMastodonContent(status.content),
-    }));
+    const genericPosts: GenericPost[] = thread.posts.map((status) => {
+      if (status.reblog) {
+        return {
+          content: cleanMastodonContent(status.content),
+          quotedThread: {
+            author: {
+              platformId: PLATFORM.Mastodon,
+              id: status.reblog.account.id,
+              username: parseMastodonAccountURI(status.reblog.account.url)
+                .globalUsername,
+              name: status.reblog.account.displayName,
+              avatarUrl: status.reblog.account.avatar,
+            },
+            thread: [
+              {
+                url: status.reblog.url || undefined,
+                content: cleanMastodonContent(status.reblog.content),
+              },
+            ],
+          },
+        };
+      }
+      return {
+        url: status.url ? status.url : undefined,
+        content: cleanMastodonContent(status.content),
+      };
+    });
 
     return {
       author: genericAuthor,
@@ -426,7 +449,14 @@ export class MastodonService
     };
   }
 
-  public async get(
+  getSinglePost(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+    throw new Error('Method not implemented.');
+  }
+
+  public async getThread(
     post_id: string,
     credentials: AccountCredentials<
       MastodonAccountCredentials,

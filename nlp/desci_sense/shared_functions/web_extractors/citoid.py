@@ -15,18 +15,17 @@ from tenacity import (
     wait_exponential,
 )
 from ..utils import identify_social_media
+from ..interface import PlatformType
 
 
-def citoid_twitter_post(target_url: str) -> Dict:
+def citoid_social_media_post(target_url: str, platform_type:PlatformType) -> Dict:
     return {
         "itemType": "forumPost",
         "creators": [],
         "tags": [],
-        "title": "Twitter post",
+        "title": f"{platform_type.value} post",
         "url": target_url,
     }
-
-
 def pre_check_target_url(target_url: str) -> Tuple[bool, Dict]:
     """_summary_
 
@@ -40,10 +39,10 @@ def pre_check_target_url(target_url: str) -> Tuple[bool, Dict]:
     # check social media type
     social_type = identify_social_media(target_url)
 
-    if social_type == "twitter":
-        return True, citoid_twitter_post(target_url)
-    else:
+    if social_type == PlatformType.UNKNOWN:
         return False, None
+    else:
+        return True, citoid_social_media_post(target_url,social_type)
 
 
 # https://plainenglish.io/blog/send-http-requests-as-fast-as-possible-in-python-304134d46604
