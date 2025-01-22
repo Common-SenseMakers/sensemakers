@@ -495,18 +495,17 @@ describe('02-platforms', () => {
           fetchParams: { expectedAmount: 100 },
         });
       await services.db.run(async (manager) => {
-        allProfilePosts.forEach(async (post) => {
+        for (const post of allProfilePosts) {
           if (
             post.id !== sinceAndUntilPosts.sincePost.id &&
             post.id !== sinceAndUntilPosts.untilPost.id
           ) {
-            // NOTE: something in this method calls seems to leave an unresolved async call
             await services.postsManager.processing.deletePostFull(
               post.id,
               manager
             );
           }
-        });
+        }
       });
 
       const fetchParamsSince: FetchParams = {
