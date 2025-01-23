@@ -5,11 +5,13 @@ import { useAccountContext } from '../../user-login/contexts/AccountContext';
 import { PostDerivedContext, usePostDerived } from './use.post.derived';
 import { PostFetchContext, usePostFetch } from './use.post.fetch';
 import { PostUpdateContext, usePostUpdate } from './use.post.update';
+import { PostDeleteContext, usePostDelete } from './use.post.delete';
 
 interface PostContextType {
   fetched: PostFetchContext;
   derived: PostDerivedContext;
   updated: PostUpdateContext;
+  deleted: PostDeleteContext;
 }
 
 const PostContextValue = createContext<PostContextType | undefined>(undefined);
@@ -29,6 +31,7 @@ export const PostContext: React.FC<{
   const fetched = usePostFetch(connectedUser, _postId, postInit);
   const derived = usePostDerived(fetched);
   const updated = usePostUpdate(fetched, derived, postInit, connectedUser);
+  const deleted = usePostDelete(fetched, connectedUser);
 
   return (
     <PostContextValue.Provider
@@ -36,6 +39,7 @@ export const PostContext: React.FC<{
         fetched,
         derived,
         updated,
+        deleted,
       }}>
       {children}
     </PostContextValue.Provider>
