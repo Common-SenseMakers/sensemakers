@@ -26,7 +26,7 @@ export class IndexedPostsRepo {
 
   async setPost(id: string, post: IndexedPost, manager: TransactionManager) {
     const postRef = this.getPostRef(id, post.id);
-    manager.create(postRef, removeUndefined(post));
+    manager.set(postRef, removeUndefined(post));
   }
 
   async getAllPosts(
