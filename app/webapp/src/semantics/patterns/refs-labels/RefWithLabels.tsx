@@ -24,6 +24,7 @@ export const RefWithLabels = (props: {
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
   ontology?: ParserOntology;
+  renderContext?: 'post' | 'refPage';
 }) => {
   const { t } = useTranslation();
   const labelsOntology = props.ontology?.semantic_predicates;
@@ -84,18 +85,39 @@ export const RefWithLabels = (props: {
   return (
     <>
       {props.oembed ? (
-        <RefCard
-          ix={props.ix + 1}
-          url={props.oembed.url}
-          title={props.oembed.title}
-          description={
-            props.showDescription ? props.oembed.description : undefined
-          }
-          image={props.oembed.thumbnail_url}
-          refType={
-            props.oembed.type !== 'unknown' ? props.oembed.type : undefined
-          }
-          showDescription={props.showDescription}></RefCard>
+        <Box justify="between" direction="row">
+          <RefCard
+            ix={props.ix + 1}
+            url={props.oembed.url}
+            title={props.oembed.title}
+            description={
+              props.showDescription ? props.oembed.description : undefined
+            }
+            image={props.oembed.thumbnail_url}
+            refType={
+              props.oembed.type !== 'unknown' ? props.oembed.type : undefined
+            }
+            showDescription={props.showDescription}></RefCard>
+          {props.renderContext === 'post' && (
+            <span
+              style={{
+                color: '#4B5563',
+                fontFamily: 'Libre Franklin',
+                fontSize: '14px',
+                fontStyle: 'normal',
+                fontWeight: 500,
+                lineHeight: '16px',
+                textDecorationLine: 'underline',
+                textDecorationStyle: 'solid',
+                textDecorationSkipInk: 'none',
+                textDecorationThickness: 'auto',
+                textUnderlineOffset: 'auto',
+                textUnderlinePosition: 'from-font',
+              }}>
+              All Commments
+            </span>
+          )}
+        </Box>
       ) : (
         <Box gap="10px" pad={{ vertical: '8px' }}>
           <LoadingDiv

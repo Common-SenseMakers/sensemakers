@@ -170,6 +170,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                         showDescription={isPlatformPost(ref)}
                         editable={props.editable}
                         ontology={props.originalParsed?.support?.ontology}
+                        renderContext="post"
                         removeLabel={(labelUri: string) => {
                           removeLabel(ref, labelUri).catch(console.error);
                         }}
