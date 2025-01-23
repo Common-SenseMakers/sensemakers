@@ -166,9 +166,9 @@ export const PostView = (props: {
       structuredSemantics: updated.postMerged?.structuredSemantics,
       post: updated.postMerged,
     };
-    const handlePostDelete = async () => {
+    const handlePostDelete = () => {
       if (window.confirm('Are you sure you want to delete this post?')) {
-        await deleted.deletePost();
+        deleted.deletePost().catch(console.error);
       }
     };
 

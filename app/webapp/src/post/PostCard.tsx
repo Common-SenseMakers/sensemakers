@@ -101,7 +101,7 @@ export const PostCard = (props: {
   const { shade: _shade } = props;
   const shade = _shade || false;
 
-  const { updated } = usePost();
+  const { updated, deleted } = usePost();
   const post = updated.postMerged;
 
   const { constants } = useThemeContext();
@@ -152,10 +152,9 @@ export const PostCard = (props: {
 
   const hideSemantics = false;
 
-  const { deleted } = usePost();
-  const handlePostDelete = async () => {
+  const handlePostDelete = () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
-      await deleted.deletePost();
+      deleted.deletePost().catch(console.error);
     }
   };
 
