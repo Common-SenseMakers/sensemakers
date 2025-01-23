@@ -102,7 +102,7 @@ export const RefWithLabels = (props: {
               props.oembed.type !== 'unknown' ? props.oembed.type : undefined
             }
             showDescription={props.showDescription}></RefCard>
-          {props.renderContext === 'post' && (
+          {props.renderContext === 'post' && showAggregateLabels && (
             <span
               style={{
                 color: '#4B5563',
