@@ -77,7 +77,6 @@ export const feedTabs: FeedTabConfig[] = [
       'http://purl.org/spar/cito/agreesWith',
       'http://purl.org/spar/cito/reviews',
       'https://sense-nets.xyz/asksQuestionAbout',
-      'http://purl.org/spar/cito/includesQuotationFrom',
       'http://purl.org/spar/cito/discusses',
     ],
     topic: SCIENCE_TOPIC_URI,
