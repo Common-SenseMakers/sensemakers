@@ -91,6 +91,7 @@ export const RefCard = (props: {
             alignItems: 'flex-start',
             gap: '4px',
             flex: '1 0 0',
+            overflow: 'hidden',
           }}>
           <AppHeading
             level={4}
