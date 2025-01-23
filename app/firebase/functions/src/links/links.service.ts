@@ -19,6 +19,8 @@ import { TimeService } from '../time/time.service';
 import { LinksRepository } from './links.repository';
 import { hashUrl } from './links.utils';
 
+const DEBUG = false;
+
 export interface LinksMockConfig {
   get: boolean;
   enable?: boolean;
@@ -190,6 +192,15 @@ export class LinksService {
       refLabels.map((l) => l.label),
       manager
     );
+
+    if (DEBUG) {
+      logger.debug(`getAggregatedRefLabelsForDisplay ${ref}`, {
+        refLabels,
+        refOEmbed,
+        clusterId,
+        ontology,
+      });
+    }
 
     const refDisplayMeta: RefDisplayMeta = {
       aggregatedLabels: refLabels,

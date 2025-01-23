@@ -337,12 +337,3 @@ exports['trigger'] = functions
     secrets,
   })
   .https.onRequest(buildApp(emulatorTriggerRouter));
-
-/** admin */
-exports['admin'] = functions
-  .region(region)
-  .runWith({
-    ...deployConfig,
-    secrets: [...secrets, envRuntime.ADMIN_API_KEY],
-  })
-  .https.onRequest(buildAdminApp(adminRouter));

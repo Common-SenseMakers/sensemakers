@@ -77,6 +77,7 @@ export const RefOverlay = (props: { refUrl: string }) => {
       .filter((refLabel) => refLabel.authorProfileId === accountProfileId)
       .map((refLabel) => refLabel.label)
       .filter((label) => label !== 'https://sense-nets.xyz/quotesPost') || [];
+
   const aggregatedLabelsWithoutAuthorLabels = (
     refDisplayMeta?.aggregatedLabels || []
   ).filter((refLabel) => refLabel.authorProfileId !== accountProfileId);

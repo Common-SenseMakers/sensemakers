@@ -699,10 +699,12 @@ export class PostsManager {
       )
     );
 
-    logger.debug(
-      `getOfUser query for user ${queryParams.userId} has ${appPosts.length} results for query params: `,
-      { queryParams }
-    );
+    if (DEBUG)
+      logger.debug(
+        `getOfUser query for user ${queryParams.userId} has ${appPosts.length} results for query params: `,
+        { queryParams }
+      );
+
     return postsFull;
   }
 
@@ -946,9 +948,27 @@ export class PostsManager {
 
     /** store the semantics and mark as processed */
     await this.db.run(async (manager) => {
+      const parserOntology = parserResult.support?.ontology;
       /** store the ontology */
-      if (parserResult.metadata?.ontology) {
-        await this.ontologies.setMany(parserResult.metadata?.ontology, manager);
+      if (parserOntology) {
+        if (parserOntology.semantic_predicates) {
+          await this.ontologies.setMany(
+            parserOntology.semantic_predicates,
+            manager
+          );
+        }
+        if (parserOntology.keyword_predicate) {
+          await this.ontologies.setMany(
+            [parserOntology.keyword_predicate],
+            manager
+          );
+        }
+        if (parserOntology.topics_predicate) {
+          await this.ontologies.setMany(
+            [parserOntology.topics_predicate],
+            manager
+          );
+        }
       }
 
       /** store the semantics in the post */

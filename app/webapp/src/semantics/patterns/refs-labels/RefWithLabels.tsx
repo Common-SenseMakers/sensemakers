@@ -54,15 +54,13 @@ export const RefWithLabels = (props: {
   labelsDisplayNames = Array.from(new Set(labelsDisplayNames));
 
   /** list of possible labels from ontology (filtering those selected) */
-  const optionDisplayNames = useMemo(
-    () =>
-      ontology
-        ? ontology
-            .filter((l) => !props.authorLabels.includes(l.uri))
-            .map((l) => l.display_name)
-        : undefined,
-    [ontology, props.authorLabels]
-  );
+  const optionDisplayNames = useMemo(() => {
+    return ontology
+      ? ontology
+          .filter((l) => !props.authorLabels.includes(l.uri))
+          .map((l) => l.display_name)
+      : undefined;
+  }, [ontology, props.authorLabels]);
 
   const getLabelFromDisplayName = (displayName: string) => {
     const item = ontology
