@@ -37,8 +37,11 @@ from desci_sense.shared_functions.dataloaders import (
 from desci_sense.shared_functions.interface import (
     RDFTriplet,
     ZoteroItemTypeDefinition,
+    AppThread
 )
-
+from desci_sense.shared_functions.preprocessing import (
+    convert_thread_interface_to_ref_post,
+)
 TEST_POST_TEXT_W_REF = """
 I really liked this paper!
 https://arxiv.org/abs/2402.04607
@@ -51,6 +54,60 @@ https://arxiv.org/abs/2402.04607
 https://arxiv.org/abs/2401.14000
 """
 
+TEST_RE_POST = {
+  #"id": "sdhLWjIZaK9hzXfzwLpS",
+  #"generic": {
+    "author": {
+      "platformId": "bluesky",
+      "id": "did:plc:xq36vykdkrzknmcxo3jnn5wq",
+      "username": "sensenetsbot.bsky.social",
+      "name": "Sense Bot",
+      "avatarUrl": "https://cdn.bsky.app/img/avatar/plain/did:plc:xq36vykdkrzknmcxo3jnn5wq/bafkreidjv7bsdwqhaq6ft44iwsrp2xplruur76lnny4v2ecixqtzkpjf34@jpeg"
+    },
+    "thread": [
+      {
+        "content": "",
+        "quotedThread": {
+          "author": {
+            "platformId": "bluesky",
+            "id": "did:plc:xq36vykdkrzknmcxo3jnn5wq",
+            "username": "sensenetsbot.bsky.social",
+            "name": "Sense Bot"
+          },
+          "thread": [
+            {
+              "url": "https://bsky.app/profile/plato-philosophy.bsky.social/post/3lbsjlmobfk2c",
+              "content": "There is still time to submit your proposal for the 2025 PLATO conference! Learn more and submit here: https://www.plato-philosophy.org/plato-conferences/ #Philsky #philosophy"
+            }
+          ]
+        }
+      }
+    ],
+  #},
+  "origin": "bluesky",
+  "authorProfileId": "bluesky-did:plc:xq36vykdkrzknmcxo3jnn5wq",
+  "authorUserId": "twitter:1753077743816777728",
+  "mirrorsIds": [
+    "4LxVik40k2biNVcURdTt"
+  ],
+  "createdAtMs": 1736504456748,
+  "editStatus": "pending",
+  "parsedStatus": "unprocessed",
+  "parsingStatus": "idle"
+}
+
+def test_multi_re_post_combined():
+    # get a few posts for input
+    thread = AppThread.model_validate(TEST_RE_POST)
+    thread = convert_thread_interface_to_ref_post(thread)
+    multi_config = create_multi_config_for_tests()
+    multi_config.post_process_type = PostProcessType.COMBINED
+    mcp = MultiChainParser(multi_config)
+    res = mcp.process_ref_post(thread)
+
+    
+    assert 'default' in res.multi_reference_tagger[1]
+    
 
 def test_combined_pp():
     multi_config = create_multi_config_for_tests()
@@ -232,12 +289,13 @@ def test_short_post_no_ref_i146():
     
 
 if __name__ == "__main__":
-    multi_config = create_multi_config_for_tests()
+   """ multi_config = create_multi_config_for_tests()
     multi_config.post_process_type = PostProcessType.COMBINED
     mcp = MultiChainParser(multi_config)
     res = mcp.process_text(TEST_POST_TEXT_W_REF)
     assert res.item_types == ["preprint"]
-    assert len(res.keywords) > 0
+    assert len(res.keywords) > 0"""
+   test_multi_re_post_combined()
 #     posts = [scrape_post(url) for url in urls]
 #     multi_config = create_multi_config_for_tests(llm_type="google/gemma-7b-it:free")
 #     multi_chain_parser = MultiChainParser(multi_config)

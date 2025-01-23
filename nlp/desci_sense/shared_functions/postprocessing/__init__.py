@@ -600,6 +600,26 @@ def combine_from_raw_results(
             label_set = set(pred_labels)
             label_set.add(default_label)
             pred_labels[:] = list(label_set)  # write back to the same list object
+        # If special scenario: the first post content is empty
+        is_re_post= False
+        if len(post.thread_posts()) == 1:
+            first_content = post.content.strip()
+            if not first_content:  # empty
+                is_re_post= True
+
+        if is_re_post:
+            SPECIAL_TAG_SET = {
+                "default",
+                "funding", 
+                "event",
+                "job",
+                "call-for-papers",
+                "quote",
+                }  # your intersection set
+            for tag_list in combined.multi_reference_tagger:
+                # Convert to set, intersect, then back to list
+                new_tags = list(set(tag_list).intersection(SPECIAL_TAG_SET))
+                tag_list[:] = new_tags  # replace contents in-place
 
     return combined
 
