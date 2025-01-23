@@ -39,7 +39,7 @@ import {
   triggerAutofetchPosts,
 } from './posts/tasks/posts.autofetch.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
-// import { router } from './router';
+import { router } from './router';
 import { getConfig } from './services.config';
 
 // all secrets are available to all functions
@@ -80,10 +80,10 @@ export const firestore = app.firestore();
 // import { fetchNewPosts } from './posts/posts.job';
 
 /** Registed the API as an HTTP triggered function */
-// exports['api'] = functions
-//   .region(region)
-//   .runWith(deployConfig)
-//   .https.onRequest(buildApp(router));
+exports['api'] = functions
+  .region(region)
+  .runWith(deployConfig)
+  .https.onRequest(buildApp(router));
 
 exports['admin'] = functions
   .region(envDeploy.REGION)
