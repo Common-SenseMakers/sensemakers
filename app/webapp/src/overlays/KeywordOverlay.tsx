@@ -21,7 +21,7 @@ export const KeywordOverlay = (props: { keyword: string }) => {
     return {
       endpoint: '/api/feed/get',
       queryParams: {
-        semantics: { keywords: [keyword], topic: SCIENCE_TOPIC_URI },
+        semantics: { keyword: keyword, topic: SCIENCE_TOPIC_URI },
         hydrateConfig: { addAggregatedLabels: false },
       },
       DEBUG_PREFIX: 'REF FEED',

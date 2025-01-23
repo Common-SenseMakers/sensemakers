@@ -1,7 +1,8 @@
+import { SetOptions } from 'firebase-admin/firestore';
+
 import { DefinedIfTrue } from '../@shared/types/types.user';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
-import { DBInstance } from './instance';
 
 const DEBUG = false;
 
@@ -25,7 +26,6 @@ export function removeUndefined<T>(obj: T): T {
 export class BaseRepository<DataType, DataCreateType> {
   constructor(
     protected collection: FirebaseFirestore.CollectionReference,
-    protected db: DBInstance,
     protected idConvert?: {
       encode: (id: string) => string;
       decode: (encoded: string) => string;
@@ -62,15 +62,25 @@ export class BaseRepository<DataType, DataCreateType> {
     };
   }
 
-  protected getRef(id: string) {
+  public getRef(id: string) {
     const ref = this.collection.doc(this.encode ? this.encode(id) : id);
     if (DEBUG) logger.debug(`Getting ${this.decode(ref.id)}`);
     return ref;
   }
 
-  public set(id: string, data: DataType, manager: TransactionManager) {
+  public set(
+    id: string,
+    data: DataType,
+    manager: TransactionManager,
+    options?: SetOptions
+  ) {
     const ref = this.getRef(id);
-    manager.set(ref, data);
+    manager.set(ref, data, options);
+  }
+
+  public delete(id: string, manager: TransactionManager) {
+    const ref = this.getRef(id);
+    manager.delete(ref);
   }
 
   protected async getDoc(id: string, manager: TransactionManager) {
@@ -88,10 +98,15 @@ export class BaseRepository<DataType, DataCreateType> {
     if (ids.length === 0) return [];
 
     const refs = Array.from(ids).map((id) => this.getRef(id));
-    const snapshot = await this.db.firestore.getAll(...refs);
+    const snapshot = await this.collection.firestore.getAll(...refs);
     return snapshot.map((doc) => {
       return { id: this.decode(doc.id), ...doc.data() } as DataType;
     });
+  }
+
+  public async exists(id: string, manager: TransactionManager) {
+    const doc = await this.getDoc(id, manager);
+    return doc.exists;
   }
 
   public async get<T extends boolean, R = DataType>(

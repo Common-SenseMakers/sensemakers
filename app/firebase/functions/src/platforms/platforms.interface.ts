@@ -1,6 +1,7 @@
 import { PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   FetchedResult,
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostDeleteDraft,
   PlatformPostDraft,
@@ -56,7 +57,7 @@ export interface PlatformService<
   UserDetails extends AccountDetailsBase = AccountDetailsBase,
   DraftType = any,
 > extends IdentityService<SignupContext, SignupData, UserDetails> {
-  get(
+  getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
   ): Promise<
@@ -64,11 +65,22 @@ export interface PlatformService<
       platformPost: PlatformPostPosted;
     } & WithCredentials
   >;
+
+  getThread(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<
+    {
+      platformPost: PlatformPostPosted;
+    } & WithCredentials
+  >;
+
   fetch(
     user_id: string,
     params: PlatformFetchParams,
     credentials?: AccountCredentials
   ): Promise<FetchedResult>;
+
   publish(
     platformPost: PlatformPostPublish
   ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials>;
@@ -76,7 +88,9 @@ export interface PlatformService<
     platformPost: PlatformPostUpdate
   ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials>;
 
-  convertToGeneric(platformPost: PlatformPostCreate): Promise<GenericThread>;
+  convertToGeneric(
+    platformPost: Pick<PlatformPostCreate, 'posted'>
+  ): Promise<GenericThread>;
   convertFromGeneric(postAndAuthor: PostAndAuthor): Promise<PlatformPostDraft>;
 
   signDraft?(post: PlatformPostDraft): Promise<DraftType>;
@@ -87,4 +101,10 @@ export interface PlatformService<
     post: AppPostFull,
     author: AppUserRead
   ): Promise<PlatformPostDeleteDraft | undefined>;
+
+  mergeBrokenThreads(
+    rootPost: PlatformPost,
+    post: PlatformPostCreate
+  ): PlatformPostPosted | undefined;
+  isRootThread(post: PlatformPostCreate): boolean;
 }

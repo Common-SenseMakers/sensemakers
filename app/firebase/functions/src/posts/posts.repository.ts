@@ -1,10 +1,8 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
-import {
-  ArrayIncludeQuery,
-  StructuredSemantics,
-} from '../@shared/types/types.posts';
+import { ClusterInstance } from '../@shared/types/types.clusters';
+import { ArrayIncludeQuery } from '../@shared/types/types.posts';
 import {
   AppPost,
   AppPostCreate,
@@ -12,14 +10,21 @@ import {
   PostUpdate,
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
-import { RefLabel, RefPostData } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
-import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
 import { DBInstance, Query } from '../db/instance';
 import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { hashUrl } from '../links/links.utils';
-import { doesQueryUseSubcollection } from '../posts/posts.helper';
+import {
+  AUTHOR_PROFILE_KEY,
+  AUTHOR_USER_KEY,
+  CREATED_AT_KEY,
+  ORIGIN_KEY,
+  STRUCTURED_SEMANTICS_KEY,
+  TABS_KEY,
+  TOPIC_KEY,
+} from '../posts/posts.helper';
+import { IndexedPostsRepo } from './indexed.posts.repository';
 
 const DEBUG = false;
 const DEBUG_PREFIX = 'PostsRepository';
@@ -56,7 +61,7 @@ const filterByIn = (_base: Query, key: string, values?: string[]) => {
   return query;
 };
 
-const filterByArrayContainsAny = (
+export const filterByArrayContainsAny = (
   _base: Query,
   key: string,
   values?: ArrayIncludeQuery
@@ -77,7 +82,7 @@ const filterByArrayContainsAny = (
 
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
-    super(db.collections.posts, db);
+    super(db.collections.posts);
   }
 
   public async update(
@@ -104,70 +109,60 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     manager.update(ref, { mirrorsIds: FieldValue.arrayUnion(mirrorId) });
   }
 
-  /** Cannot be part of a transaction */
-  public async getMany(queryParams: PostsQueryDefined) {
-    /** type protection against properties renaming */
-    const createdAtKey: keyof AppPost = 'createdAtMs';
-    const authorUserKey: keyof AppPost = 'authorUserId';
-    const authorProfileKey: keyof AppPost = 'authorProfileId';
-    const originKey: keyof AppPost = 'origin';
-
-    const structuredSemanticsKey: keyof AppPost = 'structuredSemantics';
-
-    const keywordsKey: keyof StructuredSemantics = 'keywords';
-
-    const labelsKey: keyof StructuredSemantics = 'labels';
-    const topicKey: keyof StructuredSemantics = 'topic';
-    const refsKey: keyof StructuredSemantics = 'refs';
-
-    if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
-
-    const { useLinksSubcollection } = doesQueryUseSubcollection(queryParams);
-
-    /** check if we can query the links subcollection rather than the entire posts */
-    const baseCollection = (() => {
-      if (useLinksSubcollection && queryParams.semantics?.refs) {
-        const linkId = hashUrl(queryParams.semantics.refs[0]);
-        return this.db.collections.links
-          .doc(linkId)
-          .collection(CollectionNames.LinkPostsSubcollection);
-      }
-      return this.db.collections.posts;
-    })();
-
-    let query = filterByEqual(
-      baseCollection,
-      authorUserKey,
-      queryParams.userId
-    );
-
-    query = filterByEqual(query, authorProfileKey, queryParams.profileId);
-
-    query = filterByIn(query, originKey, queryParams.origins);
-
-    if (!useLinksSubcollection) {
-      query = filterByArrayContainsAny(
-        query,
-        `${structuredSemanticsKey}.${refsKey}`,
-        queryParams.semantics?.refs
+  /** checks if this query should use a subcollection and set up the query object on the best collection */
+  private getBaseQuery = (
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ) => {
+    if (queryParams.semantics?.ref) {
+      const refId = hashUrl(queryParams.semantics.ref);
+      const indexedRepo = new IndexedPostsRepo(
+        cluster.collection(CollectionNames.Refs)
       );
+      return indexedRepo.getPostsCollection(refId);
     }
 
-    query = filterByArrayContainsAny(
-      query,
-      `${structuredSemanticsKey}.${labelsKey}`,
-      queryParams.semantics?.labels
-    );
+    if (queryParams.semantics?.keyword) {
+      const keyword = queryParams.semantics.keyword;
+      const indexedRepo = new IndexedPostsRepo(
+        cluster.collection(CollectionNames.Keywords)
+      );
+      return indexedRepo.getPostsCollection(keyword);
+    }
 
-    query = filterByArrayContainsAny(
-      query,
-      `${structuredSemanticsKey}.${keywordsKey}`,
-      queryParams.semantics?.keywords
-    );
+    /** general posts subcollection */
+    return cluster.collection(CollectionNames.Posts);
+  };
+
+  /** Cannot be part of a transaction */
+  public async getMany(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ) {
+    /** type protection against properties renaming */
+    if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
+
+    const baseQuery = this.getBaseQuery(queryParams, cluster);
+
+    let query = filterByEqual(baseQuery, AUTHOR_USER_KEY, queryParams.userId);
+
+    query = filterByEqual(query, AUTHOR_PROFILE_KEY, queryParams.profileId);
+
+    query = filterByIn(query, ORIGIN_KEY, queryParams.origins);
+
+    const tabIx = queryParams.semantics?.tab;
+    query =
+      tabIx !== undefined
+        ? filterByEqual(
+            query,
+            `${STRUCTURED_SEMANTICS_KEY}.${TABS_KEY}.isTab${tabIx.toString().padStart(2, '0')}`,
+            true
+          )
+        : query;
 
     query = filterByEqual(
       query,
-      `${structuredSemanticsKey}.${topicKey}`,
+      `${STRUCTURED_SEMANTICS_KEY}.${TOPIC_KEY}`,
       queryParams.semantics?.topic
     );
 
@@ -200,88 +195,37 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     /** two modes, forward sinceId or backwards untilId  */
     const paginated = await (async (_base: Query) => {
       if (sinceCreatedAt) {
-        const ordered = _base.orderBy(createdAtKey, 'asc');
+        const ordered = _base.orderBy(CREATED_AT_KEY, 'asc');
         return ordered.startAfter(sinceCreatedAt);
       } else {
-        const ordered = _base.orderBy(createdAtKey, 'desc');
+        const ordered = _base.orderBy(CREATED_AT_KEY, 'desc');
         return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
     })(query);
 
-    const posts = await paginated
+    const postsIds = await paginated
       .limit(queryParams.fetchParams.expectedAmount)
+      .select('id')
       .get();
 
-    let appPosts = (await (async () => {
-      if (useLinksSubcollection) {
-        const docRefs = posts.docs.map((doc) =>
-          this.db.collections.posts.doc(doc.id)
-        );
-        if (docRefs.length === 0) return [];
-        const docs = await this.db.firestore.getAll(...docRefs);
-        return docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-      }
-      return posts.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-    })()) as AppPost[];
+    /** need to get the full AppPost objects since the baseQuery just included indexed properties */
+    const docIds = postsIds.docs.map((doc) => doc.id);
+    const appPosts = await this.getFromIds(docIds);
 
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 
-  public async getAggregatedRefLabels(
-    references: string[]
-  ): Promise<Record<string, RefLabel[]>> {
-    const refsStats: Record<string, RefLabel[]> = {};
-
-    // Get all posts for each reference from their respective subcollections
-    const postsPromises = references.map(async (reference) => {
-      const linkId = hashUrl(reference);
-      const linkPosts = await this.db.collections.links
-        .doc(linkId)
-        .collection(CollectionNames.LinkPostsSubcollection)
-        .get();
-
-      // Process each post's labels directly from the subcollection documents
-      linkPosts.docs.forEach((doc) => {
-        const refPost = doc.data() as RefPostData;
-        if (
-          refPost?.structuredSemantics?.labels &&
-          refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
-        ) {
-          const refLabels = refPost.structuredSemantics?.labels?.map(
-            (label): RefLabel => ({
-              label,
-              postId: doc.id,
-              authorProfileId: refPost.authorProfileId,
-              platformPostUrl: refPost.platformPostUrl,
-            })
-          );
-          if (refLabels) {
-            refsStats[reference] = [
-              ...(refsStats[reference] || []),
-              ...refLabels,
-            ];
-          }
-        }
-      });
-    });
-
-    await Promise.all(postsPromises);
-    return refsStats;
-  }
-
-  public async getAllOfQuery(queryParams: PostsQueryDefined, limit?: number) {
+  public async getAllOfQuery(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance,
+    limit?: number
+  ) {
     let stillPending = true;
     const allPosts: AppPost[] = [];
 
     while (stillPending) {
       if (DEBUG) logger.debug('getAllOfQuery', queryParams, DEBUG_PREFIX);
-      const posts = await this.getMany(queryParams);
+      const posts = await this.getMany(queryParams, cluster);
 
       stillPending = posts.length === queryParams.fetchParams.expectedAmount;
 

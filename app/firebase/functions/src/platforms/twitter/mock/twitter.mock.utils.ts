@@ -12,6 +12,7 @@ export const getSampleTweet = (
   return {
     id: id,
     conversation_id,
+    edit_history_tweet_ids: ['123456'],
     text: `This is an interesting paper https://arxiv.org/abs/2312.05230 ${id} | ${content}`,
     author_id: authorId,
     created_at: date.toISOString(),

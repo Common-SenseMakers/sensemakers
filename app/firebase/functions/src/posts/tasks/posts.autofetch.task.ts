@@ -1,9 +1,8 @@
-import { Request } from 'firebase-functions/v2/tasks';
-
 import {
   ALL_SOURCE_PLATFORMS,
   IDENTITY_PLATFORM,
 } from '../../@shared/types/types.platforms';
+import { FetchPlatfomAccountTaskData } from '../../@shared/types/types.profiles';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 import {
@@ -22,7 +21,7 @@ const DEBUG_PREFIX = 'AUTOFETCH';
 export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
   if (DEBUG)
     logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
-  const { users, db } = services;
+  const { users, db, profiles } = services;
 
   ALL_SOURCE_PLATFORMS.forEach(async (platformId) => {
     if (DEBUG)
@@ -31,11 +30,14 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
         DEBUG_PREFIX
       );
 
-    const profilesIds = await users.profiles.getMany({
+    const profilesIds = await users.profiles.repo.getMany({
       autofetch: true,
       platformId: platformId as IDENTITY_PLATFORM,
       userIdDefined: false,
     });
+
+    if (DEBUG)
+      logger.debug(`Profiles found: ${profilesIds.length}`, DEBUG_PREFIX);
 
     const fetchPlatformMinPeriod =
       (profilesIds.length / FETCH_TASK_DISPATCH_RATES[platformId]) * 1000; // in ms
@@ -62,6 +64,13 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
 
     const now = services.time.now();
 
+    if (DEBUG)
+      logger.debug(
+        `Checking rate limit for ${platformId}`,
+        { now, jobLastRun, fetchPlatformMinPeriod },
+        DEBUG_PREFIX
+      );
+
     if (now - jobLastRun > fetchPlatformMinPeriod) {
       if (DEBUG)
         logger.debug(
@@ -78,7 +87,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
       for (const profileId of profilesIds) {
         // Skip profiles that belong to registered users
         const profile = await db.run((manager) =>
-          users.profiles.getByProfileId(profileId, manager, true)
+          profiles.repo.getByProfileId(profileId, manager, true)
         );
 
         if (profile.userId) {
@@ -87,9 +96,8 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
 
         const taskName = FETCH_ACCOUNT_TASKS[platformId];
 
-        const taskData = {
+        const taskData: FetchPlatfomAccountTaskData = {
           profileId,
-          platformId,
           amount: 50, // Fetch last 50 posts
           latest: true,
         };
@@ -100,7 +108,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
             { taskName, taskData },
             DEBUG_PREFIX
           );
-        await enqueueTask(taskName, taskData);
+        await enqueueTask(taskName, taskData, services);
       }
     } else {
       if (DEBUG)
@@ -139,7 +147,10 @@ export const triggerAutofetchPosts = async (services: Services) => {
   );
 };
 
-export const autofetchUserPosts = async (req: Request, services: Services) => {
+export const autofetchUserPosts = async (
+  req: { data: { userId: string } },
+  services: Services
+) => {
   if (DEBUG) logger.debug(`autofetchUserPosts: userId: ${req.data.userId}`);
 
   const userId = req.data.userId as string;
@@ -165,6 +176,7 @@ export const autofetchUserPosts = async (req: Request, services: Services) => {
     if (!error.message.includes('code: 429')) {
       throw error;
     }
+    logger.warn(`Rate limit hit for user ${userId}`);
     return undefined;
   }
 };

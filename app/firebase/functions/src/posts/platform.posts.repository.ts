@@ -15,7 +15,7 @@ export class PlatformPostsRepository extends BaseRepository<
   PlatformPostCreate
 > {
   constructor(protected db: DBInstance) {
-    super(db.collections.platformPosts, db);
+    super(db.collections.platformPosts);
   }
 
   /** Get the platform post from platform, account and the AppPost id */
@@ -98,7 +98,7 @@ export class PlatformPostsRepository extends BaseRepository<
     );
 
     if (posts.empty) {
-      if (_shouldThrow) throw new Error(`User ${post_id} not found`);
+      if (_shouldThrow) throw new Error(`Post ${post_id} not found`);
       else return undefined as DefinedIfTrue<T, R>;
     }
 

@@ -3,14 +3,17 @@ import { Context } from 'mocha';
 import * as sinon from 'sinon';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
-import { AccountProfile } from '../../src/@shared/types/types.profiles';
+import {
+  AccountProfile,
+  AccountProfileCreate,
+} from '../../src/@shared/types/types.profiles';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { envRuntime } from '../../src/config/typedenv.runtime';
 import * as tasksSupport from '../../src/tasksUtils/tasks.support';
 import { authenticateTestUser } from '../utils/authenticate.users';
 import { resetDB } from '../utils/db';
 import { enqueueTaskMockOnTests } from '../utils/tasks.enqueuer.mock.tests';
-import { testCredentials } from './test.accounts';
+import { testCredentials, testProfilesBase } from './test.accounts';
 import { getTestServices } from './test.services';
 
 export const LOG_LEVEL_MSG = envRuntime.LOG_LEVEL_MSG.value();
@@ -26,15 +29,24 @@ export const EMAIL_SENDER_FROM = process.env.EMAIL_SENDER_FROM as string;
 export const TEST_EMAIL = process.env.TEST_EMAIL as string;
 export const INCLUDE_TEST_PLATFORMS_STR = process.env
   .INCLUDE_TEST_PLATFORMS_STR as string;
+export const TWITTER_BEARER_TOKEN = process.env.TWITTER_BEARER_TOKEN as string;
 
 export type InjectableContext = Readonly<{
   // properties injected using the Root Mocha Hooks
 }>;
-export interface UserAndProfiles {
+export interface TestUserData {
   user: AppUser;
   profiles: AccountProfile[];
+  clustersIds: string[];
 }
-export let testUsers: UserAndProfiles[] = [];
+
+export interface TestProfileData {
+  profile: AccountProfileCreate<{ id: string; username: string }>;
+  clustersIds: string[];
+}
+
+export let testUsers: TestUserData[] = [];
+export let testProfiles: TestProfileData[] = [];
 
 export const TEST_THREADS: string[][] = process.env.TEST_THREADS
   ? JSON.parse(process.env.TEST_THREADS as string)
@@ -109,21 +121,28 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       await Promise.all(
         users.map(async (user) => {
           const profiles = await globalTestServices.db.run(async (manager) => {
-            return globalTestServices.users.profiles.getOfUser(
+            return globalTestServices.profiles.repo.getOfUser(
               user.userId,
               manager
             );
           });
 
-          const userAndProfiles: UserAndProfiles = {
+          const clustersIds =
+            testCredentials.find((cred) =>
+              profiles.some((p) => p.user_id === cred.twitter?.id)
+            )?.clustersIds || [];
+
+          const userData: TestUserData = {
             user,
             profiles,
+            clustersIds,
           };
-          testUsers.push(userAndProfiles);
+          testUsers.push(userData);
         })
       );
 
       testUsers.sort((a, b) => a.user.userId.localeCompare(b.user.userId));
+      testProfiles = testProfilesBase;
 
       Object.assign(this, context);
     },

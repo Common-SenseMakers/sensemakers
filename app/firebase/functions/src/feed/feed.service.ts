@@ -4,13 +4,17 @@ import {
   PostsQuery,
   PostsQueryDefined,
 } from '../@shared/types/types.posts';
+import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
 import { PostsManager } from '../posts/posts.manager';
+
+const DEBUG = false;
 
 export class FeedService {
   constructor(
     protected db: DBInstance,
-    protected postsManager: PostsManager
+    protected postsManager: PostsManager,
+    protected clusters: ClustersService
   ) {}
 
   async getFeed(params: PostsQuery): Promise<AppPostFull[]> {
@@ -37,7 +41,14 @@ export class FeedService {
       addMirrors,
     };
 
-    const posts = await this.postsManager.processing.posts.getMany(queryParams);
+    if (DEBUG) console.log('getFeed', { queryParams });
+
+    const cluster = this.clusters.getInstance(queryParams.clusterId);
+
+    const posts = await this.postsManager.processing.posts.getMany(
+      queryParams,
+      cluster
+    );
 
     const postsFull = await Promise.all(
       posts.map((post) =>
@@ -45,7 +56,8 @@ export class FeedService {
           this.postsManager.processing.hydratePostFull(
             post,
             hydrateConfig,
-            manager
+            manager,
+            cluster
           )
         )
       )

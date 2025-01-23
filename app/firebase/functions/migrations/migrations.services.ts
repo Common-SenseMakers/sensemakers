@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 
 import { initApp } from '../scripts/scripts.utils';
+import { createServices as createServicesOld } from '../src-old/instances/services';
 import { LocalLogger, LogLevel } from '../src/instances/local.logger';
 import { logger } from '../src/instances/logger';
 import { createServices } from '../src/instances/services';
@@ -60,5 +61,5 @@ export const appTarget = initApp(
   'target'
 );
 
-export const servicesSource = createServices(appSource.firestore(), config);
+export const servicesSource = createServicesOld(appSource.firestore(), config);
 export const servicesTarget = createServices(appTarget.firestore(), config);

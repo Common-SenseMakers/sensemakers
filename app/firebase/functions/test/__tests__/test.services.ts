@@ -4,6 +4,8 @@ import { spy, when } from 'ts-mockito';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { ActivityRepository } from '../../src/activity/activity.repository';
 import { ActivityService } from '../../src/activity/activity.service';
+import { ClustersRepository } from '../../src/clusters/clusters.repository';
+import { ClustersService } from '../../src/clusters/clusters.service';
 import {
   BLUESKY_APP_PASSWORD,
   BLUESKY_SERVICE_URL,
@@ -16,6 +18,8 @@ import { Services } from '../../src/instances/services';
 import { LinksRepository } from '../../src/links/links.repository';
 import { LinksMockConfig, LinksService } from '../../src/links/links.service';
 import { getLinksMock } from '../../src/links/links.service.mock';
+import { OntologiesRepository } from '../../src/ontologies/ontologies.repository';
+import { OntologiesService } from '../../src/ontologies/ontologies.service';
 import {
   ParserMockConfig,
   getParserMock,
@@ -31,7 +35,6 @@ import {
   MastodonMockConfig,
   getMastodonMock,
 } from '../../src/platforms/mastodon/mock/mastodon.service.mock';
-import { OrcidService } from '../../src/platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
   PlatformsMap,
@@ -47,6 +50,7 @@ import { PostsManager } from '../../src/posts/posts.manager';
 import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
 import { ProfilesRepository } from '../../src/profiles/profiles.repository';
+import { ProfilesService } from '../../src/profiles/profiles.service';
 import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
@@ -94,10 +98,15 @@ export const getTestServices = (config: TestServicesConfig) => {
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
   const linksRepo = new LinksRepository(db);
+  const ontologiesRepo = new OntologiesRepository(db);
+  const clustersRepo = new ClustersRepository(db);
 
   const identityServices: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
   const time = getTimeMock(new TimeService(), config.time);
+  const ontologiesService = new OntologiesService(ontologiesRepo);
+  const clusters = new ClustersService(clustersRepo);
+
   const MockedTime = spy(new TimeService());
 
   when(MockedTime.now()).thenReturn(
@@ -105,9 +114,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     Date.now() + 3 * 60 * 60 * 1000
   );
 
-  /** mocked orcid */
-  const orcid = new OrcidService();
-
+  
   /** mocked twitter */
   const _twitter = new TwitterService(time, userRepo, {
     clientId: process.env.TWITTER_CLIENT_ID as string,
@@ -125,7 +132,7 @@ export const getTestServices = (config: TestServicesConfig) => {
   const mastodon = getMastodonMock(_mastodon, config.mastodon, testUser);
 
   /** mocked mastodon */
-  const _bluesky = new BlueskyService(time, userRepo, {
+  const _bluesky = new BlueskyService(db, time, {
     BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
     BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
     BLUESKY_SERVICE_URL,
@@ -133,7 +140,6 @@ export const getTestServices = (config: TestServicesConfig) => {
   const bluesky = getBlueskyMock(_bluesky, config.bluesky, testUser);
 
   /** all identity services */
-  identityServices.set(PLATFORM.Orcid, orcid);
   identityServices.set(PLATFORM.Twitter, twitter);
   identityServices.set(PLATFORM.Mastodon, mastodon);
   identityServices.set(PLATFORM.Bluesky, bluesky);
@@ -143,11 +149,18 @@ export const getTestServices = (config: TestServicesConfig) => {
   platformsMap.set(PLATFORM.Mastodon, mastodon);
   platformsMap.set(PLATFORM.Bluesky, bluesky);
 
+  /** profiles service */
+  const profilesService = new ProfilesService(
+    profilesRepo,
+    identityServices,
+    db
+  );
+
   /** users service */
   const usersService = new UsersService(
     db,
     userRepo,
-    profilesRepo,
+    profilesService,
     identityServices,
     platformsMap,
     time,
@@ -169,10 +182,16 @@ export const getTestServices = (config: TestServicesConfig) => {
   const parser = getParserMock(_parser, config.parser);
 
   /** links */
-  const _linksService = new LinksService(linksRepo, time, {
-    apiKey: process.env.IFRAMELY_API_KEY as string,
-    apiUrl: process.env.IFRAMELY_API_URL as string,
-  });
+  const _linksService = new LinksService(
+    clusters,
+    linksRepo,
+    time,
+    ontologiesService,
+    {
+      apiKey: process.env.IFRAMELY_API_KEY as string,
+      apiUrl: process.env.IFRAMELY_API_URL as string,
+    }
+  );
   const links = getLinksMock(_linksService, config.links);
 
   /** posts service */
@@ -182,21 +201,25 @@ export const getTestServices = (config: TestServicesConfig) => {
     postsRepo,
     platformPostsRepo,
     platformsService,
-    links
+    links,
+    clusters
   );
 
   const postsManager = new PostsManager(
     db,
     usersService,
+    profilesService,
     postsProcessing,
     platformsService,
     parser,
-    time
+    time,
+    ontologiesService,
+    clusters
   );
 
   const activity = new ActivityService(activityRepo);
 
-  const feed = new FeedService(db, postsManager);
+  const feed = new FeedService(db, postsManager, clusters);
 
   const services: TestServices = {
     users: usersService,
@@ -207,6 +230,9 @@ export const getTestServices = (config: TestServicesConfig) => {
     db,
     activity,
     links,
+    ontology: ontologiesService,
+    profiles: profilesService,
+    clusters
   };
 
   return services;

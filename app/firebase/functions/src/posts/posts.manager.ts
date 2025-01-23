@@ -1,6 +1,6 @@
 import { DataFactory } from 'n3';
 
-import { BlueskyThread } from '../@shared/types/types.bluesky';
+import { ClusterInstance } from '../@shared/types/types.clusters';
 import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PARSER_MODE,
@@ -54,12 +54,15 @@ import {
   isReferenceLabel,
   isZoteroType,
 } from '../@shared/utils/semantics.helper';
+import { ClustersService } from '../clusters/clusters.service';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { OntologiesService } from '../ontologies/ontologies.service';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
@@ -75,10 +78,13 @@ export class PostsManager {
   constructor(
     protected db: DBInstance,
     protected users: UsersService,
+    protected profiles: ProfilesService,
     public processing: PostsProcessing,
     protected platforms: PlatformsService,
     protected parserService: ParserService,
-    protected time: TimeService
+    protected time: TimeService,
+    public ontologies: OntologiesService,
+    protected clusters: ClustersService
   ) {}
 
   /**
@@ -128,10 +134,8 @@ export class PostsManager {
     }
 
     try {
-      const { platformPost, credentials: newCredentials } = await platform.get(
-        post_id,
-        account.credentials
-      );
+      const { platformPost, credentials: newCredentials } =
+        await platform.getThread(post_id, account.credentials);
 
       if (newCredentials) {
         await this.users.updateAccountCredentials(
@@ -168,6 +172,68 @@ export class PostsManager {
     }
   }
 
+  private async getPlatformPostTimestamp(
+    platformId: PLATFORM,
+    post_id: string,
+    manager: TransactionManager
+  ) {
+    const platformPostId = await this.processing.platformPosts.getFrom_post_id(
+      platformId,
+      post_id,
+      manager
+    );
+
+    const platformPostPosted = await (async () => {
+      if (platformPostId) {
+        const post = await this.processing.platformPosts.get<
+          true,
+          PlatformPost
+        >(platformPostId, manager, true);
+        return post.posted;
+      } else {
+        throw new Error(
+          `Platform post not found on ${platformId} post_id: ${post_id}. 
+           We should not have unavailable posts yet as we are not merging threads`
+        );
+        const result = await this.platforms
+          .get(platformId)
+          .getSinglePost(post_id);
+
+        return result.platformPost;
+      }
+    })();
+
+    if (!platformPostPosted) {
+      throw new Error('PlatformPost not found');
+    }
+
+    return platformPostPosted.timestampMs;
+  }
+
+  private async appendTimestamps(
+    platformId: PLATFORM,
+    params: PlatformFetchParams,
+    manager: TransactionManager
+  ) {
+    if (params.since_id) {
+      params.since_timestamp = await this.getPlatformPostTimestamp(
+        platformId,
+        params.since_id,
+        manager
+      );
+    }
+
+    if (params.until_id) {
+      params.until_timestamp = await this.getPlatformPostTimestamp(
+        platformId,
+        params.until_id,
+        manager
+      );
+    }
+
+    return params;
+  }
+
   /**
    * Read the platformPosts from a platform,
    * Manages the fetched property of the Profile keeping the oldest and newest fetched posts ids.
@@ -181,8 +247,8 @@ export class PostsManager {
     credentials?: AccountCredentials,
     userId?: string
   ) {
-    const profile = await this.users.getOrCreateProfile(
-      getProfileId(platformId, user_id),
+    const profile = await this.profiles.getOrCreateProfile(
+      { profileId: getProfileId(platformId, user_id) },
       manager
     );
 
@@ -191,46 +257,19 @@ export class PostsManager {
       profile.fetched
     );
 
+    /** just add timestamps to bksy fethes for now */
+    const newParams =
+      platformId === PLATFORM.Bluesky
+        ? await this.appendTimestamps(platformId, platformParams, manager)
+        : platformParams;
+
     if (DEBUG) logger.debug(`Platform Service - fetch ${platformId}`);
+
     try {
-      if (platformId === PLATFORM.Bluesky) {
-        if (platformParams.since_id) {
-          const platformPostDocId =
-            await this.processing.platformPosts.getFrom_post_id(
-              platformId,
-              platformParams.since_id,
-              manager
-            );
-          const platformPost: PlatformPost<BlueskyThread> | undefined =
-            platformPostDocId
-              ? await this.processing.platformPosts.get(
-                  platformPostDocId,
-                  manager
-                )
-              : undefined;
-          platformParams.since_timestamp = platformPost?.posted?.timestampMs;
-        }
-        if (platformParams.until_id) {
-          const platformPostDocId =
-            await this.processing.platformPosts.getFrom_post_id(
-              platformId,
-              platformParams.until_id,
-              manager
-            );
-          const platformPost: PlatformPost<BlueskyThread> | undefined =
-            platformPostDocId
-              ? await this.processing.platformPosts.get(
-                  platformPostDocId,
-                  manager
-                )
-              : undefined;
-          platformParams.until_timestamp = platformPost?.posted?.timestampMs;
-        }
-      }
       const fetchedPosts = await this.platforms.fetch(
         user_id,
         platformId,
-        platformParams,
+        newParams,
         credentials
       );
 
@@ -257,7 +296,7 @@ export class PostsManager {
         fetchedPosts.fetched
       );
 
-      await this.users.profiles.setAccountProfileFetched(
+      await this.profiles.repo.setAccountProfileFetched(
         platformId,
         user_id,
         newFetchedDetails,
@@ -395,23 +434,24 @@ export class PostsManager {
       }
 
       const authorUserId =
-        await this.users.profiles.getUserIdWithPlatformAccount(
+        await this.profiles.repo.getUserIdWithPlatformAccount(
           platformId,
           user_id,
           manager
         );
 
       /** Create the PlatformPosts and AppPosts */
-      const platformPostsCreated = await this.processing.createPlatformPosts(
-        platformPostsCreate,
-        manager,
-        authorUserId
-      );
+      const platformPostsCreated =
+        await this.processing.createOrMergePlatformPosts(
+          platformPostsCreate,
+          manager,
+          authorUserId
+        );
 
       /** make sure the profiles of each post exist */
       const profileIds = new Set<string>();
 
-      /** get all unique profiles */
+      /** fetch all unique profiles presets in the platform posts */
       platformPostsCreated.forEach((posts) => {
         if (!profileIds.has(posts.post.authorProfileId)) {
           profileIds.add(posts.post.authorProfileId);
@@ -420,7 +460,7 @@ export class PostsManager {
 
       await Promise.all(
         Array.from(profileIds).map((profileId) => {
-          this.users.getOrCreateProfile(profileId, manager);
+          this.profiles.getOrCreateProfile({ profileId }, manager);
         })
       );
 
@@ -514,7 +554,10 @@ export class PostsManager {
    * single place where new posts are fetched for a signedup user
    * from any platform
    * */
-  private async fetchIfNecessary(queryParams: PostsQueryDefined): Promise<{
+  private async fetchIfNecessary(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ): Promise<{
     posts: AppPost[];
     enough: boolean;
   }> {
@@ -539,7 +582,7 @@ export class PostsManager {
     let enough: boolean = true;
 
     /** if untilId is provided fetch backwards, but only if not enough posts are already stored */
-    const posts = await this.processing.posts.getMany(queryParams);
+    const posts = await this.processing.posts.getMany(queryParams, cluster);
 
     /** fetch if older posts are less thant he expected amount */
     if (posts.length < queryParams.fetchParams.expectedAmount) {
@@ -556,7 +599,7 @@ export class PostsManager {
       if (queryParams.userId === undefined) {
         throw new Error('userId is a required query parameter here');
       }
-      return this.users.profiles.getOfUser(queryParams.userId, manager);
+      return this.profiles.repo.getOfUser(queryParams.userId, manager);
     });
 
     const platformsWithoutFetch = profiles
@@ -582,13 +625,16 @@ export class PostsManager {
   }
 
   /** get AppPost and fetch for new posts if necessary */
-  private async getAndFetchIfNecessary(queryParams: PostsQueryDefined) {
+  private async getAndFetchIfNecessary(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ) {
     if (!queryParams.userId) {
       throw new Error('userId is required');
     }
 
     /** only fetch if searching for all "my posts" and not filtering by status or  */
-    const { posts, enough } = await this.fetchIfNecessary(queryParams);
+    const { posts, enough } = await this.fetchIfNecessary(queryParams, cluster);
 
     /**
      * after fetching (if it was necessary), get the posts from
@@ -600,10 +646,13 @@ export class PostsManager {
         return posts;
       }
 
-      return this.processing.posts.getMany({
-        ...queryParams,
-        userId: queryParams.userId,
-      });
+      return this.processing.posts.getMany(
+        {
+          ...queryParams,
+          userId: queryParams.userId,
+        },
+        cluster
+      );
     })();
 
     return _posts;
@@ -639,12 +688,13 @@ export class PostsManager {
       ..._queryParams,
     };
 
-    const appPosts = await this.getAndFetchIfNecessary(queryParams);
+    const cluster = this.clusters.getInstance(queryParams.clusterId);
+    const appPosts = await this.getAndFetchIfNecessary(queryParams, cluster);
 
     const postsFull = await Promise.all(
       appPosts.map((post) =>
         this.db.run((manager) =>
-          this.processing.hydratePostFull(post, hydrateConfig, manager)
+          this.processing.hydratePostFull(post, hydrateConfig, manager, cluster)
         )
       )
     );
@@ -660,13 +710,17 @@ export class PostsManager {
     postId: string,
     config: HydrateConfig,
     shouldThrow?: T,
-    manager?: TransactionManager
+    manager?: TransactionManager,
+    clusterId?: string
   ) {
     const func = async (manager: TransactionManager) => {
+      const cluster = this.clusters.getInstance(clusterId);
+
       const post = await this.processing.getPostFull(
         postId,
         config,
         manager,
+        cluster,
         shouldThrow
       );
       // use this occassion to check if post processing expired
@@ -688,6 +742,7 @@ export class PostsManager {
             postId,
             config,
             manager,
+            cluster,
             shouldThrow
           );
         }
@@ -862,9 +917,12 @@ export class PostsManager {
   }
 
   protected async _parsePost(postId: string) {
+    /** split the read post and write semantics in two transactions because the parsePost
+     * can take longer than the transaction expiration time */
     const post = await this.db.run(async (manager) => {
       return this.processing.posts.get(postId, manager, true);
     });
+
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
@@ -884,17 +942,23 @@ export class PostsManager {
     /** single place where we enforce rules over semantics */
     const parserResult = await this.sanitizeParserResult(post, _parserResult);
 
-    const update: PostUpdate = {
-      semantics: parserResult.semantics,
-      originalParsed: parserResult,
-      parsedStatus: AppPostParsedStatus.PROCESSED,
-      parsingStatus: AppPostParsingStatus.IDLE,
-    };
-
-    if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
+    if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId });
 
     /** store the semantics and mark as processed */
     await this.db.run(async (manager) => {
+      /** store the ontology */
+      if (parserResult.metadata?.ontology) {
+        await this.ontologies.setMany(parserResult.metadata?.ontology, manager);
+      }
+
+      /** store the semantics in the post */
+      const update: PostUpdate = {
+        semantics: parserResult.semantics,
+        originalParsed: parserResult,
+        parsedStatus: AppPostParsedStatus.PROCESSED,
+        parsingStatus: AppPostParsingStatus.IDLE,
+      };
+
       return this.updatePost(post.id, update, manager);
     });
   }
@@ -950,7 +1014,7 @@ export class PostsManager {
                 );
               }
 
-              const profile = await this.users.profiles.getByProfileId(
+              const profile = await this.profiles.repo.getByProfileId(
                 profileId,
                 manager,
                 true
@@ -959,7 +1023,7 @@ export class PostsManager {
                 throw new Error('unexpected missing profile');
               }
 
-              await this.users.profiles.setUserId(profileId, userId, manager);
+              await this.profiles.repo.update(profileId, { userId }, manager);
             })
           );
         })
@@ -978,10 +1042,14 @@ export class PostsManager {
               /** udpate the profile */
               const profileId = getProfileId(platform, account.user_id);
               /** get this account platform posts */
-              const posts = await this.processing.posts.getAllOfQuery({
-                profileId,
-                fetchParams: { expectedAmount: 1000 },
-              });
+              const posts = await this.processing.posts.getAllOfQuery(
+                {
+                  profileId,
+                  fetchParams: { expectedAmount: 1000 },
+                },
+                this.clusters.getInstance()
+              );
+
               if (DEBUG) {
                 logger.debug(`got ${posts.length} posts of ${profileId}`);
               }
@@ -1013,10 +1081,13 @@ export class PostsManager {
   async deleteAccountFull(platformId: PLATFORM, user_id: string) {
     const profileId = getProfileId(platformId, user_id);
 
-    const posts = await this.processing.posts.getAllOfQuery({
-      profileId,
-      fetchParams: { expectedAmount: 100000 },
-    });
+    const posts = await this.processing.posts.getAllOfQuery(
+      {
+        profileId,
+        fetchParams: { expectedAmount: 100000 },
+      },
+      this.clusters.getInstance()
+    );
 
     if (DEBUG) {
       logger.debug(`fully deleting ${posts.length} posts of ${profileId}`);
@@ -1048,7 +1119,7 @@ export class PostsManager {
           manager
         );
       }
-      this.users.profiles.delete(profileId, manager);
+      this.profiles.repo.delete(profileId, manager);
     });
   }
 }

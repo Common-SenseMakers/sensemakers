@@ -22,9 +22,8 @@ describe('021-nonuser account tests', () => {
   describe('create a non user account with autofetch true', () => {
     it('gets all autofetched profiles', async () => {
       const nonUserProfile = await services.db.run(async (manager) =>
-        services.users.getOrCreateProfileByUsername(
-          PLATFORM.Bluesky,
-          'wesleyfinck.org',
+        services.profiles.getOrCreateProfile(
+          { platform: PLATFORM.Bluesky, username: 'wesleyfinck.org' },
           manager
         )
       );
@@ -33,7 +32,7 @@ describe('021-nonuser account tests', () => {
       }
 
       const fetchedProfile = await services.db.run(async (manager) =>
-        services.users.profiles.getByProfileId(
+        services.profiles.repo.getByProfileId(
           getProfileId(PLATFORM.Bluesky, nonUserProfile.user_id),
           manager,
           true
@@ -41,14 +40,14 @@ describe('021-nonuser account tests', () => {
       );
 
       expect(fetchedProfile).to.not.be.undefined;
-      const profiles = await services.users.profiles.getMany({
+      const profiles = await services.profiles.repo.getMany({
         autofetch: true,
         platformId: PLATFORM.Bluesky,
         userIdDefined: false,
       });
       expect(profiles.length).to.be.equal(1);
 
-      const userProfiles = await services.users.profiles.getMany({
+      const userProfiles = await services.profiles.repo.getMany({
         autofetch: true,
         platformId: PLATFORM.Bluesky,
         userIdDefined: true,

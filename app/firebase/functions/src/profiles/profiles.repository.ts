@@ -1,3 +1,5 @@
+import { FieldValue } from 'firebase-admin/firestore';
+
 import { PLATFORM } from '../@shared/types/types.platforms';
 import {
   AccountProfile,
@@ -9,6 +11,7 @@ import {
   profileDefaults,
 } from '../@shared/types/types.profiles';
 import { DefinedIfTrue } from '../@shared/types/types.user';
+import { CollectionNames } from '../@shared/utils/collectionNames';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import { DBInstance, Query } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
@@ -217,15 +220,6 @@ export class ProfilesRepository {
     manager.update(profileRef, { fetched: newFetched });
   }
 
-  async setUserId(
-    profileId: string,
-    userId: string,
-    manager: TransactionManager
-  ) {
-    const profileRef = await this.getRef(profileId, manager, true);
-    manager.update(profileRef, { userId });
-  }
-
   async update(
     profileId: string,
     update: ProfileUpdate,
@@ -289,5 +283,54 @@ export class ProfilesRepository {
     return snapshot.docs.map((doc) => {
       return doc.id;
     });
+  }
+
+  async getClusters(profileId: string, manager: TransactionManager) {
+    const profile = await this.getByProfileId(profileId, manager, true);
+    return profile.clusters || [];
+  }
+
+  getClusterRef(clusterId: string) {
+    return this.db.collections.clusters.doc(clusterId);
+  }
+
+  getClusterProfilesCollection(clusterId: string) {
+    return this.getClusterRef(clusterId).collection(
+      CollectionNames.ClusterProfiles
+    );
+  }
+
+  getClusterProfileRef(clusterId: string, profileId: string) {
+    return this.getClusterProfilesCollection(clusterId).doc(profileId);
+  }
+
+  async addClusterToProfile(
+    profileId: string,
+    clusterId: string,
+    manager: TransactionManager
+  ) {
+    const profileRef = await this.getRef(profileId, manager);
+    manager.update(profileRef, { clusters: FieldValue.arrayUnion(clusterId) });
+
+    const clusterRef = this.getClusterRef(clusterId);
+    const clusterProfileRef = this.getClusterProfileRef(clusterId, profileId);
+
+    manager.set(clusterProfileRef, { profileId });
+
+    /** set clusterId as property of all clusters */
+    manager.set(clusterRef, { clusterId });
+  }
+
+  async removeCluster(
+    profileId: string,
+    clusterId: string,
+    manager: TransactionManager
+  ) {
+    const ref = await this.getRef(profileId, manager, true);
+    manager.update(ref, { clusters: FieldValue.arrayRemove(clusterId) });
+
+    const clusterRef = this.getClusterRef(clusterId);
+
+    manager.delete(clusterRef);
   }
 }

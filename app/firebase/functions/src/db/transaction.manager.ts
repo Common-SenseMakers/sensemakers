@@ -119,15 +119,15 @@ export class TransactionManager {
   }
 
   async mutate<D>(documentRef: DocumentReference<any>, mutation: Mutation<D>) {
-    const current = this.mutations.get(documentRef.id) || [];
+    const current = this.mutations.get(documentRef.path) || [];
     current.push(mutation);
-    return this.mutations.set(documentRef.id, current);
+    return this.mutations.set(documentRef.path, current);
   }
 
   async get<T>(
     documentRef: DocumentReference<T>
   ): Promise<DocumentSnapshot<T>> {
-    const cached = this.getCumMutationOf(documentRef.id);
+    const cached = this.getCumMutationOf(documentRef.path);
     const onFirestore = this.transaction
       ? await this.transaction.get(documentRef)
       : await documentRef.get();

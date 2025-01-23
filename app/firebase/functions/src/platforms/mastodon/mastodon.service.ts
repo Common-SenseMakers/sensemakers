@@ -12,6 +12,7 @@ import {
 } from '../../@shared/types/types.mastodon';
 import {
   FetchedResult,
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostDraftApproval,
@@ -32,6 +33,7 @@ import {
 } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
 import {
+  buildMastodonPostUri,
   getGlobalMastodonUsername,
   parseMastodonAccountURI,
   parseMastodonGlobalUsername,
@@ -41,7 +43,7 @@ import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
 import { UsersRepository } from '../../users/users.repository';
-import { PlatformService } from '../platforms.interface';
+import { PlatformService, WithCredentials } from '../platforms.interface';
 import {
   cleanMastodonContent,
   convertMastodonPostsToThreads,
@@ -309,12 +311,23 @@ export class MastodonService
       allStatuses[0].account
     );
 
-    const platformPosts = threads.map((thread) => ({
-      post_id: thread.thread_id,
-      user_id,
-      timestampMs: new Date(thread.posts[0].createdAt).getTime(),
-      post: thread,
-    }));
+    const platformPosts = await Promise.all(
+      threads.map(async (thread) => {
+        const rootPostId = await this.getRootPostId(
+          thread.posts[0],
+          credentials
+        );
+        return {
+          post_id: rootPostId,
+          user_id,
+          timestampMs: new Date(thread.posts[0].createdAt).getTime(),
+          post: {
+            ...thread,
+            thread_id: rootPostId,
+          },
+        };
+      })
+    );
 
     const result = {
       fetched: {
@@ -378,8 +391,8 @@ export class MastodonService
         };
       }
       return {
-      url: status.url ? status.url : undefined,
-      content: cleanMastodonContent(status.content),
+        url: status.url ? status.url : undefined,
+        content: cleanMastodonContent(status.content),
       };
     });
 
@@ -436,7 +449,14 @@ export class MastodonService
     };
   }
 
-  public async get(
+  getSinglePost(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+    throw new Error('Method not implemented.');
+  }
+
+  public async getThread(
     post_id: string,
     credentials: AccountCredentials<
       MastodonAccountCredentials,
@@ -556,5 +576,69 @@ export class MastodonService
     };
 
     return profile;
+  }
+  isPartOfMainThread(
+    rootPost: PlatformPost<MastodonThread>,
+    post: PlatformPostCreate<MastodonThread>
+  ): boolean {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (rootPost.posted.post_id !== post.posted.post_id) return false;
+    const rootThreadPosts = rootPost.posted.post.posts;
+    const lastRootThreadPost = rootThreadPosts[rootThreadPosts.length - 1];
+    const newThreadPosts = post.posted.post.posts;
+    const firstNewThreadPost = newThreadPosts[0];
+
+    if (firstNewThreadPost.inReplyToId === lastRootThreadPost.id) return true;
+
+    return false;
+  }
+  mergeBrokenThreads(
+    rootPost: PlatformPost<MastodonThread>,
+    post: PlatformPostCreate<MastodonThread>
+  ): PlatformPostPosted | undefined {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (!this.isPartOfMainThread(rootPost, post)) {
+      return undefined;
+    }
+
+    const mergedThread = [
+      ...rootPost.posted?.post.posts,
+      ...post.posted?.post.posts,
+    ];
+    rootPost.posted.post.posts = mergedThread;
+    return rootPost.posted;
+  }
+  isRootThread(post: PlatformPostCreate<MastodonThread>): boolean {
+    return post.posted?.post.posts[0].uri === post.posted?.post_id;
+  }
+
+  public async getRootPostId(
+    post: MastodonPost,
+    credentials?: AccountCredentials<
+      MastodonAccountCredentials,
+      MastodonAccountCredentials
+    >
+  ): Promise<string> {
+    if (!post.inReplyToId) {
+      return post.uri;
+    }
+
+    const { server, postId, username } = parseMastodonPostURI(post.uri);
+    const client = this.getClient(server, credentials?.read);
+
+    const context = await client.v1.statuses.$select(postId).context.fetch();
+    const rootPostId = context.ancestors.find(
+      (status) => !status.inReplyToId
+    )?.id;
+
+    return buildMastodonPostUri(
+      username,
+      server,
+      rootPostId || post.inReplyToId
+    ); // if can't find the root id from the context, assume the root is the post's inReplyToId
   }
 }

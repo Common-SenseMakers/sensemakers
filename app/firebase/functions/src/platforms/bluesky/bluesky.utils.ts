@@ -1,10 +1,5 @@
-import AtpAgent, {
-  AppBskyEmbedExternal,
-  AppBskyFeedPost,
-  AtpSessionData,
-} from '@atproto/api';
+import { AppBskyEmbedExternal, AppBskyFeedPost } from '@atproto/api';
 import { Link } from '@atproto/api/dist/client/types/app/bsky/richtext/facet';
-import { Firestore } from 'firebase-admin/firestore';
 
 import {
   BLUESKY_REPOST_URI_PARAM,
@@ -12,8 +7,6 @@ import {
   BlueskyThread,
   QuotedBlueskyPost,
 } from '../../@shared/types/types.bluesky';
-import { PLATFORM } from '../../@shared/types/types.platforms';
-import { getConfig } from '../../services.config';
 
 export const convertBlueskyPostsToThreads = (
   posts: BlueskyPost[],
@@ -24,7 +17,7 @@ export const convertBlueskyPostsToThreads = (
   posts
     .filter((post) => post.author.did === authorId)
     .forEach((post) => {
-      const rootId = findRootId(post, posts);
+      const rootId = findRootId(post);
       if (!postThreadsMap.has(rootId)) {
         postThreadsMap.set(rootId, []);
       }
@@ -52,7 +45,7 @@ export const convertBlueskyPostsToThreads = (
     const bskAuthor = sortedPosts[0].author;
 
     return {
-      thread_id: sortedPosts[0].uri,
+      thread_id: findRootId(sortedPosts[0]),
       posts: primaryThread,
       author: {
         id: bskAuthor.did,
@@ -83,21 +76,12 @@ export const convertBlueskyPostsToThreads = (
   return [...threads, ...repostedThreads];
 };
 
-const findRootId = (post: BlueskyPost, posts: BlueskyPost[]): string => {
-  let currentPost = post;
-
-  while (currentPost.record.reply) {
-    const parentPost = posts.find(
-      (p) => p.uri === currentPost.record.reply?.parent.uri
-    );
-    if (!parentPost) {
-      // If we don't have the parent in the list, treat the current post as root
-      return currentPost.uri;
-    }
-    currentPost = parentPost;
+const findRootId = (post: BlueskyPost): string => {
+  const rootUri = post.record.reply?.root.uri;
+  if (rootUri) {
+    return rootUri;
   }
-
-  return currentPost.uri; // Return the true root (post without reply)
+  return post.uri;
 };
 
 export const extractPrimaryThread = (
@@ -231,58 +215,4 @@ export function removeUndefinedFields<T extends Record<string, any>>(
     }
   });
   return obj;
-}
-
-export async function useBlueskyAdminCredentials(firestore: Firestore) {
-  const platformId = PLATFORM.Bluesky;
-  const blueskyDoc = await firestore
-    .collection('adminCredentials')
-    .doc(platformId)
-    .get();
-  const { BLUESKY_APP_PASSWORD, BLUESKY_SERVICE_URL, BLUESKY_USERNAME } =
-    getConfig().bluesky;
-  const agent = new AtpAgent({ service: BLUESKY_SERVICE_URL });
-  const blueskySession = await (async () => {
-    if (!blueskyDoc.exists || !blueskyDoc.data()?.session) {
-      await agent.login({
-        identifier: BLUESKY_USERNAME,
-        password: BLUESKY_APP_PASSWORD,
-      });
-      if (!agent.session) {
-        throw new Error('Failed to login to Bluesky with admin credentials');
-      }
-      await firestore
-        .collection('adminCredentials')
-        .doc(platformId)
-        .set({
-          session: removeUndefinedFields(agent.session),
-        });
-      return agent.session;
-    }
-    return blueskyDoc.data()?.session as AtpSessionData;
-  })();
-
-  try {
-    await agent.resumeSession(blueskySession);
-  } catch (e) {
-    await agent.login({
-      identifier: BLUESKY_USERNAME,
-      password: BLUESKY_APP_PASSWORD,
-    });
-  }
-
-  if (!agent.session) {
-    throw new Error('Failed to resume Bluesky session with admin credentials');
-  }
-
-  if (blueskySession.accessJwt !== agent.session.accessJwt) {
-    await firestore
-      .collection('adminCredentials')
-      .doc(platformId)
-      .set({
-        session: removeUndefinedFields(agent.session),
-      });
-  }
-  const credentials = { read: agent.session, write: agent.session };
-  return credentials;
 }

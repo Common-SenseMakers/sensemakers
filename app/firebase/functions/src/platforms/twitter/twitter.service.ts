@@ -13,6 +13,7 @@ import {
 } from '../../@shared/types/types.fetch';
 import {
   FetchedResult,
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostDeleteDraft,
   PlatformPostDraft,
@@ -47,7 +48,10 @@ import {
   TwitterThread,
   TwitterUser,
 } from '../../@shared/types/types.twitter';
-import { AppUserRead } from '../../@shared/types/types.user';
+import {
+  AccountCredentials,
+  AppUserRead,
+} from '../../@shared/types/types.user';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -101,8 +105,14 @@ export class TwitterService
       this.cache = {};
     }
   }
+  getSinglePost(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+    throw new Error('Method not implemented.');
+  }
 
-  async get(
+  async getThread(
     post_id: string,
     credentials?: TwitterAccountCredentials
   ): Promise<{
@@ -664,5 +674,45 @@ export class TwitterService
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
+  }
+  isPartOfMainThread(
+    rootPost: PlatformPost<TwitterThread>,
+    post: PlatformPostCreate<TwitterThread>
+  ): boolean {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (rootPost.posted.post_id !== post.posted.post_id) return false;
+    const rootThreadPosts = rootPost.posted.post.tweets;
+    const lastRootThreadPost = rootThreadPosts[rootThreadPosts.length - 1];
+    const newThreadPosts = post.posted.post.tweets;
+    const firstNewThreadPost = newThreadPosts[0];
+    const replyToId = firstNewThreadPost.referenced_tweets?.find(
+      (referencedTweet) => referencedTweet.type === 'replied_to'
+    )?.id;
+    if (replyToId === lastRootThreadPost.id) return true;
+
+    return false;
+  }
+  mergeBrokenThreads(
+    rootPost: PlatformPost<TwitterThread>,
+    post: PlatformPostCreate<TwitterThread>
+  ): PlatformPostPosted | undefined {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (!this.isPartOfMainThread(rootPost, post)) {
+      return undefined;
+    }
+
+    const mergedThread = [
+      ...rootPost.posted?.post.tweets,
+      ...post.posted?.post.tweets,
+    ];
+    rootPost.posted.post.tweets = mergedThread;
+    return rootPost.posted;
+  }
+  isRootThread(post: PlatformPostCreate<TwitterThread>): boolean {
+    return post.posted?.post.tweets[0].id === post.posted?.post_id;
   }
 }

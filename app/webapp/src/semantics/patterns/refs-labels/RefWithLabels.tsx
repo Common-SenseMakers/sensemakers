@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PostEditKeys } from '../../../i18n/i18n.edit.post';
-import { ParserOntology } from '../../../shared/types/types.parser';
+import { OntologyItem } from '../../../shared/types/types.parser';
 import { OEmbed, RefLabel } from '../../../shared/types/types.references';
 import { LINKS_TO_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
@@ -23,10 +23,14 @@ export const RefWithLabels = (props: {
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
-  ontology?: ParserOntology;
+  ontology?: OntologyItem[];
 }) => {
   const { t } = useTranslation();
-  const labelsOntology = props.ontology?.semantic_predicates;
+  const ontology = props.ontology;
+  const showAggregatedLabels =
+    props.showAggregatedLabels !== undefined
+      ? props.showAggregatedLabels
+      : false;
 
   /** display names for selected labels */
   let labelsDisplayNames = useMemo(
@@ -34,8 +38,8 @@ export const RefWithLabels = (props: {
       props.authorLabels
         .filter((labelUri) => labelUri !== LINKS_TO_URI)
         .map((labelUri) => {
-          const label_ontology = labelsOntology
-            ? labelsOntology.find((item) => item.uri === labelUri)
+          const label_ontology = ontology
+            ? ontology.find((item) => item.uri === labelUri)
             : undefined;
 
           if (!label_ontology)
@@ -43,7 +47,7 @@ export const RefWithLabels = (props: {
 
           return label_ontology.display_name;
         }),
-    [labelsOntology, props.authorLabels]
+    [ontology, props.authorLabels]
   );
 
   // make labelsDisplayNames unique
@@ -52,17 +56,17 @@ export const RefWithLabels = (props: {
   /** list of possible labels from ontology (filtering those selected) */
   const optionDisplayNames = useMemo(
     () =>
-      labelsOntology
-        ? labelsOntology
+      ontology
+        ? ontology
             .filter((l) => !props.authorLabels.includes(l.uri))
             .map((l) => l.display_name)
         : undefined,
-    [labelsOntology, props.authorLabels]
+    [ontology, props.authorLabels]
   );
 
   const getLabelFromDisplayName = (displayName: string) => {
-    const item = labelsOntology
-      ? labelsOntology.find((l) => l.display_name === displayName)
+    const item = ontology
+      ? ontology.find((l) => l.display_name === displayName)
       : undefined;
     if (!item)
       throw new Error(
@@ -108,7 +112,7 @@ export const RefWithLabels = (props: {
         </Box>
       )}
 
-      {props.showAggregatedLabels !== false &&
+      {showAggregatedLabels &&
       props.aggregatedLabels &&
       props.aggregatedLabels.length > 0 ? (
         <Box margin={{ top: '22px' }}>

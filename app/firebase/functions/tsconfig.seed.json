@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "lib-seed",
+    "rootDir": ".",
+    "baseUrl": "./"
+  },
+  "compileOnSave": true,
+  "include": ["seed/**/*"]
+}

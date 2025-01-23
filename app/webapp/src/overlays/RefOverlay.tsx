@@ -62,7 +62,7 @@ export const RefOverlay = (props: { refUrl: string }) => {
     return {
       endpoint: '/api/feed/get',
       queryParams: {
-        semantics: { refs: [refUrl], topic: SCIENCE_TOPIC_URI },
+        semantics: { ref: refUrl, topic: SCIENCE_TOPIC_URI },
         hydrateConfig: { addAggregatedLabels: false },
       },
       DEBUG_PREFIX: 'REF FEED',
@@ -96,6 +96,7 @@ export const RefOverlay = (props: { refUrl: string }) => {
               oembed={refDisplayMeta.oembed}
               authorLabels={authorLabels}
               aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+              showAggregatedLabels={true}
               showDescription={true}
               editable={false}
               ontology={refDisplayMeta?.ontology}

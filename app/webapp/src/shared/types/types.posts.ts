@@ -26,20 +26,31 @@ export interface GenericThread {
 }
 
 /** Structured semantics */
+export interface TabsInfo {
+  isTab01: boolean;
+  isTab02: boolean;
+  isTab03: boolean;
+  isTab04: boolean;
+  isTab05: boolean;
+  isTab06: boolean;
+}
+
 export interface StructuredSemantics {
-  labels?: string[];
+  tabs?: TabsInfo;
   keywords?: string[];
   refs?: string[];
-  refsMeta?: Record<string, RefMeta>;
   topic?: string;
+
+  labels?: ArrayIncludeQuery;
+  refsMeta?: Record<string, RefMeta>;
 }
 
 export type ArrayIncludeQuery = string[];
 
 export interface StructuredSemanticsQuery {
-  labels?: ArrayIncludeQuery;
-  keywords?: ArrayIncludeQuery;
-  refs?: ArrayIncludeQuery;
+  tab?: number;
+  keyword?: string;
+  ref?: string;
   topic?: string;
 }
 
@@ -111,16 +122,6 @@ export interface PostAndAuthor {
 }
 
 /**
- * Payload to mirror a post on other platforms,
- */
-export interface AppPostMirror {
-  postId: string;
-  content?: string;
-  semantics?: AppPostSemantics;
-  mirrors: PlatformPost[];
-}
-
-/**
  * PostUpdate
  */
 export type PostUpdate = Partial<
@@ -159,6 +160,7 @@ export interface PostsQueryParams {
 
 export interface PostsQuery extends PostsQueryParams {
   fetchParams?: FetchParams;
+  clusterId?: string;
 }
 
 export type PostsQueryDefined = Omit<PostsQuery, 'fetchParams'> & {
@@ -181,3 +183,13 @@ export interface GetPostPayload {
   postId: string;
   config?: HydrateConfig;
 }
+
+export type IndexedPost = Pick<
+  AppPost,
+  | 'id'
+  | 'authorUserId'
+  | 'origin'
+  | 'authorProfileId'
+  | 'createdAtMs'
+  | 'structuredSemantics'
+>;
