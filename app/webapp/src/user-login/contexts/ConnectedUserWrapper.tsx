@@ -1,5 +1,6 @@
 import { PropsWithChildren, createContext, useContext } from 'react';
 
+import { ClusterContext } from '../../posts.fetcher/cluster.context';
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
 import { DisconnectUserContext } from './DisconnectUserContext';
@@ -31,9 +32,11 @@ export const ConnectedUserWrapper = (props: PropsWithChildren) => {
             <BlueskyContext>
               <MastodonContext>
                 <TwitterContext>
-                  <UserPostsContext>
-                    <NavHistoryContext>{props.children}</NavHistoryContext>
-                  </UserPostsContext>
+                  <ClusterContext>
+                    <UserPostsContext>
+                      <NavHistoryContext>{props.children}</NavHistoryContext>
+                    </UserPostsContext>
+                  </ClusterContext>
                 </TwitterContext>
               </MastodonContext>
             </BlueskyContext>

@@ -1,13 +1,20 @@
+import { ClusterInstance } from '../@shared/types/types.clusters';
 import { RefMeta } from '../@shared/types/types.parser';
 import {
   LinkMeta,
   LinkSource,
   OEmbed,
-  RefPostData,
+  RefDisplayMeta,
+  RefLabel,
 } from '../@shared/types/types.references';
+import { CollectionNames } from '../@shared/utils/collectionNames';
+import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
+import { ClustersService } from '../clusters/clusters.service';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { OntologiesService } from '../ontologies/ontologies.service';
+import { IndexedPostsRepo } from '../posts/indexed.posts.repository';
 import { TimeService } from '../time/time.service';
 import { LinksRepository } from './links.repository';
 import { hashUrl } from './links.utils';
@@ -24,8 +31,10 @@ export interface LinksConfig {
 
 export class LinksService {
   constructor(
+    protected clusters: ClustersService,
     public links: LinksRepository,
     protected time: TimeService,
+    protected ontology: OntologiesService,
     protected config: LinksConfig
   ) {}
 
@@ -133,26 +142,61 @@ export class LinksService {
     return newOembed;
   }
 
-  async setRefPost(
-    url: string,
-    postData: RefPostData,
+  public async getAggregatedRefLabels(
+    reference: string,
+    cluster: ClusterInstance,
     manager: TransactionManager
-  ) {
-    const linkId = hashUrl(url);
-    await this.links.setRefPost(linkId, postData, manager);
+  ): Promise<RefLabel[]> {
+    const refLabels: RefLabel[] = [];
+
+    // Get all posts for reference from their respective subcollections
+    const refId = hashUrl(reference);
+    const indexedRepo = new IndexedPostsRepo(
+      cluster.collection(CollectionNames.Refs)
+    );
+
+    const refPosts = await indexedRepo.getAllPosts(refId, manager);
+
+    // Process each post's labels directly from the subcollection documents
+    refPosts.forEach((refPost) => {
+      if (
+        refPost?.structuredSemantics?.labels &&
+        refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
+      ) {
+        const thisRefLabels = refPost.structuredSemantics?.labels?.map(
+          (label): RefLabel => ({
+            label,
+            postId: refPost.id,
+            authorProfileId: refPost.authorProfileId,
+          })
+        );
+        refLabels.push(...thisRefLabels);
+      }
+    });
+
+    return refLabels;
   }
 
-  async getRefPosts(url: string, manager: TransactionManager) {
-    const linkId = hashUrl(url);
-    return this.links.getRefPosts(linkId, manager);
-  }
-
-  async deleteRefPost(
-    url: string,
-    postId: string,
-    manager: TransactionManager
+  async getAggregatedRefLabelsForDisplay(
+    ref: string,
+    manager: TransactionManager,
+    clusterId?: string
   ) {
-    const linkId = hashUrl(url);
-    return this.links.deleteRefPost(linkId, postId, manager);
+    const cluster = this.clusters.getInstance(clusterId);
+    const refOEmbed = await this.getOEmbed(ref, manager);
+    const refLabels = await this.getAggregatedRefLabels(ref, cluster, manager);
+
+    const ontology = await this.ontology.getMany(
+      refLabels.map((l) => l.label),
+      manager
+    );
+
+    const refDisplayMeta: RefDisplayMeta = {
+      aggregatedLabels: refLabels,
+      ontology,
+      oembed: refOEmbed,
+    };
+
+    return refDisplayMeta;
   }
 }

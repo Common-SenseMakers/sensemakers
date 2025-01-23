@@ -9,13 +9,16 @@
     "build:watch": "rm -rf ./lib & tsc --watch",
     "build:watch-test": "rm -rf ./lib-test & tsc --watch -p ./tsconfig.test.json",
     "build:watch-scripts": "tsc --watch -p ./tsconfig.scripts.json",
+    "build:watch-migration": "tsc --watch -p ./tsconfig.migration.json",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "run-script": "ts-node --project ./tsconfig.scripts.json",
+    "run-migration": "ts-node --project ./tsconfig.migration.json",
     "add-accounts": "yarn run-script ./scripts/016-add-account-data.ts",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "run-seed": "ts-node --project ./tsconfig.scripts.json"
   },
   "engines": {
     "node": "18"
@@ -25,6 +28,7 @@
     "@atproto/api": "^0.13.7",
     "@magic-sdk/admin": "^2.4.1",
     "@nanopub/sign": "^0.1.4",
+    "@notionhq/client": "^2.2.15",
     "@types/n3": "^1.16.4",
     "@types/node-forge": "^1.3.11",
     "@types/pino": "^7.0.5",

@@ -26,6 +26,7 @@ export interface AccountProfile<P extends PlatformProfile = PlatformProfile> {
   profile?: P;
   fetched?: FetchedDetails;
   autofetch?: boolean;
+  clusters?: string[];
 }
 
 export type ProfileUpdate = Partial<
@@ -36,7 +37,10 @@ export const profileDefaults: Partial<AccountProfile> = {
   autofetch: true,
 };
 
-export type AccountProfileRead = Omit<AccountProfile, 'fetched' | 'id'>;
+export type AccountProfileRead = Omit<
+  AccountProfile,
+  'fetched' | 'id' | 'clusters'
+>;
 
 export interface PlatformProfile {
   id: string;
@@ -47,7 +51,7 @@ export interface PlatformProfile {
 }
 
 export type AccountProfileCreate<P extends PlatformProfile = PlatformProfile> =
-  Omit<AccountProfile<P>, 'id'>;
+  Omit<AccountProfile<P>, 'id' | 'clusters'>;
 
 export type AccountProfileBase<P extends PlatformProfile = PlatformProfile> =
   Omit<AccountProfile<P>, 'id' | 'platformId'>;
@@ -60,3 +64,24 @@ export type PlatformAccountProfile<
 export type ProfilesQueryParams = Partial<
   Pick<AccountProfile, 'platformId' | 'userId' | 'autofetch'>
 > & { userIdDefined?: boolean } & { limit?: number };
+
+export interface AddProfilesPayload {
+  profilesUrls: string[];
+  cluster: string;
+}
+
+/**
+ * wrapper to contatin the profileId or
+ * the platform/username of a profiel
+ */
+export interface ProfileIdentifier {
+  profileId?: string;
+  platform?: IDENTITY_PLATFORM;
+  username?: string;
+}
+
+export interface FetchPlatfomAccountTaskData {
+  profileId: string;
+  amount: number;
+  latest: boolean;
+}

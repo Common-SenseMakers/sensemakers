@@ -142,17 +142,18 @@ export const RefLabelsComponent = (props: PatternProps) => {
                     refLabel.authorProfileId !== props.post?.authorProfileId
                 );
 
+              const isQuotedPost = isPlatformPost(ref);
+
               return (
                 refDisplayMeta?.oembed && (
-                  <>
-                    {isPlatformPost(ref) && (
+                  <div key={index}>
+                    {isQuotedPost && (
                       <QuotedPostLabel
                         color={constants.colors.textLight2}
                         postType={getPostType(props.post)}
                       />
                     )}
                     <Box
-                      key={index}
                       style={{
                         borderRadius: '12px',
                         border: '1.6px solid #D1D5DB',
@@ -167,9 +168,12 @@ export const RefLabelsComponent = (props: PatternProps) => {
                         oembed={refDisplayMeta.oembed}
                         authorLabels={refs.get(ref)?.labelsUris || []}
                         aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
-                        showDescription={isPlatformPost(ref)}
+                        showDescription={isQuotedPost}
                         editable={props.editable}
-                        ontology={props.originalParsed?.support?.ontology}
+                        ontology={
+                          props.originalParsed?.support?.ontology
+                            ?.semantic_predicates
+                        }
                         removeLabel={(labelUri: string) => {
                           removeLabel(ref, labelUri).catch(console.error);
                         }}
@@ -177,7 +181,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                           addLabel(ref, labelUri).catch(console.error);
                         }}></RefWithLabels>
                     </Box>
-                  </>
+                  </div>
                 )
               );
             })}

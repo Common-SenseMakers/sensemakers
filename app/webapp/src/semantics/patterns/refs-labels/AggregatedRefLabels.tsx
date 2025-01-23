@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { ParserOntology } from '../../../shared/types/types.parser';
+import { OntologyItem } from '../../../shared/types/types.parser';
 import { RefLabel } from '../../../shared/types/types.references';
 import { LabelColors } from '../../../ui-components';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
@@ -11,10 +11,10 @@ interface LabelDetails {
 
 export const AggregatedRefLabels = (props: {
   refLabels: RefLabel[];
-  ontology?: ParserOntology;
+  ontology?: OntologyItem[];
 }) => {
   const labelsSummary = useMemo(() => {
-    const labelsOntology = props.ontology?.semantic_predicates;
+    const ontology = props.ontology;
 
     const summaryMap = new Map<string, LabelDetails>();
 
@@ -29,8 +29,8 @@ export const AggregatedRefLabels = (props: {
 
     const labelsSummary = Array.from(summaryMap.entries())
       .map(([labelUri, details]) => {
-        const label_ontology = labelsOntology
-          ? labelsOntology.find((item) => item.uri === labelUri)
+        const label_ontology = ontology
+          ? ontology.find((item) => item.uri === labelUri)
           : undefined;
 
         if (!label_ontology) {

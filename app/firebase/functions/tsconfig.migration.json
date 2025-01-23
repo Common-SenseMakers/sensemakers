@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "lib-scripts",
+    "rootDir": ".",
+    "baseUrl": "./"
+  },
+  "compileOnSave": true,
+  "include": [
+    "src-old/index.ts",
+    "src-old/custom.d.ts",
+    "src/index.ts",
+    "src/custom.d.ts",
+    "migrations/**/*"
+  ],
+  "exclude": ["migrations/obsolete/**/*", "scripts/obsolete/**/*"]
+}

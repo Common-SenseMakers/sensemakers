@@ -18,7 +18,7 @@
         "USE_REAL_EMAIL": "false",
         "USE_REAL_MASTODON": "false",
         "USE_REAL_BLUESKY": "false",
-        "USE_REAL_LINKS": "true",
+        "USE_REAL_LINKS": "false",
         "APP_URL": "http://localhost:3000"
         // "TEST_THREAD_ID": "1823373556643688718"
       },
@@ -28,7 +28,7 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "script: 020",
+      "name": "script",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "ts-node",
@@ -53,7 +53,7 @@
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./scripts/016-add-account-data.ts"
+        "./seed/add-accounts-data.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -66,8 +66,8 @@
       "runtimeExecutable": "ts-node",
       "args": [
         "--project",
-        "./tsconfig.scripts.json",
-        "./migrations/009-sanitize-semantics.ts"
+        "./tsconfig.migration.json",
+        "./migrations/010-to-clusters.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

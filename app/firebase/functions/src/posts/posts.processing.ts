@@ -1,3 +1,4 @@
+import { ClusterInstance } from '../@shared/types/types.clusters';
 import { ParsePostResult, RefMeta } from '../@shared/types/types.parser';
 import {
   PlatformPost,
@@ -13,10 +14,13 @@ import {
   AppPostParsedStatus,
   AppPostParsingStatus,
   HydrateConfig,
+  IndexedPost,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
-import { RefDisplayMeta, RefPostData } from '../@shared/types/types.references';
+import { RefDisplayMeta } from '../@shared/types/types.references';
 import { DefinedIfTrue } from '../@shared/types/types.user';
+import { CollectionNames } from '../@shared/utils/collectionNames';
+import { getPostTabs } from '../@shared/utils/feed.config';
 import { parseRDF } from '../@shared/utils/n3.utils';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import {
@@ -24,12 +28,15 @@ import {
   getReferenceLabels,
   getTopic,
 } from '../@shared/utils/semantics.helper';
-import { removeUndefined } from '../db/repo.base';
+import { ClustersService } from '../clusters/clusters.service';
+import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { LinksService } from '../links/links.service';
+import { hashUrl } from '../links/links.utils';
 import { PlatformsService } from '../platforms/platforms.service';
 import { TimeService } from '../time/time.service';
 import { UsersService } from '../users/users.service';
+import { IndexedPostsRepo } from './indexed.posts.repository';
 import { PlatformPostsRepository } from './platform.posts.repository';
 import { PostsRepository } from './posts.repository';
 
@@ -44,7 +51,8 @@ export class PostsProcessing {
     public posts: PostsRepository,
     public platformPosts: PlatformPostsRepository,
     protected platforms: PlatformsService,
-    public linksService: LinksService
+    public linksService: LinksService,
+    public clusters: ClustersService
   ) {}
 
   /**
@@ -223,6 +231,7 @@ export class PostsProcessing {
     if (!semantics) return undefined;
 
     const post = await this.posts.get(postId, manager, true);
+    const originalStructuredSemantics = post.structuredSemantics;
     const store = await parseRDF(semantics);
 
     const { labels, refsLabels } = getReferenceLabels(store);
@@ -244,47 +253,147 @@ export class PostsProcessing {
       })
     );
 
+    const tabs = getPostTabs(labels);
+
     const structuredSemantics: StructuredSemantics = {
       labels: Array.from(labels),
+      tabs: tabs,
       keywords: Array.from(keywords),
       topic,
       refsMeta: removeUndefined(refsMeta),
       refs: Object.keys(refsMeta),
     };
 
-    /** Sync ref posts semantics on redundant subcollections */
-    await Promise.all(
-      Array.from(Object.keys(refsLabels)).map(async (ref) => {
-        const refStructuredSemantics = {
-          ...structuredSemantics,
-          /** filter - only labels that apply to that ref */
-          labels: refsLabels[ref],
-        };
+    /** Indexed post */
+    const postData: IndexedPost = {
+      id: post.id,
+      authorProfileId: post.authorProfileId,
+      createdAtMs: post.createdAtMs,
+      structuredSemantics,
+      origin: post.origin,
+      authorUserId: post.authorUserId,
+    };
 
-        await this.syncRefPost(ref, post, refStructuredSemantics, manager);
-      })
+    // Detect deleted keywords
+    const deletedKeywords = originalStructuredSemantics?.keywords
+      ? originalStructuredSemantics?.keywords.filter(
+          (element) => !Array.from(keywords).includes(element)
+        )
+      : [];
+
+    await this.syncPostInClusters(
+      'add',
+      post.id,
+      manager,
+      postData,
+      structuredSemantics.refs || [],
+      {
+        new: structuredSemantics.keywords || [],
+        removed: deletedKeywords,
+      }
     );
 
     await this.posts.update(postId, { structuredSemantics }, manager);
   }
 
-  async syncRefPost(
-    url: string,
-    post: AppPost,
-    semantics: StructuredSemantics,
-    manager: TransactionManager
+  /** from postId make sure the post is updated on all clusters that include that post */
+  async syncPostInClusters(
+    action: 'add' | 'remove',
+    postId: string,
+    manager: TransactionManager,
+    postData?: IndexedPost,
+    refs?: string[],
+    keywords?: { new: string[]; removed: string[] }
   ) {
-    const refPostData: RefPostData = removeUndefined({
-      id: post.id,
-      authorProfileId: post.authorProfileId,
-      createdAtMs: post.createdAtMs,
-      structuredSemantics: semantics,
-      platformPostUrl: post.generic.thread[0].url,
-    } as RefPostData);
+    const post = await this.posts.get(postId, manager, true);
 
-    /** always delete all labels from a post for a reference */
-    await this.linksService.deleteRefPost(url, post.id, manager);
-    await this.linksService.setRefPost(url, refPostData, manager);
+    /** post clusters are derived from the post authorProfileId */
+    const clustersIds: (string | undefined)[] =
+      await this.users.profiles.repo.getClusters(post.authorProfileId, manager);
+
+    // undefined in the loop below will syunc to the global root cluster where all posts are stored
+    clustersIds.push(undefined);
+
+    await Promise.all(
+      clustersIds.map(async (clusterId) => {
+        const cluster = this.clusters.getInstance(clusterId);
+        await this.syncPostInCluster(
+          cluster,
+          action,
+          postId,
+          manager,
+          postData,
+          refs || [],
+          keywords
+        );
+      })
+    );
+  }
+
+  async syncPostInCluster(
+    cluster: ClusterInstance,
+    action: 'add' | 'remove',
+    postId: string,
+    manager: TransactionManager,
+    postData?: IndexedPost,
+    refs?: string[],
+    keywords?: { new: string[]; removed: string[] }
+  ) {
+    /** Sync post in a cluster-specifc "posts" collection */
+    const posts = new BaseRepository(cluster.collection(CollectionNames.Posts));
+
+    if (action === 'add') {
+      posts.set(postId, postData, manager, { merge: true });
+    } else {
+      posts.delete(postId, manager);
+    }
+
+    /** Sync ref posts semantics on redundant subcollections */
+    if (refs) {
+      await Promise.all(
+        refs.map(async (ref) => {
+          const indexedRepo = new IndexedPostsRepo(
+            cluster.collection(CollectionNames.Refs)
+          );
+          if (action === 'add' && postData) {
+            await indexedRepo.setPost(hashUrl(ref), postData, manager);
+          } else {
+            await indexedRepo.deletePost(hashUrl(ref), postId, manager);
+          }
+        })
+      );
+    }
+
+    if (keywords) {
+      if (action === 'add') {
+        await Promise.all(
+          keywords.removed.map(async (keyword) => {
+            const indexedRepo = new IndexedPostsRepo(
+              cluster.collection(CollectionNames.Keywords)
+            );
+            if (action === 'add' && postData) {
+              /** delete the post of the removed keywords, still an add post action */
+              await indexedRepo.deletePost(keyword, postData.id, manager);
+            } else {
+              await indexedRepo.deletePost(keyword, postId, manager);
+            }
+          })
+        );
+      }
+
+      await Promise.all(
+        keywords.new.map(async (keyword) => {
+          const indexedRepo = new IndexedPostsRepo(
+            cluster.collection(CollectionNames.Keywords)
+          );
+          if (action === 'add' && postData) {
+            await indexedRepo.setPost(keyword, postData, manager);
+          } else {
+            await indexedRepo.deletePost(keyword, postId, manager);
+          }
+        })
+      );
+    }
   }
 
   async createAppPost(
@@ -302,7 +411,7 @@ export class PostsProcessing {
       editStatus: AppPostEditStatus.PENDING,
     };
 
-    /** Create the post */
+    /** Create the post in the root cluster */
     const post = this.posts.create(removeUndefined(postCreate), manager);
     return post;
   }
@@ -311,7 +420,8 @@ export class PostsProcessing {
   async hydratePostFull(
     post: AppPost,
     config: HydrateConfig,
-    manager: TransactionManager
+    manager: TransactionManager,
+    cluster: ClusterInstance
   ): Promise<AppPostFull> {
     const postFull: AppPostFull = post;
 
@@ -336,8 +446,12 @@ export class PostsProcessing {
           refMetaOrg
         );
         if (config.addAggregatedLabels) {
-          const refLabels = await this.posts.getAggregatedRefLabels([ref]);
-          postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels[ref] });
+          const refLabels = await this.linksService.getAggregatedRefLabels(
+            ref,
+            cluster,
+            manager
+          );
+          postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels });
         } else postFullMeta.set(ref, { oembed });
       }) || []
     );
@@ -353,6 +467,7 @@ export class PostsProcessing {
     postId: string,
     config: HydrateConfig,
     manager: TransactionManager,
+    cluster: ClusterInstance,
     shouldThrow?: T
   ): Promise<DefinedIfTrue<T, R>> {
     const post = await this.posts.get(postId, manager, shouldThrow);
@@ -365,7 +480,7 @@ export class PostsProcessing {
       return undefined as DefinedIfTrue<T, R>;
     }
 
-    const postFull = await this.hydratePostFull(post, config, manager);
+    const postFull = await this.hydratePostFull(post, config, manager, cluster);
 
     return postFull as unknown as DefinedIfTrue<T, R>;
   }
@@ -406,12 +521,7 @@ export class PostsProcessing {
       )
     );
 
-    /** delete all link subcollection posts */
-    await Promise.all(
-      post.structuredSemantics?.refs?.map((ref) => {
-        this.linksService.deleteRefPost(ref, postId, manager);
-      }) || []
-    );
+    await this.syncPostInClusters('remove', postId, manager);
 
     this.posts.delete(postId, manager);
   }

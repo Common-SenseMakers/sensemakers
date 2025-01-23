@@ -305,6 +305,7 @@ describe('02-platforms', () => {
         expect(result.avatar).to.be.a('string');
       }
     });
+
     it('handles newlines in the content html', async () => {
       const post_id =
         'https://w3c.social/users/w3c/statuses/113561528162272973';
@@ -362,8 +363,14 @@ describe('02-platforms', () => {
         password: blueskyAppPassword,
       });
 
+      if (!agent.session) {
+        throw new Error('Failed to login to Bluesky with admin credentials');
+      }
+
       const result = (
-        await blueskyService.getProfileByUsername(username, agent.session)
+        await blueskyService.getProfileByUsername(username, {
+          session: agent.session,
+        })
       )?.profile;
 
       expect(result).to.not.be.null;

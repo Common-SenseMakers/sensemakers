@@ -41,7 +41,7 @@ describe('012-claim-account', () => {
       );
 
       const profile = await services.db.run((manager) =>
-        services.users.profiles.getByProfileId(
+        services.profiles.repo.getByProfileId(
           getProfileId(PLATFORM.Twitter, account.user_id),
           manager,
           true
