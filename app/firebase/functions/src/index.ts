@@ -104,26 +104,26 @@ exports['admin'] = functions
   .https.onRequest(buildAdminApp(adminRouter));
 
 /** jobs */
-exports.accountFetch = onSchedule(
-  {
-    schedule: AUTOFETCH_PERIOD,
-    secrets,
-  },
-  async () => {
-    const services = createServices(firestore, getConfig());
-    await triggerAutofetchPosts(services);
-  }
-);
-exports.nonUserAccountFetch = onSchedule(
-  {
-    schedule: AUTOFETCH_NON_USER_PERIOD,
-    secrets,
-  },
-  async () => {
-    const services = createServices(firestore, getConfig());
-    await triggerAutofetchPostsForNonUsers(services);
-  }
-);
+// exports.accountFetch = onSchedule(
+//   {
+//     schedule: AUTOFETCH_PERIOD,
+//     secrets,
+//   },
+//   async () => {
+//     const services = createServices(firestore, getConfig());
+//     await triggerAutofetchPosts(services);
+//   }
+// );
+// exports.nonUserAccountFetch = onSchedule(
+//   {
+//     schedule: AUTOFETCH_NON_USER_PERIOD,
+//     secrets,
+//   },
+//   async () => {
+//     const services = createServices(firestore, getConfig());
+//     await triggerAutofetchPostsForNonUsers(services);
+//   }
+// );
 
 /** tasks */
 /**
