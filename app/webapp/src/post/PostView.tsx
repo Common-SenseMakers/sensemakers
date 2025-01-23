@@ -36,7 +36,7 @@ export const PostView = (props: {
   const [, setIsReparsing] = useState(false);
 
   const { constants } = useThemeContext();
-  const { updated, fetched } = usePost();
+  const { updated, fetched, deleted } = usePost();
 
   const postText = updated.postMerged
     ? concatenateThread(updated.postMerged.generic)
@@ -166,8 +166,10 @@ export const PostView = (props: {
       structuredSemantics: updated.postMerged?.structuredSemantics,
       post: updated.postMerged,
     };
-    const handlePostDelete = () => {
-      console.log('post deleted');
+    const handlePostDelete = async () => {
+      if (window.confirm('Are you sure you want to delete this post?')) {
+        await deleted.deletePost();
+      }
     };
 
     return (

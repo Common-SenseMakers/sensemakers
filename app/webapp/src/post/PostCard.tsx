@@ -152,8 +152,11 @@ export const PostCard = (props: {
 
   const hideSemantics = false;
 
-  const handlePostDelete = () => {
-    console.log('post delete');
+  const { deleted } = usePost();
+  const handlePostDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      await deleted.deletePost();
+    }
   };
 
   return (
