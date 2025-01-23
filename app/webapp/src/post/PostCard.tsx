@@ -1,5 +1,5 @@
 import { Box, Text } from 'grommet';
-import { MouseEventHandler, useState } from 'react';
+import { MouseEventHandler } from 'react';
 
 import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
@@ -7,7 +7,6 @@ import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { AppPostFull } from '../shared/types/types.posts';
-import { ChevronButton } from '../ui-components/ChevronButton';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PublishButtons } from './PostPublishButtons';
@@ -19,6 +18,7 @@ import { concatenateThread } from './posts.helper';
 const KEYWORDS_SEMANTICS_ID = 'keywords-semantics';
 const REFS_SEMANTICS_ID = 'refs-semantics';
 const POST_AUTHOR_ID = 'post-author';
+export const POST_CARD_SEE_MORE_CLASS = 'post-card-see-more-button';
 
 export const CARD_BORDER = '1px solid var(--Neutral-300, #D1D5DB)';
 
@@ -105,7 +105,6 @@ export const PostCard = (props: {
   const post = updated.postMerged;
 
   const { constants } = useThemeContext();
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const overlay = useOverlay();
 
@@ -138,10 +137,12 @@ export const PostCard = (props: {
     onPostClick();
   };
 
+  const seeMoreSpan = `<span style="color: #337fbd; cursor: pointer;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">See more</span>`;
+  const TRUNCATED_LENGTH = 500;
   const postText = concatenateThread(post.generic);
-  const useTruncated = postText.length > 700;
+  const useTruncated = postText.length > TRUNCATED_LENGTH;
   const postTextTruncated = useTruncated
-    ? postText.slice(0, 700) + '...'
+    ? postText.slice(0, TRUNCATED_LENGTH) + '... ' + seeMoreSpan
     : postText;
 
   const handleInternalClick = (e: React.MouseEvent) => {
@@ -204,18 +205,8 @@ export const PostCard = (props: {
               onClick={handleInternalClick}
               truncate
               shade={shade}
-              text={isExpanded ? postText : postTextTruncated}></PostTextStatic>
+              text={postTextTruncated}></PostTextStatic>
           </div>
-          {useTruncated && (
-            <Box align="end" margin={{ top: 'xxxsmall', right: 'xsmall' }}>
-              <ChevronButton
-                isExpanded={isExpanded}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsExpanded(!isExpanded);
-                }}></ChevronButton>
-            </Box>
-          )}
           {!hideSemantics && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
               <SemanticsEditor
