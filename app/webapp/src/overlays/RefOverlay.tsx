@@ -13,6 +13,7 @@ import { PLATFORM } from '../shared/types/types.platforms';
 import { PlatformProfile } from '../shared/types/types.profiles';
 import { RefDisplayMeta } from '../shared/types/types.references';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
+import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { OverlayContext } from './OverlayContext';
 import { usePublicFeed } from './PublicFeedContext';
@@ -91,7 +92,7 @@ export const RefOverlay = (props: { refUrl: string }) => {
             flexShrink: 0,
             border: '1.6px solid var(--Neutral-300, #D1D5DB)',
           }}>
-          {refDisplayMeta?.oembed && (
+          {refDisplayMeta?.oembed ? (
             <RefWithLabels
               ix={1}
               oembed={refDisplayMeta.oembed}
@@ -107,6 +108,8 @@ export const RefOverlay = (props: { refUrl: string }) => {
               addLabel={() => {
                 return undefined;
               }}></RefWithLabels>
+          ) : (
+            <LoadingDiv height={'120px'} style={{ width: '100%' }}></LoadingDiv>
           )}
         </Box>
         <PostsFetcherComponent

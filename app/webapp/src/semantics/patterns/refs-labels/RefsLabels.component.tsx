@@ -158,6 +158,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                         borderRadius: '12px',
                         border: '1.6px solid #D1D5DB',
                         width: '100%',
+                        overflow: 'hidden',
                       }}
                       pad="12px"
                       onClick={(e: React.MouseEvent<HTMLDivElement>) =>
