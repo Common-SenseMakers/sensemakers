@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import logging
 
 ROOT = Path(__file__).parents[1]
 sys.path.append(str(ROOT))
@@ -247,7 +248,47 @@ TEST_THREAD = {
         },
     ],
 }
-
+TEST_RE_POST = {
+  #"id": "sdhLWjIZaK9hzXfzwLpS",
+  #"generic": {
+    "author": {
+      "platformId": "bluesky",
+      "id": "did:plc:xq36vykdkrzknmcxo3jnn5wq",
+      "username": "sensenetsbot.bsky.social",
+      "name": "Sense Bot",
+      "avatarUrl": "https://cdn.bsky.app/img/avatar/plain/did:plc:xq36vykdkrzknmcxo3jnn5wq/bafkreidjv7bsdwqhaq6ft44iwsrp2xplruur76lnny4v2ecixqtzkpjf34@jpeg"
+    },
+    "thread": [
+      {
+        "content": "",
+        "quotedThread": {
+          "author": {
+            "platformId": "bluesky",
+            "id": "did:plc:xq36vykdkrzknmcxo3jnn5wq",
+            "username": "sensenetsbot.bsky.social",
+            "name": "Sense Bot"
+          },
+          "thread": [
+            {
+              "url": "https://bsky.app/profile/wesleyfinck.org/post/3lcwqe3td4d2m",
+              "content": "Sad I’ll be missing this one"
+            }
+          ]
+        }
+      }
+    ],
+  #},
+  "origin": "bluesky",
+  "authorProfileId": "bluesky-did:plc:xq36vykdkrzknmcxo3jnn5wq",
+  "authorUserId": "twitter:1753077743816777728",
+  "mirrorsIds": [
+    "4LxVik40k2biNVcURdTt"
+  ],
+  "createdAtMs": 1736504456748,
+  "editStatus": "pending",
+  "parsedStatus": "unprocessed",
+  "parsingStatus": "idle"
+}
 def test_trim_by_char_limit():
     thread = AppThread.model_validate(TEST_OVERLENGTH_THREAD_INTERFACE)
     thread_ref_post = convert_thread_interface_to_ref_post(thread)
@@ -256,10 +297,20 @@ def test_trim_by_char_limit():
     assert pi.thread_post.char_length() == 13926
     assert proc_pi.post_to_parse.char_length() == 8400
 
+def test_thread_length():
+    #caplog.set_level(logging.INFO)
+    #logger = logging.getLogger(__name__)
+
+    thread = AppThread.model_validate(TEST_RE_POST)
+    thread = convert_thread_interface_to_ref_post(thread)
+    #logger.info(f"The thread is {thread.content}")
+    print(f"The thread is {thread.content}")
+    assert thread.content == ''
 
 if __name__ == "__main__":
     thread = AppThread.model_validate(TEST_THREAD)
     thread_ref_post = convert_thread_interface_to_ref_post(thread)
     pi = ParserInput(thread_post=thread_ref_post, max_posts=2)
     proc_pi = preproc_parser_input(pi)
+    
 
