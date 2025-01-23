@@ -8,6 +8,7 @@ import {
   onDocumentCreated,
   onDocumentUpdated,
 } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import {
   TaskQueueOptions,
   onTaskDispatched,
@@ -20,7 +21,11 @@ import { AppPost } from './@shared/types/types.posts';
 import { CollectionNames } from './@shared/utils/collectionNames';
 import { activityEventCreatedHook } from './activity/activity.created.hook';
 import { adminRouter } from './admin.router';
-import { IS_EMULATOR } from './config/config.runtime';
+import {
+  AUTOFETCH_NON_USER_PERIOD,
+  AUTOFETCH_PERIOD,
+  IS_EMULATOR,
+} from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
 import { buildAdminApp, buildApp } from './instances/app';
@@ -37,6 +42,7 @@ import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
   triggerAutofetchPosts,
+  triggerAutofetchPostsForNonUsers,
 } from './posts/tasks/posts.autofetch.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
 import { router } from './router';
@@ -94,26 +100,26 @@ exports['admin'] = functions
   .https.onRequest(buildAdminApp(adminRouter));
 
 /** jobs */
-// exports.accountFetch = onSchedule(
-//   {
-//     schedule: AUTOFETCH_PERIOD,
-//     secrets,
-//   },
-//   async () => {
-//     const services = createServices(firestore, getConfig());
-//     await triggerAutofetchPosts(services);
-//   }
-// );
-// exports.nonUserAccountFetch = onSchedule(
-//   {
-//     schedule: AUTOFETCH_NON_USER_PERIOD,
-//     secrets,
-//   },
-//   async () => {
-//     const services = createServices(firestore, getConfig());
-//     await triggerAutofetchPostsForNonUsers(services);
-//   }
-// );
+exports.accountFetch = onSchedule(
+  {
+    schedule: AUTOFETCH_PERIOD,
+    secrets,
+  },
+  async () => {
+    const services = createServices(firestore, getConfig());
+    await triggerAutofetchPosts(services);
+  }
+);
+exports.nonUserAccountFetch = onSchedule(
+  {
+    schedule: AUTOFETCH_NON_USER_PERIOD,
+    secrets,
+  },
+  async () => {
+    const services = createServices(firestore, getConfig());
+    await triggerAutofetchPostsForNonUsers(services);
+  }
+);
 
 /** tasks */
 /**
