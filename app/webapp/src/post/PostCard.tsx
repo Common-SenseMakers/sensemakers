@@ -152,6 +152,10 @@ export const PostCard = (props: {
 
   const hideSemantics = false;
 
+  const handlePostDelete = () => {
+    console.log('post delete');
+  };
+
   return (
     <Box
       style={{
@@ -161,7 +165,7 @@ export const PostCard = (props: {
         borderLeft: CARD_BORDER,
         borderTop: 'none',
       }}>
-      <PublishButtons></PublishButtons>
+      <PublishButtons handlePostDelete={handlePostDelete}></PublishButtons>
 
       <Box pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}>
         <Box

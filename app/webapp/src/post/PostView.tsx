@@ -166,10 +166,15 @@ export const PostView = (props: {
       structuredSemantics: updated.postMerged?.structuredSemantics,
       post: updated.postMerged,
     };
+    const handlePostDelete = () => {
+      console.log('post deleted');
+    };
 
     return (
       <>
-        <PublishButtons margin={{ bottom: '16px' }}></PublishButtons>
+        <PublishButtons
+          handlePostDelete={handlePostDelete}
+          margin={{ bottom: '16px' }}></PublishButtons>
 
         <Box
           pad={{ top: 'medium', horizontal: 'medium', bottom: 'large' }}
