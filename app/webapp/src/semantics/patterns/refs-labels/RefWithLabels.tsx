@@ -28,7 +28,6 @@ export const RefWithLabels = (props: {
 }) => {
   const { t } = useTranslation();
   const labelsOntology = props.ontology?.semantic_predicates;
-
   /** display names for selected labels */
   let labelsDisplayNames = useMemo(
     () =>
@@ -82,6 +81,11 @@ export const RefWithLabels = (props: {
     props.addLabel(getLabelFromDisplayName(label).uri);
   };
 
+  const showAggregateLabels =
+    !!props.showAggregatedLabels &&
+    !!props.aggregatedLabels &&
+    props.aggregatedLabels.length > 0;
+
   return (
     <>
       {props.oembed ? (
@@ -130,20 +134,17 @@ export const RefWithLabels = (props: {
         </Box>
       )}
 
-      {props.showAggregatedLabels !== false &&
-      props.aggregatedLabels &&
-      props.aggregatedLabels.length > 0 ? (
+      {showAggregateLabels && (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
-            refLabels={props.aggregatedLabels.filter(
-              (refLabel) => refLabel.label !== LINKS_TO_URI
-            )}
+            refLabels={
+              props.aggregatedLabels?.filter(
+                (refLabel) => refLabel.label !== LINKS_TO_URI
+              ) || []
+            }
             ontology={props.ontology}></AggregatedRefLabels>
         </Box>
-      ) : (
-        <></>
       )}
-
       <Box margin={{ top: '16px' }}>
         {props.showAuthorLabels !== false && (
           <AppLabelsEditor

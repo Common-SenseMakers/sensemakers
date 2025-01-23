@@ -24,6 +24,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
     props.originalParsed
   );
   const { constants } = useThemeContext();
+  const overlayContext = useOverlay();
   const size = props.size || 'normal';
 
   const overlay = useOverlay();
@@ -124,6 +125,11 @@ export const RefLabelsComponent = (props: PatternProps) => {
   const allRefs = Array.from(refs.entries());
   const [visibleRefs, restOfRefs] =
     size === 'compact' ? splitArray(allRefs, 1) : [allRefs, []];
+  const currOverlay = overlayContext?.overlay || {};
+  const isRefPage =
+    overlayContext?.overlay.ref ||
+    (Object.keys(currOverlay).length === 0 &&
+      overlayContext?.parentOverlay?.overlay.ref);
 
   if (refs && refs.size > 0) {
     return (
@@ -167,6 +173,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                         oembed={refDisplayMeta.oembed}
                         authorLabels={refs.get(ref)?.labelsUris || []}
                         aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+                        showAggregatedLabels={!isRefPage}
                         showDescription={isPlatformPost(ref)}
                         editable={props.editable}
                         ontology={props.originalParsed?.support?.ontology}

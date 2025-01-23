@@ -29,6 +29,7 @@ export interface OverlayContextType {
   onChildOverlayNav: (value: OverlayValue) => void;
   setIsLast: (isLast: boolean) => void;
   overlay: OverlayValue;
+  parentOverlay?: OverlayContextType;
 }
 
 const OverlayContextValue = createContext<OverlayContextType | undefined>(
@@ -144,6 +145,7 @@ export const OverlayContext = (
         onPostClick,
         onChildOverlayNav,
         setIsLast,
+        parentOverlay,
       }}>
       <Box
         style={{
