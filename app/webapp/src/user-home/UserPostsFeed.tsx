@@ -58,6 +58,7 @@ export const UserPostsFeed = () => {
           </Box>
         )}
         <PostsFetcherComponent
+          showAggregatedLabels={true}
           boxProps={{}}
           feed={feed}
           pageTitle={t(AppGeneralKeys.myPosts)}></PostsFetcherComponent>

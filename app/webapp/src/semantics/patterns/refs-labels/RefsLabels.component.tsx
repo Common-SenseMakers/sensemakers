@@ -141,12 +141,10 @@ export const RefLabelsComponent = (
                 throw new Error('Unexpected undefined');
 
               const refDisplayMeta = props.post?.meta?.references[ref];
-
-              const aggregatedLabelsWithoutAuthorLabels =
-                refDisplayMeta?.aggregatedLabels?.filter(
-                  (refLabel) =>
-                    refLabel.authorProfileId !== props.post?.authorProfileId
-                );
+              const authorLabels = refs.get(ref)?.labelsUris || [];
+              const hasOtherLabels =
+                (refDisplayMeta?.aggregatedLabels?.length || 0) >
+                authorLabels.length;
 
               const isQuotedPost = isPlatformPost(ref);
 
@@ -172,10 +170,10 @@ export const RefLabelsComponent = (
                       <RefWithLabels
                         ix={index}
                         oembed={refDisplayMeta.oembed}
-                        authorLabels={refs.get(ref)?.labelsUris || []}
-                        aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+                        authorLabels={authorLabels}
+                        aggregatedLabels={refDisplayMeta.aggregatedLabels}
                         showAggregatedLabels={
-                          props.custom?.showAggregatedLabels
+                          props.custom?.showAggregatedLabels && hasOtherLabels
                         }
                         showDescription={isQuotedPost}
                         editable={props.editable}
