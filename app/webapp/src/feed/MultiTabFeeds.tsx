@@ -54,9 +54,8 @@ export const MultiTabFeeds = (props: {
                   showHeader={false}
                   isPublicFeed={true}
                   feed={feed}
-                  pageTitle={t(
-                    AppGeneralKeys.feedTitle
-                  )}></PostsFetcherComponent>
+                  pageTitle={t(AppGeneralKeys.feedTitle)}
+                  showAggregatedLabels={true}></PostsFetcherComponent>
               </Box>
             );
           })}

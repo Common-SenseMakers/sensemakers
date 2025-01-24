@@ -6,6 +6,7 @@ import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
+import { RefLabelsCustomProps } from '../semantics/patterns/refs-labels/RefsLabels.component';
 import { AppPostFull } from '../shared/types/types.posts';
 import { ChevronButton } from '../ui-components/ChevronButton';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -97,6 +98,7 @@ export const PostCard = (props: {
   isPublicFeed?: boolean;
   shade?: boolean;
   isEmail?: boolean;
+  showAggregatedLabels?: boolean;
 }) => {
   const { shade: _shade } = props;
   const shade = _shade || false;
@@ -178,7 +180,7 @@ export const PostCard = (props: {
           </Box>
           {!hideSemantics && (
             <Box id={KEYWORDS_SEMANTICS_ID}>
-              <SemanticsEditor
+              <SemanticsEditor<RefLabelsCustomProps>
                 include={[PATTERN_ID.KEYWORDS]}
                 patternProps={{
                   isLoading:
@@ -231,6 +233,9 @@ export const PostCard = (props: {
                   originalParsed: post?.originalParsed,
                   structuredSemantics: post?.structuredSemantics,
                   post,
+                  custom: {
+                    showAggregatedLabels: props.showAggregatedLabels,
+                  },
                 }}></SemanticsEditor>
             </Box>
           )}

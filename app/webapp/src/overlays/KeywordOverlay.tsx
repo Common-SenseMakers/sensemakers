@@ -45,7 +45,8 @@ export const KeywordOverlay = (props: { keyword: string }) => {
         <PostsFetcherComponent
           showHeader={false}
           isPublicFeed={isPublicFeed}
-          feed={feed}></PostsFetcherComponent>
+          feed={feed}
+          showAggregatedLabels={true}></PostsFetcherComponent>
       </Box>
     </OverlayContext>
   );
