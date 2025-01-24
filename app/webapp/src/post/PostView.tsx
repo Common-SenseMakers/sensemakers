@@ -165,6 +165,7 @@ export const PostView = (props: {
       semanticsUpdated: semanticsUpdated,
       structuredSemantics: updated.postMerged?.structuredSemantics,
       post: updated.postMerged,
+      custom: { showAggregatedLabels: true },
     };
 
     return (
