@@ -3,6 +3,7 @@ import express from 'express';
 import { getPublicFeedController } from './feed/feed.controller';
 import { getRefMetaController } from './links/links.controller';
 import {
+  deletePostController,
   getPostController,
   getUserPostsController,
   parsePostController,
@@ -33,6 +34,7 @@ router.post('/posts/getOfUser', getUserPostsController);
 router.post('/posts/get', getPostController);
 router.post('/posts/parse', parsePostController);
 router.post('/posts/update', updatePostController);
+router.post('/posts/delete', deletePostController);
 
 router.post('/feed/get', getPublicFeedController);
 
