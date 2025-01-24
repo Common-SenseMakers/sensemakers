@@ -5,7 +5,10 @@ import { useMemo } from 'react';
 import { useOverlay } from '../../../overlays/OverlayContext';
 import { isPlatformPost } from '../../../shared/utils/links.utils';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
-import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
+import {
+  THIS_POST_NAME_URI,
+  removeUndisplayedLabelUris,
+} from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
 import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
@@ -144,7 +147,7 @@ export const RefLabelsComponent = (
               const authorLabels = refs.get(ref)?.labelsUris || [];
               const hasOtherLabels =
                 (refDisplayMeta?.aggregatedLabels?.length || 0) >
-                authorLabels.length;
+                removeUndisplayedLabelUris(authorLabels).length;
 
               const isQuotedPost = isPlatformPost(ref);
 

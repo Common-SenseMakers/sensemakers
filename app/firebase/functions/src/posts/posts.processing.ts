@@ -446,12 +446,14 @@ export class PostsProcessing {
           refMetaOrg
         );
         if (config.addAggregatedLabels) {
-          const refLabels = await this.linksService.getAggregatedRefLabels(
-            ref,
-            cluster,
-            manager
-          );
-          postFullMeta.set(ref, { oembed, aggregatedLabels: refLabels });
+          const refDisplayMeta =
+            await this.linksService.getAggregatedRefLabelsForDisplay(
+              ref,
+              manager,
+              undefined,
+              cluster
+            );
+          postFullMeta.set(ref, refDisplayMeta);
         } else postFullMeta.set(ref, { oembed });
       }) || []
     );

@@ -15,6 +15,13 @@ export const HAS_ZOTERO_REFERENCE_TYPE_URI =
 export const HAS_RDF_SYNTAX_TYPE_URI =
   'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 export const LINKS_TO_URI = 'http://purl.org/spar/cito/linksTo';
+export const QUOTES_POST_URI = 'https://sense-nets.xyz/quotesPost';
+
+export const removeUndisplayedLabelUris = (labels: string[]) => {
+  return labels.filter(
+    (label) => label !== QUOTES_POST_URI && label !== LINKS_TO_URI
+  );
+};
 
 export const getKeywords = (store: Store) => {
   const keywords: Set<string> = new Set();

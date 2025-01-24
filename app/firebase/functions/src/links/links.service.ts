@@ -8,7 +8,11 @@ import {
   RefLabel,
 } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
-import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
+import {
+  LINKS_TO_URI,
+  QUOTES_POST_URI,
+  SCIENCE_TOPIC_URI,
+} from '../@shared/utils/semantics.helper';
 import { ClustersService } from '../clusters/clusters.service';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -183,20 +187,29 @@ export class LinksService {
   async getAggregatedRefLabelsForDisplay(
     ref: string,
     manager: TransactionManager,
-    clusterId?: string
+    clusterId?: string,
+    cluster?: ClusterInstance
   ) {
-    const cluster = this.clusters.getInstance(clusterId);
+    const clusterInstance = cluster || this.clusters.getInstance(clusterId);
     const refOEmbed = await this.getOEmbed(ref, manager);
-    const refLabels = await this.getAggregatedRefLabels(ref, cluster, manager);
+    const refLabels = await this.getAggregatedRefLabels(
+      ref,
+      clusterInstance,
+      manager
+    );
+    /** don't include labels that arent show */
+    const filteredRefLabels = refLabels.filter(
+      (label) => label.label !== QUOTES_POST_URI && label.label !== LINKS_TO_URI
+    );
 
     const ontology = await this.ontology.getMany(
-      refLabels.map((l) => l.label),
+      filteredRefLabels.map((l) => l.label),
       manager
     );
 
     if (DEBUG) {
       logger.debug(`getAggregatedRefLabelsForDisplay ${ref}`, {
-        refLabels,
+        filteredRefLabels,
         refOEmbed,
         clusterId,
         ontology,
@@ -204,7 +217,7 @@ export class LinksService {
     }
 
     const refDisplayMeta: RefDisplayMeta = {
-      aggregatedLabels: refLabels,
+      aggregatedLabels: filteredRefLabels,
       ontology,
       oembed: refOEmbed,
     };
