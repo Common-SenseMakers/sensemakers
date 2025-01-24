@@ -508,18 +508,17 @@ describe('02-platforms', () => {
           ).clusters.getInstance()
         );
       await services.db.run(async (manager) => {
-        allProfilePosts.forEach(async (post) => {
+        for (const post of allProfilePosts) {
           if (
             post.id !== sinceAndUntilPosts.sincePost.id &&
             post.id !== sinceAndUntilPosts.untilPost.id
           ) {
-            // NOTE: something in this method calls seems to leave an unresolved async call
             await services.postsManager.processing.deletePostFull(
               post.id,
               manager
             );
           }
-        });
+        }
       });
 
       const fetchParamsSince: FetchParams = {
@@ -604,6 +603,30 @@ describe('02-platforms', () => {
       } as PlatformPostCreate<BlueskyThread>);
 
       expect(genericPost.thread[0].quotedThread).to.not.be.undefined;
+    });
+
+    it('it can fetch a single post', async () => {
+      const post_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcmhumbudk2m';
+      const result = await blueskyService.getSinglePost(
+        post_id,
+        userDetails.credentials
+      );
+
+      expect(result.platformPost.post.posts).to.have.length(1);
+    });
+    it('it cannot fetch a single post if it is a repost', async () => {
+      const post_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcmhumbudk2m?reposted_by=did:plc:xq36vykdkrzknmcxo3jnn5wq';
+      try {
+        await blueskyService.getSinglePost(post_id, userDetails.credentials);
+        throw new Error('Should not have reached here');
+      } catch (error: any) {
+        expect(error).to.not.be.undefined;
+        expect(error.message).to.equal(
+          `reposts cannot be fetched with getSinglePost. Tried to fetch ${post_id}`
+        );
+      }
     });
   });
 });

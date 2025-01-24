@@ -5,6 +5,7 @@ import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { logger } from '../../src/instances/logger';
 import { resetDB } from '../utils/db';
 import {
+  blueskyRepost,
   brokenBlueskyThreadWithRoot,
   brokenBlueskyThreadWithRootNotPartOfMain,
   brokenBlueskyThreadWithoutRoot,
@@ -26,7 +27,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('023 Platform Thread Merging', () => {
+describe('023 Platform Thread Merging', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
@@ -41,20 +42,6 @@ describe.only('023 Platform Thread Merging', () => {
     parser: USE_REAL_PARSER ? 'real' : 'mock',
   });
   describe('Bluesky Thread Merging', () => {
-    const services = getTestServices({
-      time: 'mock',
-      twitter: USE_REAL_TWITTER
-        ? undefined
-        : { publish: true, signup: true, fetch: true, get: true },
-      bluesky: USE_REAL_BLUESKY
-        ? undefined
-        : { publish: true, signup: true, fetch: true, get: true },
-      mastodon: USE_REAL_MASTODON
-        ? undefined
-        : { publish: true, signup: true, fetch: true, get: true },
-      parser: USE_REAL_PARSER ? 'real' : 'mock',
-    });
-
     beforeEach(async () => {
       logger.debug('resetting DB');
       await resetDB();
@@ -137,6 +124,26 @@ describe.only('023 Platform Thread Merging', () => {
 
       /** ASSERT the broken thread has been ignored */
       expect(mergedPlatformPostCreated).to.not.exist;
+    });
+    it('treats a repost as a root post', async () => {
+      const { postsManager } = services;
+
+      /** ACT create platform post */
+      const repostedPost: PlatformPostCreate = (
+        postsManager as any
+      ).initPlatformPost(PLATFORM.Bluesky, blueskyRepost);
+
+      const mergedPlatformPostCreated = await services.db.run(
+        async (manager) => {
+          return postsManager.processing.createOrMergePlatformPost(
+            repostedPost,
+            manager
+          );
+        }
+      );
+
+      /** ASSERT the broken thread has been ignored */
+      expect(mergedPlatformPostCreated).to.exist;
     });
   });
   describe('Twitter Thread Merging', () => {

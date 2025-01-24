@@ -589,6 +589,190 @@ export const brokenBlueskyThreadWithRootNotPartOfMain: PlatformPostPosted<Bluesk
     },
   };
 
+export const blueskyRepost: PlatformPostPosted<BlueskyThread> = {
+  post_id:
+    'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3ldc6uw4czr2y?reposted_by=did:plc:xq36vykdkrzknmcxo3jnn5wq',
+  user_id: 'did:plc:xq36vykdkrzknmcxo3jnn5wq',
+  timestampMs: 1727204998385,
+  post: {
+    thread_id:
+      'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3ldc6uw4czr2y?reposted_by=did:plc:xq36vykdkrzknmcxo3jnn5wq',
+    posts: [
+      {
+        uri: 'at://did:plc:tgfzv5irks5acnmk75j4elky/app.bsky.feed.post/3leu4dukohy25',
+        cid: 'bafyreihkt5phcjm6iir7dlbpeo35l3pzwlvnt3nebpirub7d6l4de7u2ri',
+        author: {
+          did: 'did:plc:tgfzv5irks5acnmk75j4elky',
+          handle: 'chadkoh.com',
+          displayName: 'Chad Kohalyk 🐍 🐍 🐍',
+          avatar:
+            'https://cdn.bsky.app/img/avatar/plain/did:plc:tgfzv5irks5acnmk75j4elky/bafkreiaq4e2zx3ja3ezpijlxreqhxitnieht4m5yp3fgybmv6ujlbozsii@jpeg',
+          associated: {
+            chat: {
+              allowIncoming: 'all',
+            },
+          },
+          viewer: {
+            muted: false,
+            blockedBy: false,
+          },
+          labels: [],
+          createdAt: '2023-01-18T17:40:49.591Z',
+        },
+        record: {
+          $type: 'app.bsky.feed.post',
+          createdAt: '2025-01-03T17:26:18.852682Z',
+          embed: {
+            $type: 'app.bsky.embed.external',
+            external: {
+              $type: 'app.bsky.embed.external#external',
+              description:
+                'Welcome the first DWeb Local First weekend, a weekend of shared learning and coding!\nLocal first software\nWhat if we could build collaborative applications…',
+              thumb: {
+                $type: 'blob',
+                ref: {
+                  $link:
+                    'bafkreibe46ddabl3wjjcm5n5x55dj5j6kd6neyygejw2hilpqtdb2dh43u',
+                },
+                mimeType: 'image/jpeg',
+                size: 22477,
+              },
+              title: 'DWeb Local First Weekend · Luma',
+              uri: 'https://lu.ma/2ul5uwdl?locale=en-CA',
+            },
+          },
+          facets: [
+            {
+              $type: 'app.bsky.richtext.facet',
+              features: [
+                {
+                  $type: 'app.bsky.richtext.facet#tag',
+                  tag: 'LoFiWKND',
+                },
+              ],
+              index: {
+                $type: 'app.bsky.richtext.facet#byteSlice',
+                byteEnd: 39,
+                byteStart: 30,
+              },
+            },
+            {
+              $type: 'app.bsky.richtext.facet',
+              features: [
+                {
+                  $type: 'app.bsky.richtext.facet#tag',
+                  tag: 'localFirstSoftware',
+                },
+              ],
+              index: {
+                $type: 'app.bsky.richtext.facet#byteSlice',
+                byteEnd: 60,
+                byteStart: 41,
+              },
+            },
+            {
+              $type: 'app.bsky.richtext.facet',
+              features: [
+                {
+                  $type: 'app.bsky.richtext.facet#tag',
+                  tag: 'DWeb',
+                },
+              ],
+              index: {
+                $type: 'app.bsky.richtext.facet#byteSlice',
+                byteEnd: 66,
+                byteStart: 61,
+              },
+            },
+            {
+              $type: 'app.bsky.richtext.facet',
+              features: [
+                {
+                  $type: 'app.bsky.richtext.facet#tag',
+                  tag: 'event',
+                },
+              ],
+              index: {
+                $type: 'app.bsky.richtext.facet#byteSlice',
+                byteEnd: 73,
+                byteStart: 67,
+              },
+            },
+            {
+              $type: 'app.bsky.richtext.facet',
+              features: [
+                {
+                  $type: 'app.bsky.richtext.facet#tag',
+                  tag: 'Vancouver',
+                },
+              ],
+              index: {
+                $type: 'app.bsky.richtext.facet#byteSlice',
+                byteEnd: 84,
+                byteStart: 74,
+              },
+            },
+            {
+              $type: 'app.bsky.richtext.facet',
+              features: [
+                {
+                  $type: 'app.bsky.richtext.facet#link',
+                  uri: 'https://lu.ma/2ul5uwdl?locale=en-CA',
+                },
+              ],
+              index: {
+                $type: 'app.bsky.richtext.facet#byteSlice',
+                byteEnd: 121,
+                byteStart: 86,
+              },
+            },
+          ],
+          text: 'Just over a week to go before #LoFiWKND  #localFirstSoftware #DWeb #event #Vancouver\n\nhttps://lu.ma/2ul5uwdl?locale=en-CA',
+        },
+        replyCount: 0,
+        repostCount: 1,
+        likeCount: 3,
+        quoteCount: 0,
+        indexedAt: '2025-01-03T17:26:19.756Z',
+        viewer: {
+          threadMuted: false,
+          embeddingDisabled: false,
+        },
+        labels: [],
+        repostedBy: {
+          $type: 'app.bsky.feed.defs#reasonRepost',
+          by: {
+            did: 'did:plc:6z5botgrc5vekq7j26xnvawq',
+            handle: 'wesleyfinck.org',
+            displayName: 'Wesley Finck',
+            avatar:
+              'https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg',
+            associated: {
+              chat: {
+                allowIncoming: 'following',
+              },
+            },
+            viewer: {
+              muted: false,
+              blockedBy: false,
+            },
+            labels: [],
+            createdAt: '2024-02-08T00:14:23.947Z',
+          },
+          indexedAt: '2025-01-04T00:43:53.754Z',
+        },
+      },
+    ],
+    author: {
+      id: 'did:plc:6z5botgrc5vekq7j26xnvawq',
+      username: 'weswalla.bsky.social',
+      displayName: 'Wesley Finck',
+      avatar:
+        'https://cdn.bsky.app/img/avatar/plain/did:plc:6z5botgrc5vekq7j26xnvawq/bafkreig3weniwt64x5rmau77bgqmpo26p6qy4tusdzfccreun44nvuaczq@jpeg',
+    },
+  },
+};
+
 export const rootTwitterThread: PlatformPostPosted<TwitterThread> = {
   post_id: '1234',
   user_id: '12345678',
