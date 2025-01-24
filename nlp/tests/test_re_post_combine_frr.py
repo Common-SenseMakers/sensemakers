@@ -68,7 +68,7 @@ class MockOntology(OntologyBase):
 # -----------------------------------------
 #The pytest test
 # -----------------------------------------
-@pytest.mark.asyncio
+
 def test_repost_scenario():
     """
     Test that when the first post is empty, it triggers is_re_post logic

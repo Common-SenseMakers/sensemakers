@@ -610,17 +610,10 @@ def combine_from_raw_results(
         if is_re_post:
             # TODO hotfix - we should have this be a property in the ontology
             # that we can read from, as oppose to hardcoding
-            SPECIAL_TAG_SET = {
-                "default",
-                "funding",
-                "event",
-                "job",
-                "call-for-papers",
-                "quote",
-            }  # your intersection set
+            repost_allowed_tags = set(ontology.get_re_post_allowed_tags())  # your intersection set
             for tag_list in combined.multi_reference_tagger:
                 # Convert to set, intersect, then back to list
-                new_tags = list(set(tag_list).intersection(SPECIAL_TAG_SET))
+                new_tags = list(set(tag_list).intersection(repost_allowed_tags))
                 tag_list[:] = new_tags  # replace contents in-place
 
     return combined
