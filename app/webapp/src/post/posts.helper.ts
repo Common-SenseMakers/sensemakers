@@ -29,13 +29,14 @@ export interface AppPostStatus {
   isEditing?: boolean;
   unpublished?: boolean;
 }
-export const getPostStatuses = (post?: AppPostFull): AppPostStatus => {
-  const processed = post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
-  const errored = post && post.parsingStatus === AppPostParsingStatus.ERRORED;
+export const getPostStatuses = (post?: AppPostFull | null): AppPostStatus => {
+  const processed =
+    !!post && post.parsedStatus === AppPostParsedStatus.PROCESSED;
+  const errored = !!post && post.parsingStatus === AppPostParsingStatus.ERRORED;
   const isParsing =
-    post && post.parsingStatus === AppPostParsingStatus.PROCESSING;
+    !!post && post.parsingStatus === AppPostParsingStatus.PROCESSING;
 
-  const isEditing = post && post.editStatus === AppPostEditStatus.DRAFT;
+  const isEditing = !!post && post.editStatus === AppPostEditStatus.DRAFT;
 
   return {
     processed,

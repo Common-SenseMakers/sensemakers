@@ -2,10 +2,10 @@ import React, { createContext, useContext } from 'react';
 
 import { AppPostFull } from '../../shared/types/types.posts';
 import { useAccountContext } from '../../user-login/contexts/AccountContext';
+import { PostDeleteContext, usePostDelete } from './use.post.delete';
 import { PostDerivedContext, usePostDerived } from './use.post.derived';
 import { PostFetchContext, usePostFetch } from './use.post.fetch';
 import { PostUpdateContext, usePostUpdate } from './use.post.update';
-import { PostDeleteContext, usePostDelete } from './use.post.delete';
 
 interface PostContextType {
   fetched: PostFetchContext;
