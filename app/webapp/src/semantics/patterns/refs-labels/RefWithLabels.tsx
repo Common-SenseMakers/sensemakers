@@ -20,6 +20,7 @@ export const RefWithLabels = (props: {
   showAggregatedLabels?: boolean;
   showAuthorLabels?: boolean;
   showDescription?: boolean;
+  showAllMentionsText?: boolean;
   addLabel: (labelUri: string) => void;
   removeLabel: (labelUri: string) => void;
   editable?: boolean;
@@ -82,6 +83,10 @@ export const RefWithLabels = (props: {
   const addLabel = (label: string) => {
     props.addLabel(getLabelFromDisplayName(label).uri);
   };
+  const renderAggregateLabels =
+    showAggregatedLabels &&
+    props.aggregatedLabels &&
+    props.aggregatedLabels.length > 0;
 
   return (
     <>
@@ -97,6 +102,9 @@ export const RefWithLabels = (props: {
           refType={
             props.oembed.type !== 'unknown' ? props.oembed.type : undefined
           }
+          showAllMentionsText={
+            props.showAllMentionsText && renderAggregateLabels
+          }
           showDescription={props.showDescription}></RefCard>
       ) : (
         <Box gap="10px" pad={{ vertical: '8px' }}>
@@ -110,14 +118,14 @@ export const RefWithLabels = (props: {
         </Box>
       )}
 
-      {showAggregatedLabels &&
-      props.aggregatedLabels &&
-      props.aggregatedLabels.length > 0 ? (
+      {renderAggregateLabels ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
-            refLabels={props.aggregatedLabels.filter(
-              (refLabel) => refLabel.label !== LINKS_TO_URI
-            )}
+            refLabels={
+              props.aggregatedLabels?.filter(
+                (refLabel) => refLabel.label !== LINKS_TO_URI
+              ) || []
+            }
             ontology={props.ontology}></AggregatedRefLabels>
         </Box>
       ) : (

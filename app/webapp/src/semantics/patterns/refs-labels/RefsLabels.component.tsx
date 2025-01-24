@@ -176,6 +176,7 @@ export const RefLabelsComponent = (
                           props.custom?.showAggregatedLabels && hasOtherLabels
                         }
                         showDescription={isQuotedPost}
+                        showAllMentionsText={true}
                         editable={props.editable}
                         ontology={
                           props.originalParsed?.support?.ontology
