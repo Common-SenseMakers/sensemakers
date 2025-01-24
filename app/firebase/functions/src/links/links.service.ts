@@ -165,13 +165,14 @@ export class LinksService {
         refPost?.structuredSemantics?.labels &&
         refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
       ) {
-        const thisRefLabels = refPost.structuredSemantics?.labels?.map(
-          (label): RefLabel => ({
-            label,
-            postId: refPost.id,
-            authorProfileId: refPost.authorProfileId,
-          })
-        );
+        const thisRefLabels =
+          refPost.structuredSemantics?.refsMeta?.[reference].labels?.map(
+            (label): RefLabel => ({
+              label,
+              postId: refPost.id,
+              authorProfileId: refPost.authorProfileId,
+            })
+          ) || [];
         refLabels.push(...thisRefLabels);
       }
     });
