@@ -21,6 +21,7 @@ import {
   parseMastodonPostURI,
 } from '../../src/@shared/utils/mastodon.utils';
 import { getProfileId } from '../../src/@shared/utils/profiles.utils';
+import { ClustersService } from '../../src/clusters/clusters.service';
 import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
@@ -497,10 +498,15 @@ describe('02-platforms', () => {
       }
 
       const allProfilePosts =
-        await services.postsManager.processing.posts.getAllOfQuery({
-          profileId: getProfileId(PLATFORM.Bluesky, userDetails.user_id),
-          fetchParams: { expectedAmount: 100 },
-        });
+        await services.postsManager.processing.posts.getAllOfQuery(
+          {
+            profileId: getProfileId(PLATFORM.Bluesky, userDetails.user_id),
+            fetchParams: { expectedAmount: 100 },
+          },
+          (
+            services.postsManager as unknown as { clusters: ClustersService }
+          ).clusters.getInstance()
+        );
       await services.db.run(async (manager) => {
         allProfilePosts.forEach(async (post) => {
           if (
@@ -526,7 +532,7 @@ describe('02-platforms', () => {
         untilId: sinceAndUntilPosts.untilPost.id,
       };
       await services.db.run(async (manager) => {
-        await services.users.profiles.setAccountProfileFetched(
+        await services.users.profiles.repo.setAccountProfileFetched(
           PLATFORM.Bluesky,
           userDetails.user_id,
           { newest_id: sincePost_id, oldest_id: untilPost_id },
@@ -541,7 +547,7 @@ describe('02-platforms', () => {
       });
 
       await services.db.run(async (manager) => {
-        await services.users.profiles.setAccountProfileFetched(
+        await services.users.profiles.repo.setAccountProfileFetched(
           PLATFORM.Bluesky,
           userDetails.user_id,
           { newest_id: sincePost_id, oldest_id: untilPost_id },
