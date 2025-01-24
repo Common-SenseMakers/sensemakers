@@ -37,6 +37,7 @@ export const PostsFetcherComponent = (props: {
   pageTitle?: string;
   isPublicFeed?: boolean;
   showHeader?: boolean;
+  showAggregatedLabels?: boolean;
   overlayConfig?: OverlayConfig;
   boxProps?: BoxExtendedProps;
 }) => {
@@ -133,7 +134,9 @@ export const PostsFetcherComponent = (props: {
       {posts.map((post, ix) => (
         <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
           <PostContext postInit={post}>
-            <PostCard isPublicFeed={isPublicFeed}></PostCard>
+            <PostCard
+              isPublicFeed={isPublicFeed}
+              showAggregatedLabels={props.showAggregatedLabels}></PostCard>
           </PostContext>
         </Box>
       ))}

@@ -18,7 +18,13 @@ import { QuotedPostLabel } from './QuotedPostLabel';
 import { RefWithLabels } from './RefWithLabels';
 import { RefsMap, processSemantics } from './process.semantics';
 
-export const RefLabelsComponent = (props: PatternProps) => {
+export interface RefLabelsCustomProps {
+  showAggregatedLabels?: boolean;
+}
+
+export const RefLabelsComponent = (
+  props: PatternProps<RefLabelsCustomProps>
+) => {
   const { store, originalStore } = useSemanticsStore(
     props.semantics,
     props.originalParsed
@@ -168,6 +174,9 @@ export const RefLabelsComponent = (props: PatternProps) => {
                         oembed={refDisplayMeta.oembed}
                         authorLabels={refs.get(ref)?.labelsUris || []}
                         aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+                        showAggregatedLabels={
+                          props.custom?.showAggregatedLabels
+                        }
                         showDescription={isQuotedPost}
                         editable={props.editable}
                         ontology={

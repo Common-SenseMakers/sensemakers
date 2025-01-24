@@ -2,8 +2,8 @@ import { Box } from 'grommet';
 
 import { PATTERN_ID, PatternProps, Patterns } from './patterns/patterns';
 
-export const SemanticsEditor = (props: {
-  patternProps: PatternProps;
+export const SemanticsEditor = <C,>(props: {
+  patternProps: PatternProps<C>;
   include?: PATTERN_ID[];
 }) => {
   return (
