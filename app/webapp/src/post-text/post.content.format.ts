@@ -43,6 +43,8 @@ export const textToHtml = (text: string) => {
   const paragraphs = text.split('---');
 
   let html = paragraphs?.map((p, i) => `<p>${p}</p>`).join('');
+  const newlines = html.split('\n');
+  html = newlines.map((p) => `<p>${p}</p>`).join('');
 
   const urlRegex =
     /\bhttps?:\/\/[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gi;
