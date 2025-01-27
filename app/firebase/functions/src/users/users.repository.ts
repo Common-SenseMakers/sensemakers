@@ -51,6 +51,37 @@ export class UsersRepository {
     return doc.exists;
   }
 
+  public async getByClerkId<T extends boolean>(
+    clerkId: string,
+    manager: TransactionManager,
+    shouldThrow?: T
+  ) {
+    const clerkId_property: keyof AppUser = 'clerkId';
+    const query = this.db.collections.users.where(
+      clerkId_property,
+      '==',
+      clerkId
+    );
+    const snap = await manager.query(query);
+
+    const _shouldThrow = shouldThrow !== undefined ? shouldThrow : false;
+
+    if (snap.empty) {
+      if (_shouldThrow)
+        throw new Error(`User with clerkId: ${clerkId} not found`);
+      else return undefined as DefinedIfTrue<T, string>;
+    }
+
+    if (snap.size > 1) {
+      throw new Error(
+        `Data corrupted. Unexpected multiple users with the same platform clerkId ${clerkId}`
+      );
+    }
+
+    /** should not return the data as it does not include the tx manager cache */
+    return snap.docs[0].id as DefinedIfTrue<T, string>;
+  }
+
   public async getUser<T extends boolean>(
     userId: string,
     manager: TransactionManager,
@@ -77,21 +108,9 @@ export class UsersRepository {
     } as unknown as DefinedIfTrue<T, AppUser>;
   }
 
-  public async createUser(
-    userId: string,
-    user: AppUserCreate,
-    manager: TransactionManager
-  ) {
-    const ref = await this.getUserRef(userId, manager);
-    const accountsIds = UsersHelper.accountsToAccountsIds(user.accounts);
-    const userWithAccountsIds: AppUserCreate & {
-      accountsIds: AppUser['accountsIds'];
-    } = {
-      ...user,
-      accountsIds,
-    };
-
-    manager.create(ref, removeUndefined(userWithAccountsIds));
+  public async createUser(user: AppUserCreate, manager: TransactionManager) {
+    const ref = this.db.collections.users.doc();
+    manager.create(ref, removeUndefined(user));
     return ref.id;
   }
 

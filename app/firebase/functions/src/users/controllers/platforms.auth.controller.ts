@@ -24,7 +24,6 @@ export const getSignupContextController: RequestHandler = async (
   response
 ) => {
   try {
-    const userId = getAuthenticatedUser(request);
     const services = getServices(request);
 
     const platform = request.params.platform as PLATFORM;
@@ -53,11 +52,7 @@ export const getSignupContextController: RequestHandler = async (
       logger.debug('getSignupContext', payload, DEBUG_PREFIX);
     }
 
-    const context = await services.users.getSignupContext(
-      platform,
-      userId,
-      payload
-    );
+    const context = await services.users.getSignupContext(platform, payload);
 
     response.status(200).send({ success: true, data: context });
   } catch (error: any) {
@@ -74,7 +69,6 @@ export const handleSignupController: RequestHandler = async (
     const platform = request.params.platform as IDENTITY_PLATFORM;
 
     const services = getServices(request);
-    const userId = getAuthenticatedUser(request);
 
     const payload = await (async () => {
       if (platform === PLATFORM.Twitter) {
@@ -106,6 +100,12 @@ export const handleSignupController: RequestHandler = async (
 
     const result = await services.db.run(
       async (manager) => {
+        const userId = await getAuthenticatedUser(
+          request,
+          services.users,
+          manager,
+          true
+        );
         /** handle signup and refetch user posts */
         return services.users.handleSignup(platform, payload, manager, userId);
       },
