@@ -21,7 +21,7 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { CARD_BORDER } from './PostCard';
 import { PostHeader } from './PostHeader';
 import { PublishButtons } from './PostPublishButtons';
-import { PostTextEditable } from './PostTextEditable';
+import { PostTextStatic } from './PostTextStatic';
 import { usePost } from './post.context/PostContext';
 import { concatenateThread } from './posts.helper';
 
@@ -185,7 +185,7 @@ export const PostView = (props: {
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
           )}
 
-          <PostTextEditable text={postText}></PostTextEditable>
+          <PostTextStatic text={postText}></PostTextStatic>
 
           {!hideSemantics && (
             <Box margin={{ top: '24px' }}>
