@@ -63,7 +63,7 @@ export const Welcome = () => {
   }, [connectedUser]);
 
   const startLogin = () => {
-    openSignIn({ afterSignInUrl: '/' });
+    openSignIn();
   };
 
   return (

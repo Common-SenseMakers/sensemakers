@@ -4,7 +4,7 @@ import { envRuntime } from './typedenv.runtime';
 /** Verify that all needed env variables were provided */
 const mandatory: Array<keyof typeof envRuntime> = [
   'ORCID_CLIENT_ID',
-  'OUR_TOKEN_SECRET',
+  'CLERK_PUBLISHABLE_KEY',
   'TWITTER_CLIENT_ID',
   'TWITTER_CLIENT_SECRET',
   'TWITTER_BEARER_TOKEN',
@@ -64,9 +64,6 @@ export const USE_REAL_LINKS = envRuntime.USE_REAL_LINKS;
 export const TEST_USER_ACCOUNTS = envRuntime.TEST_USER_ACCOUNTS;
 
 export const PARSING_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-
-export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
-export const OUR_EXPIRES_IN = '30d';
 
 export const EMAIL_SENDER_FROM = envRuntime.EMAIL_SENDER_FROM;
 export const ADMIN_EMAIL = envRuntime.ADMIN_EMAIL;

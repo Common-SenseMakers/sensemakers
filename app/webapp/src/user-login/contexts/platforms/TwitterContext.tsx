@@ -52,7 +52,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
   const {
     connectedUser,
-    setToken: setOurToken,
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
@@ -205,11 +204,7 @@ export const TwitterContext = (props: PropsWithChildren) => {
 
               searchParams.delete('state');
               searchParams.delete('code');
-              if (result && result.ourAccessToken) {
-                setOurToken(result.ourAccessToken);
-              } else {
-                refreshConnected().catch(console.error);
-              }
+              refreshConnected().catch(console.error);
 
               setSearchParams(searchParams);
             })
@@ -238,7 +233,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
     t,
     refreshConnected,
     appFetch,
-    setOurToken,
   ]);
   /** abandon connect path */
   useEffect(() => {

@@ -6,7 +6,6 @@ import {
   IFRAMELY_API_KEY,
   IFRAMELY_API_URL,
   MASTODON_ACCESS_TOKENS,
-  OUR_TOKEN_SECRET,
   TEST_USER_ACCOUNTS,
   TWITTER_BEARER_TOKEN,
   TWITTER_CLIENT_ID,
@@ -39,10 +38,6 @@ export const getConfig = (): ServicesConfig => {
       BLUESKY_SERVICE_URL: BLUESKY_SERVICE_URL,
     },
     parser: FUNCTIONS_PY_URL.value(),
-    our: {
-      expiresIn: '30d',
-      tokenSecret: OUR_TOKEN_SECRET.value(),
-    },
     links: {
       apiUrl: IFRAMELY_API_URL,
       apiKey: IFRAMELY_API_KEY.value(),

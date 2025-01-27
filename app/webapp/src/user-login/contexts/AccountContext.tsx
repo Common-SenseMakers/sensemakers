@@ -28,7 +28,6 @@ import { usePersist } from '../../utils/use.persist';
 
 const DEBUG = false;
 
-export const OUR_TOKEN_NAME = 'ourToken';
 export const LOGIN_STATUS = 'loginStatus';
 export const PLATFORMS_LOGIN_STATUS = 'platformsLoginStatus';
 export const ALREADY_CONNECTED_KEY = 'already-connected';
@@ -113,10 +112,13 @@ ALL_PUBLISH_PLATFORMS.forEach((platform) => {
  * in the localStorage
  */
 export const AccountContext = (props: PropsWithChildren) => {
+  /** clark does its things, then isSignedIn is tru, we call getToken, then token is defined,
+   * we refresh connected user (the backend will create the user in our DB, if the user does not exist)
+   */
   const { isSignedIn } = useUser();
   const { getToken, signOut } = useAuth();
 
-  const [token, setToken] = usePersist<string>(OUR_TOKEN_NAME, null);
+  const [token, setToken] = useState<string>();
 
   useEffect(() => {
     if (isSignedIn) {
@@ -263,8 +265,8 @@ export const AccountContext = (props: PropsWithChildren) => {
   const disconnect = () => {
     if (DEBUG) console.log(`disconnect called`);
 
+    signOut().catch(console.error);
     setConnectedUser(undefined);
-    setToken(null);
 
     const disabledStatus: PlatformsConnectedStatus = {};
 

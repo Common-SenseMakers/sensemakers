@@ -1,7 +1,4 @@
-import {
-  HandleSignupResult,
-  OurTokenConfig,
-} from '../@shared/types/types.fetch';
+import { HandleSignupResult } from '../@shared/types/types.fetch';
 import {
   ALL_IDENTITY_PLATFORMS,
   IDENTITY_PLATFORM,
@@ -52,8 +49,7 @@ export class UsersService {
     public profiles: ProfilesService,
     public identityPlatforms: IdentityServicesMap,
     public platformServices: PlatformsMap,
-    public time: TimeService,
-    protected ourToken: OurTokenConfig
+    public time: TimeService
   ) {}
 
   private getIdentityService(platform: PLATFORM) {

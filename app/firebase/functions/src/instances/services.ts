@@ -1,6 +1,5 @@
 import { Firestore } from 'firebase-admin/firestore';
 
-import { OurTokenConfig } from '../@shared/types/types.fetch';
 import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
@@ -49,6 +48,11 @@ import { logger } from './logger';
 
 const DEBUG = false;
 
+export interface ClerkConfig {
+  publishableKey: string;
+  secretKey: string;
+}
+
 export interface Services {
   users: UsersService;
   profiles: ProfilesService;
@@ -69,7 +73,6 @@ export interface ServicesConfig {
   mastodon: MastodonServiceConfig;
   bluesky: BlueskyServiceConfig;
   parser: string;
-  our: OurTokenConfig;
   isEmulator: boolean;
   links: LinksConfig;
   mock: {
@@ -159,8 +162,7 @@ export const createServices = (
     profilesService,
     identityPlatforms,
     platformsMap,
-    time,
-    config.our
+    time
   );
 
   // trigger magic init

@@ -54,7 +54,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
 
   const {
     connectedUser,
-    setToken: setOurToken,
     refresh: refreshConnected,
     overallLoginStatus,
     setLoginFlowState,
@@ -210,11 +209,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
                 localStorage.removeItem(LS_MASTODON_CONTEXT_KEY);
               }
 
-              if (result && result.ourAccessToken) {
-                setOurToken(result.ourAccessToken);
-              } else {
-                refreshConnected().catch(console.error);
-              }
+              refreshConnected().catch(console.error);
 
               searchParams.delete('code');
               setSearchParams(searchParams);

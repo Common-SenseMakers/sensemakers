@@ -4,8 +4,12 @@ import express from 'express';
 
 import { attachServices } from '../middleware/attach.services';
 import { errorHandling } from '../middleware/errorHandlingMiddleware';
+import { ClerkConfig } from './services';
 
-export const buildApp = (router?: express.Router): express.Application => {
+export const buildApp = (
+  clerk?: ClerkConfig,
+  router?: express.Router
+): express.Application => {
   const app = express();
 
   app.use(express.json());
@@ -16,7 +20,7 @@ export const buildApp = (router?: express.Router): express.Application => {
   );
 
   app.use(attachServices);
-  app.use(clerkMiddleware());
+  app.use(clerkMiddleware(clerk));
 
   if (router) {
     app.use(router);
@@ -27,7 +31,10 @@ export const buildApp = (router?: express.Router): express.Application => {
   return app;
 };
 
-export const buildAdminApp = (router?: express.Router): express.Application => {
+export const buildAdminApp = (
+  clerk?: ClerkConfig,
+  router?: express.Router
+): express.Application => {
   const app = express();
 
   app.use(express.json());
@@ -38,7 +45,7 @@ export const buildAdminApp = (router?: express.Router): express.Application => {
   );
 
   app.use(attachServices);
-  app.use(clerkMiddleware());
+  app.use(clerkMiddleware(clerk));
 
   if (router) {
     app.use(router);

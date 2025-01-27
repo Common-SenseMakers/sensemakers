@@ -50,7 +50,7 @@ import { getConfig } from './services.config';
 
 // all secrets are available to all functions
 const secrets: SecretParam[] = [
-  envRuntime.OUR_TOKEN_SECRET,
+  envRuntime.CLERK_SECRET_KEY,
   envRuntime.TWITTER_CLIENT_SECRET,
   envRuntime.TWITTER_BEARER_TOKEN,
   envRuntime.MASTODON_ACCESS_TOKENS,
@@ -89,7 +89,15 @@ export const firestore = app.firestore();
 exports['api'] = functions
   .region(region)
   .runWith(deployConfig)
-  .https.onRequest(buildApp(router));
+  .https.onRequest(
+    buildApp(
+      {
+        publishableKey: envRuntime.CLERK_PUBLISHABLE_KEY.value(),
+        secretKey: envRuntime.CLERK_SECRET_KEY.value(),
+      },
+      router
+    )
+  );
 
 exports['admin'] = functions
   .region(envDeploy.REGION)
@@ -97,7 +105,15 @@ exports['admin'] = functions
     ...deployConfig,
     secrets: [...secrets, envRuntime.ADMIN_API_KEY],
   })
-  .https.onRequest(buildAdminApp(adminRouter));
+  .https.onRequest(
+    buildAdminApp(
+      {
+        publishableKey: envRuntime.CLERK_PUBLISHABLE_KEY.value(),
+        secretKey: envRuntime.CLERK_SECRET_KEY.value(),
+      },
+      adminRouter
+    )
+  );
 
 /** jobs */
 exports.accountFetch = onSchedule(
@@ -336,4 +352,12 @@ exports['trigger'] = functions
     ...deployConfig,
     secrets,
   })
-  .https.onRequest(buildApp(emulatorTriggerRouter));
+  .https.onRequest(
+    buildApp(
+      {
+        publishableKey: envRuntime.CLERK_PUBLISHABLE_KEY.value(),
+        secretKey: envRuntime.CLERK_SECRET_KEY.value(),
+      },
+      emulatorTriggerRouter
+    )
+  );
