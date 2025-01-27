@@ -37,7 +37,7 @@ const TEST_USER_ACCOUNTS = defineString('TEST_USER_ACCOUNTS');
 const LOG_LEVEL_MSG = defineString('LOG_LEVEL_MSG');
 const LOG_LEVEL_OBJ = defineString('LOG_LEVEL_OBJ');
 
-const CLERK_SECRET_KEY = defineString('CLERK_SECRET_KEY');
+const CLERK_SECRET_KEY = defineSecret('CLERK_SECRET_KEY');
 const TWITTER_CLIENT_SECRET = defineSecret('TWITTER_CLIENT_SECRET');
 const TWITTER_BEARER_TOKEN = defineSecret('TWITTER_BEARER_TOKEN');
 const MASTODON_ACCESS_TOKENS = defineSecret('MASTODON_ACCESS_TOKENS');

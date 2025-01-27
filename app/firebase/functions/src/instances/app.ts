@@ -7,7 +7,7 @@ import { errorHandling } from '../middleware/errorHandlingMiddleware';
 import { ClerkConfig } from './services';
 
 export const buildApp = (
-  clerk?: ClerkConfig,
+  clerk: () => ClerkConfig,
   router?: express.Router
 ): express.Application => {
   const app = express();
@@ -20,7 +20,10 @@ export const buildApp = (
   );
 
   app.use(attachServices);
-  app.use(clerkMiddleware(clerk));
+  app.use((req, res, next) => {
+    const clerkConfig = clerk();
+    clerkMiddleware(clerkConfig)(req, res, next);
+  });
 
   if (router) {
     app.use(router);
@@ -32,7 +35,7 @@ export const buildApp = (
 };
 
 export const buildAdminApp = (
-  clerk?: ClerkConfig,
+  clerk: () => ClerkConfig,
   router?: express.Router
 ): express.Application => {
   const app = express();
@@ -45,7 +48,10 @@ export const buildAdminApp = (
   );
 
   app.use(attachServices);
-  app.use(clerkMiddleware(clerk));
+  app.use((req, res, next) => {
+    const clerkConfig = clerk();
+    clerkMiddleware(clerkConfig)(req, res, next);
+  });
 
   if (router) {
     app.use(router);

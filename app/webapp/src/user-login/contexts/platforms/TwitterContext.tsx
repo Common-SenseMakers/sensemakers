@@ -51,9 +51,9 @@ export const TwitterContext = (props: PropsWithChildren) => {
   const verifierHandled = useRef(false);
 
   const {
+    token,
     connectedUser,
     refresh: refreshConnected,
-    overallLoginStatus,
     setLoginFlowState,
     getPlatformConnectedStatus,
     setPlatformConnectedStatus,
@@ -131,7 +131,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
           console.log('was connecting true but no state params - logout', {
             state_param,
             code_param,
-            overallLoginStatus,
           });
 
         setPlatformConnectedStatus(
@@ -161,13 +160,13 @@ export const TwitterContext = (props: PropsWithChildren) => {
         code_param &&
         state_param &&
         getPlatformConnectedStatus(PLATFORM.Twitter) ===
-          PlatformConnectedStatus.Connecting
+          PlatformConnectedStatus.Connecting &&
+        token
       ) {
         if (DEBUG)
           console.log('useEffect TwitterSignup', {
             state_param,
             code_param,
-            overallLoginStatus,
           });
 
         verifierHandled.current = true;
@@ -190,13 +189,10 @@ export const TwitterContext = (props: PropsWithChildren) => {
           if (DEBUG)
             console.log(`calling api/auth/${PLATFORM.Twitter}/signup`, context);
 
-          appFetch<HandleSignupResult, unknown, false>(
-            `/api/auth/${PLATFORM.Twitter}/signup`,
-            {
-              ...context,
-              code: code_param,
-            }
-          )
+          appFetch<HandleSignupResult>(`/api/auth/${PLATFORM.Twitter}/signup`, {
+            ...context,
+            code: code_param,
+          })
             .then((result) => {
               if (result) {
                 localStorage.removeItem(LS_TWITTER_CONTEXT_KEY);
@@ -224,7 +220,6 @@ export const TwitterContext = (props: PropsWithChildren) => {
   }, [
     state_param,
     code_param,
-    overallLoginStatus,
     error_param,
     searchParams,
     connectedUser,

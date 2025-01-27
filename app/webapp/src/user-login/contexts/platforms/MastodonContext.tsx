@@ -55,7 +55,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
   const {
     connectedUser,
     refresh: refreshConnected,
-    overallLoginStatus,
     setLoginFlowState,
     setPlatformConnectedStatus,
     getPlatformConnectedStatus,
@@ -156,7 +155,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
       if (DEBUG)
         console.log('was connecting true but no state params - logout', {
           code_param,
-          overallLoginStatus,
         });
 
       setPlatformConnectedStatus(
@@ -173,7 +171,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
       ) {
         log('useEffect MastodonSignup', {
           code_param,
-          overallLoginStatus,
         });
 
         verifierHandled.current = true;
@@ -219,7 +216,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code_param, overallLoginStatus, searchParams, connectedUser]);
+  }, [code_param, searchParams, connectedUser]);
 
   return (
     <MastodonContextValue.Provider

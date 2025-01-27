@@ -45,6 +45,9 @@ export const BLUESKY_SERVICE_URL = 'https://bsky.social';
 
 export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
 
+export const CLERK_PUBLISHABLE_KEY = envRuntime.CLERK_PUBLISHABLE_KEY;
+export const CLERK_SECRET_KEY = envRuntime.CLERK_SECRET_KEY;
+
 export const IFRAMELY_API_URL = 'https://iframe.ly/api';
 export const IFRAMELY_API_KEY = envRuntime.IFRAMELY_API_KEY;
 

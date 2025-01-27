@@ -2,6 +2,8 @@ import {
   BLUESKY_APP_PASSWORD,
   BLUESKY_SERVICE_URL,
   BLUESKY_USERNAME,
+  CLERK_PUBLISHABLE_KEY,
+  CLERK_SECRET_KEY,
   FUNCTIONS_PY_URL,
   IFRAMELY_API_KEY,
   IFRAMELY_API_URL,
@@ -36,6 +38,10 @@ export const getConfig = (): ServicesConfig => {
       BLUESKY_USERNAME: BLUESKY_USERNAME.value(),
       BLUESKY_APP_PASSWORD: BLUESKY_APP_PASSWORD.value(),
       BLUESKY_SERVICE_URL: BLUESKY_SERVICE_URL,
+    },
+    clerk: {
+      publishableKey: CLERK_PUBLISHABLE_KEY.value(),
+      secretKey: CLERK_SECRET_KEY.value(),
     },
     parser: FUNCTIONS_PY_URL.value(),
     links: {

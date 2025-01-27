@@ -9,7 +9,7 @@ export const getAuthenticatedClerkUser = <T extends boolean>(
   request: Request,
   fail?: T
 ): DefinedIfTrue<T, string> => {
-  const clerkUserId = (request as any).req.auth.userId;
+  const clerkUserId = (request as any).auth.userId;
   if (fail && !clerkUserId) {
     throw new Error(`userId not found on request`);
   }

@@ -89,15 +89,7 @@ export const firestore = app.firestore();
 exports['api'] = functions
   .region(region)
   .runWith(deployConfig)
-  .https.onRequest(
-    buildApp(
-      {
-        publishableKey: envRuntime.CLERK_PUBLISHABLE_KEY.value(),
-        secretKey: envRuntime.CLERK_SECRET_KEY.value(),
-      },
-      router
-    )
-  );
+  .https.onRequest(buildApp(() => getConfig().clerk, router));
 
 exports['admin'] = functions
   .region(envDeploy.REGION)
@@ -105,15 +97,7 @@ exports['admin'] = functions
     ...deployConfig,
     secrets: [...secrets, envRuntime.ADMIN_API_KEY],
   })
-  .https.onRequest(
-    buildAdminApp(
-      {
-        publishableKey: envRuntime.CLERK_PUBLISHABLE_KEY.value(),
-        secretKey: envRuntime.CLERK_SECRET_KEY.value(),
-      },
-      adminRouter
-    )
-  );
+  .https.onRequest(buildAdminApp(() => getConfig().clerk, adminRouter));
 
 /** jobs */
 exports.accountFetch = onSchedule(
@@ -352,12 +336,4 @@ exports['trigger'] = functions
     ...deployConfig,
     secrets,
   })
-  .https.onRequest(
-    buildApp(
-      {
-        publishableKey: envRuntime.CLERK_PUBLISHABLE_KEY.value(),
-        secretKey: envRuntime.CLERK_SECRET_KEY.value(),
-      },
-      emulatorTriggerRouter
-    )
-  );
+  .https.onRequest(buildApp(() => getConfig().clerk, emulatorTriggerRouter));

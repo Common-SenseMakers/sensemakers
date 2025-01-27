@@ -83,7 +83,6 @@ export class UsersService {
    */
   public async getSignupContext<R = any>(
     platform: PLATFORM,
-    userId?: string,
     params?: any
   ): Promise<R> {
     const context =
@@ -91,7 +90,6 @@ export class UsersService {
 
     if (DEBUG)
       logger.debug('UsersService: getSignupContext', {
-        userId,
         platform,
         params,
         context,

@@ -8,7 +8,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { AbsoluteRoutes } from '../../route.names';
-import { OverallLoginStatus, useAccountContext } from './AccountContext';
+import { useAccountContext } from './AccountContext';
 
 export type ConnectedUserContextType = {
   disconnect: () => void;
@@ -20,8 +20,7 @@ const ConnectedUserContextValue = createContext<
 
 /** Disconnect from all platforms */
 export const DisconnectUserContext = (props: PropsWithChildren) => {
-  const { disconnect: disconnectServer, overallLoginStatus } =
-    useAccountContext();
+  const { disconnect: disconnectServer, connectedUser } = useAccountContext();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,10 +39,10 @@ export const DisconnectUserContext = (props: PropsWithChildren) => {
     const isClosedRoute = closedRoutes.some((route) =>
       location.pathname.includes(route)
     );
-    if (isClosedRoute && overallLoginStatus === OverallLoginStatus.LoggedOut) {
+    if (isClosedRoute && !connectedUser) {
       navigate(AbsoluteRoutes.App);
     }
-  }, [closedRoutes, location, navigate, overallLoginStatus]);
+  }, [closedRoutes, connectedUser, location, navigate]);
 
   const disconnect = () => {
     disconnectServer();

@@ -75,6 +75,7 @@ export interface ServicesConfig {
   parser: string;
   isEmulator: boolean;
   links: LinksConfig;
+  clerk: ClerkConfig;
   mock: {
     USE_REAL_PARSER: boolean;
     USE_REAL_TWITTER: boolean;
