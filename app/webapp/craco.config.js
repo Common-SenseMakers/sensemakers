@@ -20,6 +20,8 @@ module.exports = {
               APP_URL: '"http://localhost:3000"',
               IFRAMELY_API_URL: '"https://iframe.ly/api"',
               IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
+              PUBLIC_CLERK_KEY:
+                '"pk_test_Y2FwYWJsZS1yaGluby0yNi5jbGVyay5hY2NvdW50cy5kZXYk"',
             },
           },
         }),

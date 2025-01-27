@@ -1,5 +1,3 @@
-import * as jwt from 'jsonwebtoken';
-
 import {
   HandleSignupResult,
   OurTokenConfig,
@@ -40,10 +38,6 @@ import { getPrefixedUserId } from './users.utils';
 
 const DEBUG = false;
 const DEBUG_PREFIX = 'UsersService';
-
-interface TokenData {
-  userId: string;
-}
 
 /**
  * A user profile is made up of a dictionary of PLATFORM => Arrray<AuthenticationDetails>
@@ -255,9 +249,6 @@ export class UsersService {
         }
 
         return {
-          ourAccessToken: this.generateOurAccessToken({
-            userId,
-          }),
           userId,
           linkProfile: true,
         };
@@ -297,9 +288,6 @@ export class UsersService {
           );
 
         return {
-          ourAccessToken: this.generateOurAccessToken({
-            userId: prefixed_user_id,
-          }),
           userId: prefixed_user_id,
           linkProfile: true,
         };
@@ -350,19 +338,6 @@ export class UsersService {
       );
 
     await this.repo.setAccountDetails(userId, platformId, account, manager);
-  }
-
-  protected generateOurAccessToken(data: TokenData) {
-    return jwt.sign(data, this.ourToken.tokenSecret, {
-      expiresIn: this.ourToken.expiresIn,
-    });
-  }
-
-  public verifyAccessToken(token: string) {
-    const verified = jwt.verify(token, this.ourToken.tokenSecret, {
-      complete: true,
-    }) as unknown as jwt.JwtPayload & TokenData;
-    return verified.payload.userId;
   }
 
   public async getUserReadProfiles(

@@ -9,7 +9,6 @@ export interface OurTokenConfig {
 export interface HandleSignupResult {
   linkProfile: boolean;
   userId: string;
-  ourAccessToken?: string;
 }
 
 /** there are two fetch modes:

@@ -1,3 +1,4 @@
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { usePostHog } from 'posthog-js/react';
 import {
   PropsWithChildren,
@@ -112,13 +113,30 @@ ALL_PUBLISH_PLATFORMS.forEach((platform) => {
  * in the localStorage
  */
 export const AccountContext = (props: PropsWithChildren) => {
+  const { isSignedIn } = useUser();
+  const { getToken, signOut } = useAuth();
+
+  const [token, setToken] = usePersist<string>(OUR_TOKEN_NAME, null);
+
+  useEffect(() => {
+    if (isSignedIn) {
+      getToken()
+        .then((token) => {
+          if (token) {
+            setToken(token);
+          }
+        })
+        .catch(console.error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getToken, isSignedIn]);
+
   const [connectedUser, setConnectedUser] = useState<ConnectedUser | null>();
 
   const [loginFlowState, _setLoginFlowState] = useState<LoginFlowState>(
     LoginFlowState.Idle
   );
 
-  const [token, setToken] = usePersist<string>(OUR_TOKEN_NAME, null);
   const [overallLoginStatus, _setOverallLoginStatus] =
     usePersist<OverallLoginStatus>(LOGIN_STATUS, OverallLoginStatus.NotKnown);
 
@@ -181,8 +199,7 @@ export const AccountContext = (props: PropsWithChildren) => {
         setConnectedUser(null);
       }
     } catch (e) {
-      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
-      setToken(null);
+      signOut().catch(console.error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setOverallLoginStatus, setToken, token]);
