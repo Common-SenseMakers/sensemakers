@@ -1,5 +1,6 @@
 import { Quad, Store } from 'n3';
 
+import { RefDisplayMeta } from '../types/types.references';
 import { forEachStore } from './n3.utils';
 
 export const THIS_POST_NAME_URI = 'https://sense-nets.xyz/mySemanticPost';
@@ -18,9 +19,38 @@ export const LINKS_TO_URI = 'http://purl.org/spar/cito/linksTo';
 export const QUOTES_POST_URI = 'https://sense-nets.xyz/quotesPost';
 
 export const removeUndisplayedLabelUris = (labels: string[]) => {
-  return labels.filter(
-    (label) => label !== QUOTES_POST_URI && label !== LINKS_TO_URI
+  return labels.filter((label) => !isIgnoredLabelUri(label));
+};
+
+export const isIgnoredLabelUri = (label: string) => {
+  return label === QUOTES_POST_URI || label === LINKS_TO_URI;
+};
+
+export const parseRefDisplayMeta = (
+  refDisplayMeta?: RefDisplayMeta,
+  authorProfileId?: string
+) => {
+  const aggregatedLabels = refDisplayMeta?.aggregatedLabels?.filter(
+    (label) => !isIgnoredLabelUri(label.label)
   );
+
+  const authorLabels = authorProfileId
+    ? aggregatedLabels
+        ?.filter((label) => label.authorProfileId === authorProfileId)
+        .map((label) => label.label)
+    : undefined;
+
+  const nonAuthorLabels = authorProfileId
+    ? aggregatedLabels?.filter(
+        (label) => label.authorProfileId !== authorProfileId
+      )
+    : undefined;
+
+  return {
+    aggregatedLabels,
+    authorLabels,
+    nonAuthorLabels,
+  };
 };
 
 export const getKeywords = (store: Store) => {

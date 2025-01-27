@@ -8,11 +8,7 @@ import {
   RefLabel,
 } from '../@shared/types/types.references';
 import { CollectionNames } from '../@shared/utils/collectionNames';
-import {
-  LINKS_TO_URI,
-  QUOTES_POST_URI,
-  SCIENCE_TOPIC_URI,
-} from '../@shared/utils/semantics.helper';
+import { SCIENCE_TOPIC_URI } from '../@shared/utils/semantics.helper';
 import { ClustersService } from '../clusters/clusters.service';
 import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
@@ -197,19 +193,15 @@ export class LinksService {
       clusterInstance,
       manager
     );
-    /** don't include labels that arent show */
-    const filteredRefLabels = refLabels.filter(
-      (label) => label.label !== QUOTES_POST_URI && label.label !== LINKS_TO_URI
-    );
 
     const ontology = await this.ontology.getMany(
-      filteredRefLabels.map((l) => l.label),
+      refLabels.map((l) => l.label),
       manager
     );
 
     if (DEBUG) {
       logger.debug(`getAggregatedRefLabelsForDisplay ${ref}`, {
-        filteredRefLabels,
+        refLabels,
         refOEmbed,
         clusterId,
         ontology,
@@ -217,7 +209,7 @@ export class LinksService {
     }
 
     const refDisplayMeta: RefDisplayMeta = {
-      aggregatedLabels: filteredRefLabels,
+      aggregatedLabels: refLabels,
       ontology,
       oembed: refOEmbed,
     };
