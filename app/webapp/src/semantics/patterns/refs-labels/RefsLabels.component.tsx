@@ -8,7 +8,6 @@ import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
 import {
   THIS_POST_NAME_URI,
   parseRefDisplayMeta,
-  removeUndisplayedLabelUris,
 } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
 import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
@@ -145,13 +144,11 @@ export const RefLabelsComponent = (
                 throw new Error('Unexpected undefined');
 
               const refDisplayMeta = props.post?.meta?.references[ref];
-              const { aggregatedLabels } = parseRefDisplayMeta(refDisplayMeta);
+              const { postsIds } = parseRefDisplayMeta(refDisplayMeta);
 
               // here we get the author labels directly from the semantics of the post.
               const authorLabels = refs.get(ref)?.labelsUris || [];
-              const hasOtherLabels =
-                (aggregatedLabels?.length || 0) >
-                removeUndisplayedLabelUris(authorLabels).length;
+              const hasOtherLabels = postsIds.length > 1;
 
               const isQuotedPost = isPlatformPost(ref);
 

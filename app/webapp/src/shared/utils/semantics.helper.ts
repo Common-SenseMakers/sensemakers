@@ -23,7 +23,8 @@ export const removeUndisplayedLabelUris = (labels: string[]) => {
 };
 
 export const isIgnoredLabelUri = (label: string) => {
-  return label === QUOTES_POST_URI || label === LINKS_TO_URI;
+  return false;
+  // label === QUOTES_POST_URI || label === LINKS_TO_URI;
 };
 
 export const parseRefDisplayMeta = (
@@ -46,7 +47,15 @@ export const parseRefDisplayMeta = (
       )
     : undefined;
 
+  const postsIds = new Set<string>();
+  aggregatedLabels?.forEach((label) => {
+    if (label.postId) {
+      postsIds.add(label.postId);
+    }
+  });
+
   return {
+    postsIds: Array.from(postsIds),
     aggregatedLabels,
     authorLabels,
     nonAuthorLabels,
