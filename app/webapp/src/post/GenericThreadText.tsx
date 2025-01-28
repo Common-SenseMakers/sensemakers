@@ -18,11 +18,13 @@ export const GenericThreadText = (props: {
   return (
     <div onClick={props.onClick}>
       {thread.map((genericPost) => {
+        const textWithUrls = styleUrls(
+          genericPost.content,
+          constants.colors.links
+        );
         return (
           <p style={{ marginTop: '8px', marginBottom: '8px' }}>
-            <Markdown>
-              {styleUrls(genericPost.content, constants.colors.links)}
-            </Markdown>
+            <Markdown>{textWithUrls}</Markdown>
           </p>
         );
       })}

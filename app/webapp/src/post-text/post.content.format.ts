@@ -38,27 +38,16 @@ function cleanUrlParams(url: string): string {
   return urlObject.toString();
 }
 
-const wrapSplitWithParagraph = (text: string, split: string, join = '') => {
-  if (text.split(split).length === 1) return text;
-  return text
-    .split(split)
-    .map((p) => `<p>${p}</p>`)
-    .join(join);
-};
-
 /** gets the plain text and creates HTML compatible with Prosemirror schema */
 export const styleUrls = (text: string, color?: string) => {
-  let html = wrapSplitWithParagraph(text, '---', '<br>');
-
-  html = wrapSplitWithParagraph(html, '\n');
-  html = html.replace(new RegExp('<p></p>', 'g'), '<br>');
+  text = text.replace(new RegExp('\n', 'g'), '<br>');
 
   const urlRegex =
     /\bhttps?:\/\/[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gi;
 
-  html = html.replace(urlRegex, (url) => replaceUrlCallback(url, color));
+  text = text.replace(urlRegex, (url) => replaceUrlCallback(url, color));
 
-  return html;
+  return text;
 };
 
 const replaceUrlCallback = (url: string, color?: string) => {
