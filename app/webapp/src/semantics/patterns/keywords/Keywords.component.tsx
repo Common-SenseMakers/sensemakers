@@ -104,12 +104,13 @@ export const KeywordsComponent = (props: PatternProps) => {
         }}
         direction="row">
         <AppLabelsEditor
+          underline={true}
           maxLabels={props.size === 'compact' ? 2 : undefined}
           placeholder={
             props.editable ? t(PostEditKeys.keywordsPlaceholder) : ''
           }
           editable={props.editable}
-          colors={{ font: '#FFFFFF', background: '#498283', border: '#6C9C9D' }}
+          colors={{ font: '#498283', background: '#F5FCFC', border: '#DAEDED' }}
           labels={keywords}
           onLabelClick={handleKeywordClick}
           addLabel={(newLabel) => {
