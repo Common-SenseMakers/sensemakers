@@ -9,7 +9,7 @@ import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { RefLabelsCustomProps } from '../semantics/patterns/refs-labels/RefsLabels.component';
-import { AppPostFull } from '../shared/types/types.posts';
+import { AppPostFull, GenericPost } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { truncateGenericThread } from '../utils/post.utils';
 import { GenericThreadText } from './GenericThreadText';
@@ -142,7 +142,7 @@ export const PostCard = (props: {
   };
 
   const seeMoreSpan = `<span style="color: ${constants.colors.links};">${t(PostEditKeys.showMoreTruncatedText)}</span>`;
-  const truncatedGenericThread = truncateGenericThread(
+  const truncatedGenericThread: GenericPost[] = truncateGenericThread(
     post.generic.thread,
     seeMoreSpan
   );

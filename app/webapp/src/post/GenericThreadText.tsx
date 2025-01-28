@@ -18,7 +18,7 @@ export const GenericThreadText = (props: {
   return (
     <div onClick={props.onClick}>
       {thread.map((genericPost) => {
-        const textWithUrls = styleUrls(
+        const textWithUrls: string = styleUrls(
           genericPost.content,
           constants.colors.links
         );
