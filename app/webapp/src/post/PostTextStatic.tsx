@@ -1,4 +1,4 @@
-import { textToHtml } from '../post-text/post.content.format';
+import { styleUrls } from '../post-text/post.content.format';
 
 export const PostTextStatic = (props: {
   text?: string;
@@ -23,7 +23,7 @@ export const PostTextStatic = (props: {
         wordBreak: 'break-word',
         transition: 'all 0.5s ease-in-out',
       }}
-      dangerouslySetInnerHTML={{ __html: textToHtml(text) }}
+      dangerouslySetInnerHTML={{ __html: styleUrls(text) }}
     />
   );
 };

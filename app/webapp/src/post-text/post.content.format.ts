@@ -38,13 +38,21 @@ function cleanUrlParams(url: string): string {
   return urlObject.toString();
 }
 
-/** gets the plain text and creates HTML compatible with Prosemirror schema */
-export const textToHtml = (text: string) => {
-  const paragraphs = text.split('---');
+const wrapSplitWithParagraph = (text: string, split: string, join = '') => {
+  if (text.split(split).length === 1) return text;
+  return text
+    .split(split)
+    .map((p) => `<p>${p}</p>`)
+    .join(join);
+};
 
-  let html = paragraphs?.map((p, i) => `<p>${p}</p>`).join('');
-  const newlines = html.split('\n');
-  html = newlines.map((p) => `<p>${p}</p>`).join('');
+/** gets the plain text and creates HTML compatible with Prosemirror schema */
+export const styleUrls = (text: string) => {
+  let html = wrapSplitWithParagraph(text, '---', '<br>');
+
+  html = wrapSplitWithParagraph(html, '\n');
+  console.log('has emtpy P', html.includes('<p></p>'));
+  html = html.replace(new RegExp('<p></p>', 'g'), '<br>');
 
   const urlRegex =
     /\bhttps?:\/\/[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gi;
@@ -82,5 +90,5 @@ const replaceUrlCallback = (url: string) => {
       ? noParametersUrl.slice(0, 50) + '...'
       : noParametersUrl;
 
-  return `<a href="${url}" target="_blank">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
+  return `<a href="${url}" target="_blank" style="color: #337fbd;">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
 };
