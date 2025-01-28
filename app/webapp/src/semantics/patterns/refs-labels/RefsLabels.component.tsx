@@ -5,7 +5,11 @@ import { useMemo } from 'react';
 import { useOverlay } from '../../../overlays/OverlayContext';
 import { isPlatformPost } from '../../../shared/utils/links.utils';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
-import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
+import {
+  THIS_POST_NAME_URI,
+  parseRefDisplayMeta,
+  removeUndisplayedLabelUris,
+} from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
 import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
@@ -141,10 +145,13 @@ export const RefLabelsComponent = (
                 throw new Error('Unexpected undefined');
 
               const refDisplayMeta = props.post?.meta?.references[ref];
+              const { aggregatedLabels } = parseRefDisplayMeta(refDisplayMeta);
+
+              // here we get the author labels directly from the semantics of the post.
               const authorLabels = refs.get(ref)?.labelsUris || [];
               const hasOtherLabels =
-                (refDisplayMeta?.aggregatedLabels?.length || 0) >
-                authorLabels.length;
+                (aggregatedLabels?.length || 0) >
+                removeUndisplayedLabelUris(authorLabels).length;
 
               const isQuotedPost = isPlatformPost(ref);
 
@@ -176,6 +183,7 @@ export const RefLabelsComponent = (
                           props.custom?.showAggregatedLabels && hasOtherLabels
                         }
                         showDescription={isQuotedPost}
+                        showAllMentionsText={true}
                         editable={props.editable}
                         ontology={
                           props.originalParsed?.support?.ontology

@@ -32,6 +32,7 @@ export const RefCard = (props: {
   refType?: string;
   sourceRef?: number;
   showDescription?: boolean;
+  showAllMentionsText?: boolean;
 }) => {
   const titleTruncated = useMemo(
     () => props.title && truncate(props.title, 50),
@@ -43,24 +44,47 @@ export const RefCard = (props: {
   const domain = useMemo(() => extractDomain(props.url), [props.url]);
 
   return (
-    <Box align="start" pad={{}}>
-      <Box
-        margin={{ bottom: '20px' }}
-        width="100%"
-        direction="row"
-        justify="start">
-        {props.refType && (
-          <Text
+    <Box width="100%" align="start" pad={{}}>
+      <Box width="100%" justify="between" direction="row">
+        <Box
+          margin={{ bottom: '20px' }}
+          width="100%"
+          direction="row"
+          justify="start">
+          {props.refType && (
+            <Text
+              style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                lineHeight: '16px',
+                color: constants.colors.textLight2,
+              }}>
+              {props.sourceRef
+                ? `${zoteroItemTypeDisplay(props.refType)} from Reference ${props.sourceRef}`
+                : zoteroItemTypeDisplay(props.refType)}
+            </Text>
+          )}
+        </Box>
+        {props.showAllMentionsText && (
+          <span
             style={{
+              color: '#4B5563',
+              fontFamily: 'Libre Franklin',
               fontSize: '14px',
-              fontWeight: '500',
+              fontStyle: 'normal',
+              fontWeight: 500,
               lineHeight: '16px',
-              color: constants.colors.textLight2,
+              textDecorationLine: 'underline',
+              textDecorationStyle: 'solid',
+              textDecorationSkipInk: 'none',
+              textDecorationThickness: 'auto',
+              textUnderlineOffset: 'auto',
+              textUnderlinePosition: 'from-font',
+              width: '100%',
+              textAlign: 'right',
             }}>
-            {props.sourceRef
-              ? `${zoteroItemTypeDisplay(props.refType)} from Reference ${props.sourceRef}`
-              : zoteroItemTypeDisplay(props.refType)}
-          </Text>
+            Show All Mentions
+          </span>
         )}
       </Box>
       <Box
