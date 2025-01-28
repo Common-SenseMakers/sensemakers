@@ -51,7 +51,6 @@ export const styleUrls = (text: string) => {
   let html = wrapSplitWithParagraph(text, '---', '<br>');
 
   html = wrapSplitWithParagraph(html, '\n');
-  console.log('has emtpy P', html.includes('<p></p>'));
   html = html.replace(new RegExp('<p></p>', 'g'), '<br>');
 
   const urlRegex =
