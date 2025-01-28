@@ -183,16 +183,10 @@ export class LinksService {
   async getAggregatedRefLabelsForDisplay(
     ref: string,
     manager: TransactionManager,
-    clusterId?: string,
-    cluster?: ClusterInstance
+    cluster: ClusterInstance
   ) {
-    const clusterInstance = cluster || this.clusters.getInstance(clusterId);
     const refOEmbed = await this.getOEmbed(ref, manager);
-    const refLabels = await this.getAggregatedRefLabels(
-      ref,
-      clusterInstance,
-      manager
-    );
+    const refLabels = await this.getAggregatedRefLabels(ref, cluster, manager);
 
     const ontology = await this.ontology.getMany(
       refLabels.map((l) => l.label),
@@ -203,7 +197,6 @@ export class LinksService {
       logger.debug(`getAggregatedRefLabelsForDisplay ${ref}`, {
         refLabels,
         refOEmbed,
-        clusterId,
         ontology,
       });
     }

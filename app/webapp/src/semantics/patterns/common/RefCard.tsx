@@ -1,8 +1,10 @@
 // import axios from 'axios';
 import { Anchor, Box, Paragraph, Text } from 'grommet';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { OpenLinkIcon } from '../../../app/icons/OpenLinkIcon';
+import { PostEditKeys } from '../../../i18n/i18n.edit.post';
 import { CARD_BORDER } from '../../../post/PostCard';
 import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
@@ -34,6 +36,8 @@ export const RefCard = (props: {
   showDescription?: boolean;
   showAllMentionsText?: boolean;
 }) => {
+  const { t } = useTranslation();
+
   const titleTruncated = useMemo(
     () => props.title && truncate(props.title, 50),
     [props.title]
@@ -46,11 +50,7 @@ export const RefCard = (props: {
   return (
     <Box width="100%" align="start" pad={{}}>
       <Box width="100%" justify="between" direction="row">
-        <Box
-          margin={{ bottom: '20px' }}
-          width="100%"
-          direction="row"
-          justify="start">
+        <Box margin={{ bottom: '20px' }} direction="row" justify="start">
           {props.refType && (
             <Text
               style={{
@@ -65,26 +65,24 @@ export const RefCard = (props: {
             </Text>
           )}
         </Box>
+
         {props.showAllMentionsText && (
-          <span
-            style={{
-              color: '#4B5563',
-              fontFamily: 'Libre Franklin',
-              fontSize: '14px',
-              fontStyle: 'normal',
-              fontWeight: 500,
-              lineHeight: '16px',
-              textDecorationLine: 'underline',
-              textDecorationStyle: 'solid',
-              textDecorationSkipInk: 'none',
-              textDecorationThickness: 'auto',
-              textUnderlineOffset: 'auto',
-              textUnderlinePosition: 'from-font',
-              width: '100%',
-              textAlign: 'right',
-            }}>
-            Show All Mentions
-          </span>
+          <Box>
+            <Text
+              style={{
+                color: constants.colors.textLight2,
+                fontSize: '14px',
+                fontWeight: 500,
+                lineHeight: '16px',
+                textDecorationLine: 'underline',
+                textDecorationStyle: 'solid',
+                textDecorationSkipInk: 'none',
+                textUnderlinePosition: 'from-font',
+                whiteSpace: 'nowrap',
+              }}>
+              {t(PostEditKeys.showAllMentionsText)}
+            </Text>
+          </Box>
         )}
       </Box>
       <Box

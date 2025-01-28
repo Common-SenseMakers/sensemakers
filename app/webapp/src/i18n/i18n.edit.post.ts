@@ -11,6 +11,7 @@ export enum PostEditKeys {
   reseachNotDetectedHelp = 'edit-s009',
   keywordsPlaceholder = 'edit-s010',
   labelsPlaceholder = 'edit-s011',
+  showAllMentionsText = 'edit-s012',
   showMoreTruncatedText = 'edit-s013',
 }
 
@@ -29,5 +30,6 @@ export const editValues: Record<PostEditKeys, string> = {
     'We did not detect research-related content in this post. Only share this post to Hyperfeed if it relates to research.',
   [PostEditKeys.keywordsPlaceholder]: 'Add keywords',
   [PostEditKeys.labelsPlaceholder]: 'Add labels',
+  [PostEditKeys.showAllMentionsText]: 'Show all mentions',
   [PostEditKeys.showMoreTruncatedText]: 'Show more',
 };
