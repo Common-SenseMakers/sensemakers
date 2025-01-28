@@ -14,6 +14,7 @@ export const AppLabel = (
     showClose?: boolean;
     remove?: () => void;
     colors: LabelColors;
+    underline?: boolean;
   }
 ): JSX.Element => {
   const colors = props.colors;
@@ -29,13 +30,12 @@ export const AppLabel = (
       pad={{ horizontal: '8px', vertical: '4px' }}
       {...props}
       style={{
+        ...props.style,
         borderRadius: '24px',
-        color: colors.font,
         backgroundColor: colors.background,
-        borderColor: colors.border,
+        color: colors.border,
         border: '1px solid',
         textAlign: 'center',
-        ...props.style,
       }}
       direction="row"
       align="center">
@@ -43,12 +43,14 @@ export const AppLabel = (
         <Text
           id="text"
           style={{
+            color: colors.font,
             height: '16px',
             fontSize: '14px',
             fontStyle: 'normal',
             fontWeight: '500',
             lineHeight: '16px',
             userSelect: 'none',
+            textDecoration: props.underline ? 'underline' : 'none',
           }}
           size="small">
           {props.children}

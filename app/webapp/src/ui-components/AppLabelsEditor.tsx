@@ -27,6 +27,7 @@ export const AppLabelsEditor = (props: {
   onLabelClick?: (label: string) => void;
   onMoreClicked?: () => void;
   onNonLabelClick?: () => void;
+  underline?: boolean;
 }) => {
   const editable = props.editable !== undefined ? props.editable : false;
   const colors = props.colors;
@@ -248,6 +249,7 @@ export const AppLabelsEditor = (props: {
                 onLabelClick && !adding && onLabelClick(label as string);
               }}>
               <AppLabel
+                underline={props.underline}
                 colors={colors}
                 showClose={adding}
                 remove={() => removeLabel(label as string)}
