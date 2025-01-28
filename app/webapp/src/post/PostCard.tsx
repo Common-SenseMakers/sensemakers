@@ -141,10 +141,12 @@ export const PostCard = (props: {
     onPostClick();
   };
 
-  const seeMoreSpan = `<span style="color: ${constants.colors.links};">${t(PostEditKeys.showMoreTruncatedText)}</span>`;
   const truncatedGenericThread: GenericPost[] = truncateGenericThread(
     post.generic.thread,
-    seeMoreSpan
+    {
+      color: constants.colors.links,
+      text: t(PostEditKeys.showMoreTruncatedText),
+    }
   );
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {

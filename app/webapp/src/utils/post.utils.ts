@@ -1,5 +1,6 @@
 import { getPostStatuses } from '../post/posts.helper';
 import { AppPostFull, GenericPost } from '../shared/types/types.posts';
+import { useThemeContext } from '../ui-components/ThemedApp';
 
 export function zoteroItemTypeDisplay(itemType: string) {
   return itemType
@@ -35,7 +36,7 @@ const TRUNCATED_LENGTH = 500;
 
 export function truncateGenericThread(
   genericThread: GenericPost[],
-  seeMoreText: string
+  seeMore: { color: string; text: string }
 ) {
   const truncatedThread = [];
   let totalLength = 0;
@@ -49,7 +50,7 @@ export function truncateGenericThread(
           TRUNCATED_LENGTH - (totalLength - post.content.length)
         ) +
         '... ' +
-        seeMoreText;
+        `<span style="color: ${seeMore.color};">${seeMore.text}</span>`;
       truncatedThread.push({ ...post, content: truncatedContent });
       break;
     }
