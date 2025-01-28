@@ -9,12 +9,11 @@ import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { RefLabelsCustomProps } from '../semantics/patterns/refs-labels/RefsLabels.component';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { GenericThreadText } from './GenericThreadText';
 import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PublishButtons } from './PostPublishButtons';
-import { PostTextStatic } from './PostTextStatic';
 import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
-import { concatenateThread } from './posts.helper';
 
 const KEYWORDS_SEMANTICS_ID = 'keywords-semantics';
 const REFS_SEMANTICS_ID = 'refs-semantics';
@@ -139,14 +138,6 @@ export const PostCard = (props: {
     onPostClick();
   };
 
-  const seeMoreSpan = `<span style="color: #337fbd; cursor: pointer;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">See more</span>`;
-  const TRUNCATED_LENGTH = 500;
-  const postText = concatenateThread(post.generic);
-  const useTruncated = postText.length > TRUNCATED_LENGTH;
-  const postTextTruncated = useTruncated
-    ? postText.slice(0, TRUNCATED_LENGTH) + '... ' + seeMoreSpan
-    : postText;
-
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
       e.stopPropagation();
@@ -203,11 +194,9 @@ export const PostCard = (props: {
               transition: 'height 0.3s ease-in-out',
               height: 'auto',
             }}>
-            <PostTextStatic
+            <GenericThreadText
               onClick={handleInternalClick}
-              truncate
-              shade={shade}
-              text={postTextTruncated}></PostTextStatic>
+              thread={post.generic.thread}></GenericThreadText>
           </div>
           {!hideSemantics && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
