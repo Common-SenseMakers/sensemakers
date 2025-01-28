@@ -153,6 +153,7 @@ export const PostCard = (props: {
   };
 
   const hideSemantics = false;
+  const hasRefs = post?.structuredSemantics?.refs?.length || 0 > 0;
 
   return (
     <Box
@@ -196,17 +197,10 @@ export const PostCard = (props: {
                 }}></SemanticsEditor>
             </Box>
           )}
-          <div
-            style={{
-              overflow: 'hidden',
-              transition: 'height 0.3s ease-in-out',
-              height: 'auto',
-            }}>
-            <GenericThreadText
-              onClick={handleInternalClick}
-              thread={truncatedGenericThread}></GenericThreadText>
-          </div>
-          {!hideSemantics && (
+          <GenericThreadText
+            onClick={handleInternalClick}
+            thread={truncatedGenericThread}></GenericThreadText>
+          {!hideSemantics && hasRefs && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
               <SemanticsEditor
                 include={[PATTERN_ID.REF_LABELS]}
