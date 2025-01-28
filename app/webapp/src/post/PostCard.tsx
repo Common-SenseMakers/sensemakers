@@ -9,6 +9,7 @@ import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { RefLabelsCustomProps } from '../semantics/patterns/refs-labels/RefsLabels.component';
 import { AppPostFull } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { truncateGenericThread } from '../utils/post.utils';
 import { GenericThreadText } from './GenericThreadText';
 import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PublishButtons } from './PostPublishButtons';
@@ -138,6 +139,7 @@ export const PostCard = (props: {
     onPostClick();
   };
 
+  const truncatedGenericThread = truncateGenericThread(post.generic.thread);
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
       e.stopPropagation();
@@ -196,7 +198,7 @@ export const PostCard = (props: {
             }}>
             <GenericThreadText
               onClick={handleInternalClick}
-              thread={post.generic.thread}></GenericThreadText>
+              thread={truncatedGenericThread}></GenericThreadText>
           </div>
           {!hideSemantics && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>

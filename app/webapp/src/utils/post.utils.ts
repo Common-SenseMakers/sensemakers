@@ -1,5 +1,5 @@
 import { getPostStatuses } from '../post/posts.helper';
-import { AppPostFull } from '../shared/types/types.posts';
+import { AppPostFull, GenericPost } from '../shared/types/types.posts';
 
 export function zoteroItemTypeDisplay(itemType: string) {
   return itemType
@@ -29,4 +29,29 @@ export function getPostType(post: AppPostFull | undefined): PostType {
   if (firstPost && firstPost.content !== '' && firstPost.quotedThread)
     return 'quotePost';
   return 'regular';
+}
+
+const seeMoreSpan = `<span style="color: #337fbd; cursor: pointer;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">See more</span>`;
+const TRUNCATED_LENGTH = 500;
+
+export function truncateGenericThread(genericThread: GenericPost[]) {
+  const truncatedThread = [];
+  let totalLength = 0;
+
+  for (const post of genericThread) {
+    totalLength += post.content.length;
+    if (totalLength > TRUNCATED_LENGTH) {
+      const truncatedContent =
+        post.content.slice(
+          0,
+          TRUNCATED_LENGTH - (totalLength - post.content.length)
+        ) +
+        '... ' +
+        seeMoreSpan;
+      truncatedThread.push({ ...post, content: truncatedContent });
+      break;
+    }
+    truncatedThread.push(post);
+  }
+  return truncatedThread;
 }
