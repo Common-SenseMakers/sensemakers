@@ -30,6 +30,7 @@ export interface PostClickEvent {
   payload: unknown;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface PatternProps<C = any> {
   size?: 'compact' | 'normal';
   isLoading?: boolean;

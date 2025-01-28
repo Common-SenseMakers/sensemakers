@@ -164,6 +164,8 @@ export const getTwitterMock = (
   }
 
   if (type.fetch) {
+    when(mocked.isRootThread(anything())).thenReturn(true);
+
     when(mocked.fetchInternal(anything(), anything(), anything())).thenCall(
       async (
         user_id: string,

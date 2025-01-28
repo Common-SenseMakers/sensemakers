@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { OntologyItem } from '../../../shared/types/types.parser';
 import { RefLabel } from '../../../shared/types/types.references';
+import { transformDisplayName } from '../../../shared/utils/semantics.helper';
 import { LabelColors } from '../../../ui-components';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 
@@ -38,7 +39,7 @@ export const AggregatedRefLabels = (props: {
         }
 
         return {
-          label: label_ontology.display_name,
+          label: transformDisplayName(label_ontology.display_name),
           details,
         };
       })
@@ -47,7 +48,12 @@ export const AggregatedRefLabels = (props: {
       details: LabelDetails;
     }[];
 
-    return labelsSummary;
+    return labelsSummary.sort((a, b) => {
+      if (a.label === '💬 mentions') {
+        return -1;
+      }
+      return b.details.count - a.details.count;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.refLabels]);
 

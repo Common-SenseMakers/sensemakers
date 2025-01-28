@@ -2631,11 +2631,6 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@nytimes/react-prosemirror@^0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@nytimes/react-prosemirror/-/react-prosemirror-0.5.0.tgz#516dfa29ce70fd34fc1f4ab45b41d853e9c2974d"
-  integrity sha512-Jc3LHqHb9jzAvxNU8pkDfEQH4uEJze+TsocvdOdkGqlvV6StM93WaBPOdipWEaJUJZwV8wjHrmMRQbdbA5TsGg==
-
 "@one-ini/wasm@0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@one-ini/wasm/-/wasm-0.1.1.tgz#6013659736c9dbfccc96e8a9c2b3de317df39323"
@@ -9576,6 +9571,11 @@ markdown-to-jsx@7.4.4:
   version "7.4.4"
   resolved "https://registry.yarnpkg.com/markdown-to-jsx/-/markdown-to-jsx-7.4.4.tgz#90eccba7b74e8bd8a2831efeb281cb3ac88fadec"
   integrity sha512-R9SGyfV2zsQx25YIYImACpiQ8dQe617CNyoE1wLst4wFHtiBGG3SEtJDlI1bt9SeotIcbITbVy9+ieQFWfEoQw==
+
+markdown-to-jsx@^7.7.3:
+  version "7.7.3"
+  resolved "https://registry.yarnpkg.com/markdown-to-jsx/-/markdown-to-jsx-7.7.3.tgz#c75927252592696e9e8b2a9557628749d8ab023e"
+  integrity sha512-o35IhJDFP6Fv60zPy+hbvZSQMmgvSGdK5j8NRZ7FeZMY+Bgqw+dSg7SC1ZEzC26++CiOUCqkbq96/c3j/FfTEQ==
 
 marked@7.0.4:
   version "7.0.4"

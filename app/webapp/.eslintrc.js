@@ -20,6 +20,7 @@ module.exports = {
     'jsx-a11y/anchor-has-content': 'error',
     'jsx-a11y/anchor-is-valid': 'error',
     'no-useless-escape': 'error',
+    "@typescript-eslint/no-empty-interface": "off",
     eqeqeq: ['error', 'always'],
     '@typescript-eslint/no-floating-promises': [
       'error',
