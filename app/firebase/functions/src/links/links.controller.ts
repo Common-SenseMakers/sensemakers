@@ -22,15 +22,16 @@ export const getRefMetaController: RequestHandler = async (
     )) as GetRefDisplayMeta;
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
-    const { links, db } = getServices(request);
+    const { links, db, clusters } = getServices(request);
 
-    const refDisplayMeta = await db.run((manager) =>
-      links.getAggregatedRefLabelsForDisplay(
+    const refDisplayMeta = await db.run((manager) => {
+      const cluster = clusters.getInstance(queryParams.clusterId);
+      return links.getAggregatedRefLabelsForDisplay(
         queryParams.ref,
         manager,
-        queryParams.clusterId
-      )
-    );
+        cluster
+      );
+    });
 
     if (DEBUG)
       logger.debug(`${request.path}: refDisplayMeta`, { refDisplayMeta });

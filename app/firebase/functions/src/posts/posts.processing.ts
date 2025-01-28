@@ -450,7 +450,6 @@ export class PostsProcessing {
             await this.linksService.getAggregatedRefLabelsForDisplay(
               ref,
               manager,
-              undefined,
               cluster
             );
           postFullMeta.set(ref, refDisplayMeta);
