@@ -16,7 +16,7 @@ export const GenericThreadText = (props: {
   }
 
   return (
-    <div onClick={props.onClick}>
+    <div onClick={props.onClick} style={{ width: '100%', overflow: 'hidden' }}>
       {thread.map((genericPost) => {
         const textWithUrls: string = styleUrls(
           genericPost.content,

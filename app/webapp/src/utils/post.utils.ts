@@ -1,6 +1,5 @@
 import { getPostStatuses } from '../post/posts.helper';
 import { AppPostFull, GenericPost } from '../shared/types/types.posts';
-import { useThemeContext } from '../ui-components/ThemedApp';
 
 export function zoteroItemTypeDisplay(itemType: string) {
   return itemType
