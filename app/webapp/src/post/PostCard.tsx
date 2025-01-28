@@ -1,8 +1,10 @@
 import { Box, Text } from 'grommet';
+import { t } from 'i18next';
 import { MouseEventHandler } from 'react';
 
 import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { PostEditKeys } from '../i18n/i18n.edit.post';
 import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
@@ -139,7 +141,11 @@ export const PostCard = (props: {
     onPostClick();
   };
 
-  const truncatedGenericThread = truncateGenericThread(post.generic.thread);
+  const seeMoreSpan = `<span style="color: ${constants.colors.links};">${t(PostEditKeys.showMoreTruncatedText)}</span>`;
+  const truncatedGenericThread = truncateGenericThread(
+    post.generic.thread,
+    seeMoreSpan
+  );
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
       e.stopPropagation();

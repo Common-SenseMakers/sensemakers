@@ -31,10 +31,12 @@ export function getPostType(post: AppPostFull | undefined): PostType {
   return 'regular';
 }
 
-const seeMoreSpan = `<span style="color: #337fbd; cursor: pointer;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">See more</span>`;
 const TRUNCATED_LENGTH = 500;
 
-export function truncateGenericThread(genericThread: GenericPost[]) {
+export function truncateGenericThread(
+  genericThread: GenericPost[],
+  seeMoreText: string
+) {
   const truncatedThread = [];
   let totalLength = 0;
 
@@ -47,7 +49,7 @@ export function truncateGenericThread(genericThread: GenericPost[]) {
           TRUNCATED_LENGTH - (totalLength - post.content.length)
         ) +
         '... ' +
-        seeMoreSpan;
+        seeMoreText;
       truncatedThread.push({ ...post, content: truncatedContent });
       break;
     }

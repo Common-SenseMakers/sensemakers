@@ -47,7 +47,7 @@ const wrapSplitWithParagraph = (text: string, split: string, join = '') => {
 };
 
 /** gets the plain text and creates HTML compatible with Prosemirror schema */
-export const styleUrls = (text: string) => {
+export const styleUrls = (text: string, color?: string) => {
   let html = wrapSplitWithParagraph(text, '---', '<br>');
 
   html = wrapSplitWithParagraph(html, '\n');
@@ -56,12 +56,12 @@ export const styleUrls = (text: string) => {
   const urlRegex =
     /\bhttps?:\/\/[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gi;
 
-  html = html.replace(urlRegex, replaceUrlCallback);
+  html = html.replace(urlRegex, (url) => replaceUrlCallback(url, color));
 
   return html;
 };
 
-const replaceUrlCallback = (url: string) => {
+const replaceUrlCallback = (url: string, color?: string) => {
   let endsWithPeriod = false;
   let urlClean = url;
   try {
@@ -89,5 +89,5 @@ const replaceUrlCallback = (url: string) => {
       ? noParametersUrl.slice(0, 50) + '...'
       : noParametersUrl;
 
-  return `<a href="${url}" target="_blank" style="color: #337fbd;">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
+  return `<a href="${url}" target="_blank" style="${color ? `color: ${color}` : ''}">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
 };
