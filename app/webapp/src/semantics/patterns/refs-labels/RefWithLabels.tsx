@@ -5,7 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { PostEditKeys } from '../../../i18n/i18n.edit.post';
 import { OntologyItem } from '../../../shared/types/types.parser';
 import { OEmbed, RefLabel } from '../../../shared/types/types.references';
-import { removeUndisplayedLabelUris } from '../../../shared/utils/semantics.helper';
+import {
+  removeUndisplayedLabelUris,
+  transformDisplayName,
+} from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { RefCard } from '../common/RefCard';
@@ -45,7 +48,7 @@ export const RefWithLabels = (props: {
       if (!label_ontology)
         throw new Error(`Unexpected ontology not found for ${labelUri}`);
 
-      return label_ontology.display_name;
+      return transformDisplayName(label_ontology.display_name);
     });
     return labelsNames;
   }, [ontology, props.authorLabels]);

@@ -26,6 +26,14 @@ export const removeUndisplayedLabelUris = (labels: string[]) => {
   return labels.filter((label) => !isIgnoredLabelUri(label));
 };
 
+export const transformDisplayName = (label: string) => {
+  if (label === '🔗 links-to') {
+    return '💬 mentions';
+  }
+
+  return label;
+};
+
 export const parseRefDisplayMeta = (
   refDisplayMeta?: RefDisplayMeta,
   authorProfileId?: string
