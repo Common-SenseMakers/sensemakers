@@ -1,20 +1,22 @@
 import { Box, Text } from 'grommet';
+import { t } from 'i18next';
 import { MouseEventHandler } from 'react';
 
 import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { PostEditKeys } from '../i18n/i18n.edit.post';
 import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
 import { RefLabelsCustomProps } from '../semantics/patterns/refs-labels/RefsLabels.component';
-import { AppPostFull } from '../shared/types/types.posts';
+import { AppPostFull, GenericPost } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { truncateGenericThread } from '../utils/post.utils';
+import { GenericThreadText } from './GenericThreadText';
 import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PublishButtons } from './PostPublishButtons';
-import { PostTextStatic } from './PostTextStatic';
 import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
-import { concatenateThread } from './posts.helper';
 
 const KEYWORDS_SEMANTICS_ID = 'keywords-semantics';
 const REFS_SEMANTICS_ID = 'refs-semantics';
@@ -139,14 +141,11 @@ export const PostCard = (props: {
     onPostClick();
   };
 
-  const seeMoreSpan = `<span style="color: #337fbd; cursor: pointer;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">See more</span>`;
-  const TRUNCATED_LENGTH = 500;
-  const postText = concatenateThread(post.generic);
-  const useTruncated = postText.length > TRUNCATED_LENGTH;
-  const postTextTruncated = useTruncated
-    ? postText.slice(0, TRUNCATED_LENGTH) + '... ' + seeMoreSpan
-    : postText;
-
+  const seeMoreSpan = `<span style="color: ${constants.colors.links};">${t(PostEditKeys.showMoreTruncatedText)}</span>`;
+  const truncatedGenericThread: GenericPost[] = truncateGenericThread(
+    post.generic.thread,
+    seeMoreSpan
+  );
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
       e.stopPropagation();
@@ -154,6 +153,7 @@ export const PostCard = (props: {
   };
 
   const hideSemantics = false;
+  const hasRefs = post?.structuredSemantics?.refs?.length || 0 > 0;
 
   return (
     <Box
@@ -197,19 +197,10 @@ export const PostCard = (props: {
                 }}></SemanticsEditor>
             </Box>
           )}
-          <div
-            style={{
-              overflow: 'hidden',
-              transition: 'height 0.3s ease-in-out',
-              height: 'auto',
-            }}>
-            <PostTextStatic
-              onClick={handleInternalClick}
-              truncate
-              shade={shade}
-              text={postTextTruncated}></PostTextStatic>
-          </div>
-          {!hideSemantics && (
+          <GenericThreadText
+            onClick={handleInternalClick}
+            thread={truncatedGenericThread}></GenericThreadText>
+          {!hideSemantics && hasRefs && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
               <SemanticsEditor
                 include={[PATTERN_ID.REF_LABELS]}

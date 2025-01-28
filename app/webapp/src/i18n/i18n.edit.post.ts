@@ -12,6 +12,7 @@ export enum PostEditKeys {
   keywordsPlaceholder = 'edit-s010',
   labelsPlaceholder = 'edit-s011',
   showAllMentionsText = 'edit-s012',
+  showMoreTruncatedText = 'edit-s013',
 }
 
 export const editValues: Record<PostEditKeys, string> = {
@@ -30,4 +31,5 @@ export const editValues: Record<PostEditKeys, string> = {
   [PostEditKeys.keywordsPlaceholder]: 'Add keywords',
   [PostEditKeys.labelsPlaceholder]: 'Add labels',
   [PostEditKeys.showAllMentionsText]: 'Show all mentions',
+  [PostEditKeys.showMoreTruncatedText]: 'Show more',
 };
