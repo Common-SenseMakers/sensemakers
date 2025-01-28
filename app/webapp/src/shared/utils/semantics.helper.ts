@@ -18,22 +18,19 @@ export const HAS_RDF_SYNTAX_TYPE_URI =
 export const LINKS_TO_URI = 'http://purl.org/spar/cito/linksTo';
 export const QUOTES_POST_URI = 'https://sense-nets.xyz/quotesPost';
 
-export const removeUndisplayedLabelUris = (labels: string[]) => {
-  return labels.filter((label) => !isIgnoredLabelUri(label));
+export const isIgnoredLabelUri = (label: string) => {
+  return label === QUOTES_POST_URI || label === LINKS_TO_URI;
 };
 
-export const isIgnoredLabelUri = (label: string) => {
-  return false;
-  // label === QUOTES_POST_URI || label === LINKS_TO_URI;
+export const removeUndisplayedLabelUris = (labels: string[]) => {
+  return labels.filter((label) => !isIgnoredLabelUri(label));
 };
 
 export const parseRefDisplayMeta = (
   refDisplayMeta?: RefDisplayMeta,
   authorProfileId?: string
 ) => {
-  const aggregatedLabels = refDisplayMeta?.aggregatedLabels?.filter(
-    (label) => !isIgnoredLabelUri(label.label)
-  );
+  const aggregatedLabels = refDisplayMeta?.aggregatedLabels;
 
   const authorLabels = authorProfileId
     ? aggregatedLabels
