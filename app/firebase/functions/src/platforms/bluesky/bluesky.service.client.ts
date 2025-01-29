@@ -152,7 +152,11 @@ export class BlueskyServiceClient {
     /** if credentials are provided (user-specific session) */
     const atpAgent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
 
-    const newSession = await atpAgent.resumeSession(credentials.session);
+    const newSession = await this.resumeSession(
+      atpAgent,
+      credentials.session,
+      credentials.credentials
+    );
 
     if (!atpAgent.session) {
       throw new Error('Failed to initiate bluesky session');
