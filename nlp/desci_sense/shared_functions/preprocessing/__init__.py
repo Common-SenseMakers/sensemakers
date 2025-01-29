@@ -136,7 +136,6 @@ def convert_thread_interface_to_ref_post(
         ThreadRefPost: _description_
     """
     assert len(thread_interface.thread) > 0
-
     posts = []
     for post in thread_interface.thread:
         quote_ref_post = convert_app_post_to_quote_ref_post(
@@ -145,7 +144,8 @@ def convert_thread_interface_to_ref_post(
         posts.append(quote_ref_post)
 
     thread_ref_post = create_thread_from_posts(posts)
-
+    if len(thread_interface.thread) == 1 and thread_interface.thread[0].content=='':
+        thread_ref_post.content = ''
     return thread_ref_post
 
 
