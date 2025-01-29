@@ -21,10 +21,7 @@ def create_thread_from_posts(posts: List[QuoteRefPost]):
         all_ref_urls += post.md_ref_urls()
 
     author = posts[0].author
-    if len(posts) == 1 and posts[0] == 0:
-        content = ''
-    else:
-        content = concat_post_content(posts)
+    content = concat_post_content(posts)
     thread_post = ThreadRefPost(
         author=author,
         content=content,
