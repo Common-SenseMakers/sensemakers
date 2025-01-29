@@ -53,6 +53,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
   const verifierHandled = useRef(false);
 
   const {
+    token,
     connectedUser,
     refresh: refreshConnected,
     setLoginFlowState,
@@ -167,7 +168,8 @@ export const MastodonContext = (props: PropsWithChildren) => {
       if (
         code_param &&
         getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-          PlatformConnectedStatus.Connecting
+          PlatformConnectedStatus.Connecting &&
+        token
       ) {
         log('useEffect MastodonSignup', {
           code_param,
