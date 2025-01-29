@@ -105,7 +105,7 @@ def test_multi_re_post_combined():
     mcp = MultiChainParser(multi_config)
     res = mcp.process_ref_post(thread)
 
-    
+    assert thread.content == ''
     assert 'default' in res.multi_reference_tagger[1]
     
 
