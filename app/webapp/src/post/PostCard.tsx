@@ -1,7 +1,9 @@
 import { Box, Text } from 'grommet';
 import { t } from 'i18next';
+import { usePostHog } from 'posthog-js/react';
 import { MouseEventHandler } from 'react';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
@@ -30,6 +32,7 @@ const PostCardHeader = (props: {
   onBlankClick?: () => void;
 }) => {
   const { constants } = useThemeContext();
+  const posthog = usePostHog();
   const details = getPostDetails(props.post);
   const onBlankClick = props.onBlankClick;
   const isAutoIndexed = props.post.authorUserId === null;
@@ -37,6 +40,11 @@ const PostCardHeader = (props: {
   const overlay = useOverlay();
 
   const onUserClicked = () => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_PROFILE_PAGE, {
+      userId: props.post.authorUserId,
+      profileId: props.post.authorProfileId,
+    });
+
     if (props.post.authorUserId) {
       overlay &&
         overlay.onPostClick({
@@ -109,6 +117,7 @@ export const PostCard = (props: {
   const post = updated.postMerged;
 
   const { constants } = useThemeContext();
+  const posthog = usePostHog();
 
   const overlay = useOverlay();
 
@@ -118,6 +127,7 @@ export const PostCard = (props: {
   }
 
   const onPostClick = () => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_POST_VIEW, { postId: post.id });
     overlay &&
       overlay.onPostClick({ target: PostClickTarget.POST, payload: post });
   };

@@ -40,7 +40,8 @@ if (process.env.FB_PROJECT === 'dev') {
           IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
           PUBLIC_POSTHOG_KEY:
             '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
-          PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"',
+          PUBLIC_POSTHOG_HOST: '"https://development--sensemakers.netlify.app/ingest"',
+          PUBLIC_POSTHOG_UI_HOST: '"https://us.posthog.com"',
         },
       },
     }),
@@ -127,7 +128,8 @@ if (process.env.FB_PROJECT === 'production') {
           IFRAMELY_API_KEY: '"9b7970c7b5684e69e56692"',
           PUBLIC_POSTHOG_KEY:
             '"phc_xe0tTLhLRrP7zAjaml5NOdsbdUD9tHBzWDCy1IzSwFm"',
-          PUBLIC_POSTHOG_HOST: '"https://us.i.posthog.com"',
+          PUBLIC_POSTHOG_HOST: '"https://app.cosmik.network/ingest"',
+          PUBLIC_POSTHOG_UI_HOST: '"https://us.posthog.com"',
         },
       },
     }),

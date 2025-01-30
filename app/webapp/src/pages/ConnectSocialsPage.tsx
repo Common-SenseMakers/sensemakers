@@ -1,8 +1,10 @@
 import { Box } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { useAppFetch } from '../api/app.fetch';
 import {
   BlueskyIcon,
@@ -34,6 +36,7 @@ export enum LoginCase {
 export const ConnectSocialsPage = () => {
   const loginCase = LoginCase.login;
   const appFetch = useAppFetch();
+  const posthog = usePostHog();
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -50,6 +53,7 @@ export const ConnectSocialsPage = () => {
     loginCase === LoginCase.login ? t(IntroKeys.login) : t(IntroKeys.connect);
 
   const handleContinue = () => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_CONTINUE);
     appFetch('/api/auth/setOnboarded', {}, true).catch(console.error);
     navigate(AbsoluteRoutes.Feed);
   };

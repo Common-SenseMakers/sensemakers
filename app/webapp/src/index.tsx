@@ -7,6 +7,7 @@ import reportWebVitals from './reportWebVitals';
 
 const options = {
   api_host: process.env.PUBLIC_POSTHOG_HOST,
+  ui_host: process.env.PUBLIC_POSTHOG_UI_HOST,
 };
 
 const root = ReactDOM.createRoot(
