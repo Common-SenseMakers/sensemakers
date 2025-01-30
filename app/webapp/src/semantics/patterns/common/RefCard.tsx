@@ -1,8 +1,9 @@
-// import axios from 'axios';
 import { Anchor, Box, Paragraph, Text } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { POSTHOG_EVENTS } from '../../../analytics/posthog.events';
 import { OpenLinkIcon } from '../../../app/icons/OpenLinkIcon';
 import { PostEditKeys } from '../../../i18n/i18n.edit.post';
 import { CARD_BORDER } from '../../../post/PostCard';
@@ -37,6 +38,7 @@ export const RefCard = (props: {
   showAllMentionsText?: boolean;
 }) => {
   const { t } = useTranslation();
+  const posthog = usePostHog();
 
   const titleTruncated = useMemo(
     () => props.title && truncate(props.title, 50),
@@ -137,9 +139,12 @@ export const RefCard = (props: {
             </Paragraph>
           )}
           <Box
-            onClick={() =>
-              window.open(props.url, '_blank', 'noopener,noreferrer')
-            }
+            onClick={() => {
+              posthog?.capture(POSTHOG_EVENTS.CLICKED_REF_URL, {
+                url: props.url,
+              });
+              window.open(props.url, '_blank', 'noopener,noreferrer');
+            }}
             direction="row"
             gap="4px"
             style={{

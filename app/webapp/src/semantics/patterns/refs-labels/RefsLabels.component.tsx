@@ -1,7 +1,9 @@
 import { Box } from 'grommet';
 import { DataFactory } from 'n3';
+import { usePostHog } from 'posthog-js/react';
 import { useMemo } from 'react';
 
+import { POSTHOG_EVENTS } from '../../../analytics/posthog.events';
 import { useOverlay } from '../../../overlays/OverlayContext';
 import { isPlatformPost } from '../../../shared/utils/links.utils';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
@@ -28,6 +30,7 @@ export interface RefLabelsCustomProps {
 export const RefLabelsComponent = (
   props: PatternProps<RefLabelsCustomProps>
 ) => {
+  const posthog = usePostHog();
   const { store, originalStore } = useSemanticsStore(
     props.semantics,
     props.originalParsed
@@ -41,6 +44,10 @@ export const RefLabelsComponent = (
     event: React.MouseEvent<HTMLDivElement>,
     ref: string
   ) => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_REFERENCE_PAGE, {
+      ref,
+      postId: props.post?.id,
+    });
     let target = event.target as HTMLElement;
 
     // filter clicks on the ref semantics

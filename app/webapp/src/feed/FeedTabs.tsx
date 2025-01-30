@@ -1,7 +1,9 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import { useEffect, useRef, useState } from 'react';
 import { CSSProperties } from 'styled-components';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { FeedTabConfig } from '../shared/utils/feed.config';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -47,6 +49,7 @@ export const FeedTabs = (props: {
   feedIx: number;
 }) => {
   const { constants } = useThemeContext();
+  const posthog = usePostHog();
   const { feedTabs, onTabClicked, feedIx } = props;
 
   const [showRightCaret, setShowRightCaret] = useState(false);
@@ -137,6 +140,9 @@ export const FeedTabs = (props: {
           plain
           style={{ height: '100%' }}
           onClick={() => {
+            posthog?.capture(POSTHOG_EVENTS.CLICKED_FEED_TAB, {
+              feed: feedTabs[ix].title,
+            });
             onTabClicked(ix);
           }}>
           <Box {...internalBoxProps}>

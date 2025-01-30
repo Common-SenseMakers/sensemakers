@@ -94,6 +94,9 @@ def create_df_from_notion_db(raw_notion_db) -> pd.DataFrame:
             "versions": [
                 tag["name"] for tag in row["properties"]["versions"]["multi_select"]
             ],
+            "re_post": ((row["properties"].get("re_post") or {})
+            .get("select") or {})
+            .get("name") == "True",
         }
         data.append(data_row)
 
