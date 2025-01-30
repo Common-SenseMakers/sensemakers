@@ -1404,7 +1404,7 @@ export const getMastodonMock = (
   }
 
   if (type.signup) {
-    when(mocked.getSignupContext(anything(), anything())).thenCall(
+    when(mocked.getSignupContext(anything())).thenCall(
       (
         user_id?: string,
         params?: MastodonGetContextParams
