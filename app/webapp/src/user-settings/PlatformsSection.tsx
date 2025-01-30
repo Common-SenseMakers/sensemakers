@@ -1,5 +1,7 @@
 import { Box, Text } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { CheckIcon } from '../app/icons/FilterIcon copy';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -16,6 +18,7 @@ export const PlatformSection = (props: {
   isValidInput?: (input: string) => boolean;
 }) => {
   const { constants } = useThemeContext();
+  const posthog = usePostHog();
 
   return (
     <Box
@@ -52,7 +55,15 @@ export const PlatformSection = (props: {
           <AppButton
             disabled={props.connecting}
             label={props.connecting ? 'connecting' : props.buttonText}
-            onClick={props.onButtonClicked}
+            onClick={() => {
+              posthog?.capture(
+                POSTHOG_EVENTS.CLICKED_CONNECT_PLATFORM_ACCOUNT,
+                {
+                  platform: props.platformName,
+                }
+              );
+              props.onButtonClicked();
+            }}
           />
         ) : (
           <Box
