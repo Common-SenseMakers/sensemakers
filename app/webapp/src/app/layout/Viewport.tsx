@@ -14,6 +14,7 @@ import {
 } from 'grommet';
 import { ReactNode, createContext, useContext, useState } from 'react';
 
+import { ClustersMenu } from '../../posts.fetcher/ClustersMenu';
 import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
@@ -152,6 +153,7 @@ export const ViewportPage = (props: {
       {showLeftbar && (
         <Layer animate position="left">
           <button onClick={() => setShowLeftbar(!showLeftbar)}>hide</button>
+          <ClustersMenu></ClustersMenu>
         </Layer>
       )}
       <Grid
@@ -191,7 +193,7 @@ export const ViewportPage = (props: {
               <strong>Right Upper</strong>
             </Box>
             <Box gridArea="left-lower" background="yellow">
-              <strong>Left Lower</strong>
+              <ClustersMenu></ClustersMenu>
             </Box>
             <Box gridArea="right-lower" background="purple">
               <strong>Right Lower</strong>

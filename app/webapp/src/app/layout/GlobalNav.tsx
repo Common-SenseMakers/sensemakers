@@ -91,28 +91,41 @@ export const GlobalNav = () => {
 
   const pageIx = locationToPageIx(location);
 
+  const myPots = (
+    <NavButton
+      key="0"
+      label={t(AppGeneralKeys.myPosts)}
+      icon={<DraftsIcon></DraftsIcon>}
+      onClick={() => navigate(AbsoluteRoutes.MyPosts)}
+      isSelected={pageIx === 0}></NavButton>
+  );
+
+  const feed = (
+    <NavButton
+      key="1"
+      label={t(AppGeneralKeys.feedTitle)}
+      icon={<FeedIcon></FeedIcon>}
+      onClick={() => navigate(AbsoluteRoutes.Feed)}
+      isSelected={pageIx === 1}></NavButton>
+  );
+
+  const settings = (
+    <NavButton
+      key="2"
+      label={t(AppGeneralKeys.settings)}
+      icon={<SettignsIcon></SettignsIcon>}
+      onClick={() => navigate(AbsoluteRoutes.Settings)}
+      isSelected={pageIx === 2}></NavButton>
+  );
+
+  const buttons = [myPots, feed, settings];
+
   return (
     <Box
       direction={mobile ? 'row' : 'column'}
       align={mobile ? 'center' : 'start'}
       style={{ height: mobile ? '48px' : 'auto' }}>
-      <NavButton
-        label={t(AppGeneralKeys.myPosts)}
-        icon={<DraftsIcon></DraftsIcon>}
-        onClick={() => navigate(AbsoluteRoutes.MyPosts)}
-        isSelected={pageIx === 0}></NavButton>
-
-      <NavButton
-        label={t(AppGeneralKeys.feedTitle)}
-        icon={<FeedIcon></FeedIcon>}
-        onClick={() => navigate(AbsoluteRoutes.Feed)}
-        isSelected={pageIx === 1}></NavButton>
-
-      <NavButton
-        label={t(AppGeneralKeys.settings)}
-        icon={<SettignsIcon></SettignsIcon>}
-        onClick={() => navigate(AbsoluteRoutes.Settings)}
-        isSelected={pageIx === 2}></NavButton>
+      {buttons.map((p) => p)}
     </Box>
   );
 };
