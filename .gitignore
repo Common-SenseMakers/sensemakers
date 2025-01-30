@@ -24,3 +24,5 @@ app/last_output.json
 twitterApiCache.json
 .aider*
 .DS_store
+# Local Netlify folder
+.netlify
