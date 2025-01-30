@@ -20,7 +20,8 @@
     "build-email-code": "rm -rf ./build && craco build --config craco.config.email.bundle.js",
     "build-email-types": "tsc -p tsconfig.dist.json",
     "copy-email-static": "cp ./build/**.* ./src/shared/emailRenderer",
-    "dev-email": "email dev -d ./src/email"
+    "dev-email": "email dev -d ./src/email",
+    "netlify-dev": "netlify dev"
   },
   "resolutions": {
     "strip-ansi": "6.0.1"
@@ -87,6 +88,7 @@
     "@craco/craco": "^7.1.0",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "jest": "^29.7.0",
+    "netlify-cli": "^18.0.3",
     "node-fetch": "^3.3.2",
     "nodemon": "^3.1.4",
     "prettier": "^3.2.4",
