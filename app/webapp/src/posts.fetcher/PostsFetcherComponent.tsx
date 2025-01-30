@@ -208,7 +208,6 @@ export const PostsFetcherComponent = (props: {
         style={{
           height: '100%',
           overflowY: 'auto',
-          maxWidth: 600,
         }}>
         {!posts || isLoading
           ? showLoading

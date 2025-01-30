@@ -6,7 +6,7 @@ import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { IntroKeys } from '../i18n/i18n.intro';
 import { CARD_BORDER } from '../post/PostCard';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
-import { AppButton, AppHeading } from '../ui-components';
+import { AppButton } from '../ui-components';
 import { usePersist } from '../utils/use.persist';
 import { useUserPosts } from './UserPostsContext';
 
@@ -25,9 +25,6 @@ export const UserPostsFeed = () => {
   return (
     <>
       <Box justify="start">
-        <Box pad="medium" style={{ borderBottom: CARD_BORDER, flexShrink: 0 }}>
-          <AppHeading level={2}>{t(AppGeneralKeys.myPosts)}</AppHeading>
-        </Box>
         {!hideShareInfo && (
           <Box
             direction="row"

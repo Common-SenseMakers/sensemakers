@@ -24,15 +24,14 @@ import { AppIcon } from '../icons/AppIcon';
 export const MAX_BUTTON_WIDTH = 1600;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ViewportFooter = (props: { height: string }) => {
+const ViewportFooter = () => {
   const { constants } = useThemeContext();
 
   return (
     <Box
       id="footer"
       style={{
-        height: props.height,
-        flexShrink: 0,
+        height: '100%',
         backgroundColor: constants.colors.shade,
       }}
       pad="medium"
@@ -49,7 +48,7 @@ const ViewportFooter = (props: { height: string }) => {
         <Anchor
           href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT as string}`}
           target="_blank">
-          <AppIcon size={14}></AppIcon>
+          <AppIcon size={22}></AppIcon>
         </Anchor>
         <Box
           style={{
@@ -162,14 +161,9 @@ export const ViewportPage = (props: {
         columns={columns}
         rows={rows}
         areas={areas}>
-        <Box gridArea="content" background="red">
-          <strong>Content</strong>
-          {mobile && (
-            <button onClick={() => setShowLeftbar(!showLeftbar)}>show</button>
-          )}
-        </Box>
-        <Box gridArea="footer" background="cyan">
-          <strong>Footer</strong>
+        <Box gridArea="content">{props.content}</Box>
+        <Box gridArea="footer">
+          <ViewportFooter></ViewportFooter>
         </Box>
 
         {mobile && (
@@ -181,7 +175,7 @@ export const ViewportPage = (props: {
         )}
         {!mobile && (
           <>
-            <Box gridArea="left-upper" background="orange">
+            <Box gridArea="left-upper">
               <Box>
                 <Box pad={{ vertical: '12px', horizontal: '16px' }}>
                   <AppIcon></AppIcon>
