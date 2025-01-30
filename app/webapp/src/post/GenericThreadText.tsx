@@ -1,5 +1,3 @@
-import Markdown from 'markdown-to-jsx';
-
 import { styleUrls } from '../post-text/post.content.format';
 import { GenericPost } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -24,7 +22,15 @@ export const GenericThreadText = (props: {
         );
         return (
           <p style={{ marginTop: '8px', marginBottom: '8px' }}>
-            <Markdown>{textWithUrls}</Markdown>
+            <div
+              style={{
+                overflow: 'hidden',
+                overflowWrap: 'break-word',
+                wordWrap: 'break-word',
+                wordBreak: 'break-word',
+              }}
+              dangerouslySetInnerHTML={{ __html: textWithUrls }}
+            />
           </p>
         );
       })}

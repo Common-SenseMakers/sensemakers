@@ -132,9 +132,9 @@ export const RefWithLabels = (props: {
           <AppLabelsEditor
             editable={props.editable}
             colors={{
-              font: '#FFFFFF',
-              background: '#337FBD',
-              border: '#5293C7',
+              font: '#337FBD',
+              background: '#EDF7FF',
+              border: '#CEE2F2',
             }}
             labels={authorLabelsNames}
             options={optionDisplayNames}

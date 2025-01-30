@@ -4,8 +4,10 @@ import fs from 'fs';
 
 import {
   BlueskyPost,
+  BlueskyThread,
   QuotedBlueskyPost,
 } from '../../src/@shared/types/types.bluesky';
+import { PlatformPostPosted } from '../../src/@shared/types/types.platform.posts';
 import { parseBlueskyURI } from '../../src/@shared/utils/bluesky.utils';
 import {
   cleanBlueskyContent,
@@ -88,6 +90,24 @@ describe('bluesky utility functions', () => {
 
     const cleanedContent = cleanBlueskyContent(post.record);
     expect(cleanedContent).to.equal(expectedOutput);
+
+    const post2File = fs.readFileSync(
+      './test/__tests__/043-test.data.json',
+      'utf8'
+    );
+
+    const post2 = JSON.parse(post2File) as {
+      platformPost: PlatformPostPosted<BlueskyThread>;
+    };
+
+    const expectedOutput2 =
+      'this is really unfortunate for public science: https://www.nature.com/articles/d41586-025-00231-y\n\nat least this is something to look forward to: https://www.nature.com/articles/d41586-025-00229-6';
+
+    const cleanedContent2 = cleanBlueskyContent(
+      post2.platformPost.post.posts[0].record
+    );
+
+    expect(cleanedContent2).to.equal(expectedOutput2);
   });
 
   it('handles quoted posts correctly', () => {
