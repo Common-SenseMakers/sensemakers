@@ -18,7 +18,7 @@ import { ConnectTwitterPage } from '../user-login/ConnectTwitter';
 import { ConnectedUserWrapper } from '../user-login/contexts/ConnectedUserWrapper';
 import { LoadingContext } from './LoadingContext';
 import { GlobalStyles } from './layout/GlobalStyles';
-import { MAX_WIDTH_APP, ViewportContainer } from './layout/Viewport';
+import { ViewportContainer } from './layout/Viewport';
 
 export interface SetPageTitleType {
   prefix: string;
@@ -77,7 +77,6 @@ export const AppContainer = (props: React.PropsWithChildren) => {
       <AppContainerContextValue.Provider value={{}}>
         <ViewportContainer
           style={{
-            maxWidth: MAX_WIDTH_APP,
             backgroundColor: constants.colors.shade,
           }}>
           <Box style={{ height: `calc(100% - ${topHeight})` }}>
