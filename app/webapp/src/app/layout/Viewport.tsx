@@ -139,8 +139,7 @@ export const ViewportPage = (props: {
         { name: 'footer', start: [0, 2], end: [0, 2] },
       ]
     : [
-        { name: 'left-upper', start: [0, 0], end: [0, 0] },
-        { name: 'left-lower', start: [0, 1], end: [0, 1] },
+        { name: 'left', start: [0, 0], end: [0, 1] },
         { name: 'content', start: [1, 0], end: [1, 1] },
         { name: 'right-upper', start: [2, 0], end: [2, 0] },
         { name: 'right-lower', start: [2, 1], end: [2, 1] },
@@ -168,27 +167,25 @@ export const ViewportPage = (props: {
 
         {mobile && (
           <>
-            <Box gridArea="nav" background="green">
-              {props.nav}
-            </Box>
+            <Box gridArea="nav">{props.nav}</Box>
           </>
         )}
         {!mobile && (
           <>
-            <Box gridArea="left-upper">
-              <Box>
-                <Box pad={{ vertical: '12px', horizontal: '16px' }}>
-                  <AppIcon></AppIcon>
+            <Box gridArea="left">
+              {props.nav && (
+                <Box style={{ flexGrow: 1 }}>
+                  <Box pad={{ vertical: '12px', horizontal: '16px' }}>
+                    <AppIcon></AppIcon>
+                  </Box>
+                  {props.nav}
                 </Box>
-                {props.nav}
-              </Box>
+              )}
             </Box>
             <Box gridArea="right-upper" background="blue">
               <strong>Right Upper</strong>
             </Box>
-            <Box gridArea="left-lower" background="yellow">
-              <ClustersMenu></ClustersMenu>
-            </Box>
+            <Box gridArea="left-lower" background="yellow"></Box>
             <Box gridArea="right-lower" background="purple">
               <strong>Right Lower</strong>
             </Box>

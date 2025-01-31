@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { Location, useLocation, useNavigate } from 'react-router-dom';
 
 import { AppGeneralKeys } from '../../i18n/i18n.app.general';
+import { ClustersMenu } from '../../posts.fetcher/ClustersMenu';
 import { AbsoluteRoutes, RouteNames } from '../../route.names';
-import { AppButton } from '../../ui-components';
+import { AppButton, AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { DraftsIcon } from '../icons/DraftsIcon';
-import { FeedIcon } from '../icons/FeedIcon';
 import { SettignsIcon } from '../icons/SettingsIcon';
 
 const DEBUG = false;
@@ -91,41 +91,32 @@ export const GlobalNav = () => {
 
   const pageIx = locationToPageIx(location);
 
-  const myPots = (
-    <NavButton
-      key="0"
-      label={t(AppGeneralKeys.myPosts)}
-      icon={<DraftsIcon></DraftsIcon>}
-      onClick={() => navigate(AbsoluteRoutes.MyPosts)}
-      isSelected={pageIx === 0}></NavButton>
-  );
+  if (!mobile) {
+    return (
+      <Box style={{ flexGrow: 1 }}>
+        <Box style={{ flexGrow: 1 }}>
+          <AppHeading level="2" style={{ padding: '16px' }}>
+            Hyperfeeds
+          </AppHeading>
+          <ClustersMenu></ClustersMenu>
+        </Box>
+        <Box align="start">
+          <NavButton
+            key="0"
+            label={t(AppGeneralKeys.myPosts)}
+            icon={<DraftsIcon></DraftsIcon>}
+            onClick={() => navigate(AbsoluteRoutes.MyPosts)}
+            isSelected={pageIx === 0}></NavButton>
+          <NavButton
+            key="2"
+            label={t(AppGeneralKeys.settings)}
+            icon={<SettignsIcon></SettignsIcon>}
+            onClick={() => navigate(AbsoluteRoutes.Settings)}
+            isSelected={pageIx === 2}></NavButton>
+        </Box>
+      </Box>
+    );
+  }
 
-  const feed = (
-    <NavButton
-      key="1"
-      label={t(AppGeneralKeys.feedTitle)}
-      icon={<FeedIcon></FeedIcon>}
-      onClick={() => navigate(AbsoluteRoutes.Feed)}
-      isSelected={pageIx === 1}></NavButton>
-  );
-
-  const settings = (
-    <NavButton
-      key="2"
-      label={t(AppGeneralKeys.settings)}
-      icon={<SettignsIcon></SettignsIcon>}
-      onClick={() => navigate(AbsoluteRoutes.Settings)}
-      isSelected={pageIx === 2}></NavButton>
-  );
-
-  const buttons = [myPots, feed, settings];
-
-  return (
-    <Box
-      direction={mobile ? 'row' : 'column'}
-      align={mobile ? 'center' : 'start'}
-      style={{ height: mobile ? '48px' : 'auto' }}>
-      {buttons.map((p) => p)}
-    </Box>
-  );
+  return <></>;
 };
