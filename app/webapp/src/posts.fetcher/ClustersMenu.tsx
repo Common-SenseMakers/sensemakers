@@ -1,34 +1,44 @@
 import { Box, Text } from 'grommet';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { ClusterIcon } from '../app/icons/ClusterIcon';
 import { WorldIcon } from '../app/icons/WorldIcon';
+import { AbsoluteRoutes } from '../route.names';
+import { feedTabs } from '../shared/utils/feed.config';
 import { AppButton } from '../ui-components';
 import { ALL_CLUSTER_NAME, useCluster } from './cluster.context';
 
 export const ClustersMenu = () => {
-  const { clustersIds, select } = useCluster();
+  const navigate = useNavigate();
+  const { clustersIds } = useCluster();
+  const { tabId, clusterId } = useParams();
+
   const onClusterSelected = (clustersId: string) => {
-    select(clustersId);
+    navigate(AbsoluteRoutes.ClusterFeed(tabId || feedTabs[0].id, clustersId));
   };
 
   const allClusters = [ALL_CLUSTER_NAME].concat(clustersIds || []);
 
   return (
     <Box pad={{ horizontal: '16px' }} style={{ flexShrink: 0, flexGrow: 1 }}>
-      {allClusters.map((clusterId) => {
+      {allClusters.map((cId) => {
         return (
           <AppButton
-            key={clusterId}
+            key={cId}
             plain
-            onClick={() => onClusterSelected(clusterId)}>
+            onClick={() => onClusterSelected(cId)}
+            style={{ height: '38px' }}>
             <Box height={'24px'} direction="row" gap="8px" align="center">
-              {clusterId === ALL_CLUSTER_NAME ? (
+              {cId === ALL_CLUSTER_NAME ? (
                 <WorldIcon></WorldIcon>
               ) : (
                 <ClusterIcon></ClusterIcon>
               )}
               <Box>
-                <Text>{clusterId}</Text>
+                <Text
+                  style={{ fontWeight: cId === clusterId ? 'bold' : 'normal' }}>
+                  {cId}
+                </Text>
               </Box>
             </Box>
           </AppButton>

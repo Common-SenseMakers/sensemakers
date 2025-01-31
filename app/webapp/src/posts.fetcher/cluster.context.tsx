@@ -1,17 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import React, { useContext } from 'react';
 import { createContext } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { AbsoluteRoutes } from '../route.names';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ClusterContextType {
   clustersIds?: string[];
-  selected?: string;
-  tabId?: string;
-  select: (clusterId: string) => void;
 }
 
 export const ClusterContextValue = createContext<
@@ -29,12 +24,6 @@ const DEBUG = false;
 export const ClusterContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const navigate = useNavigate();
-
-  const select = (clusterId: string) => {
-    navigate(AbsoluteRoutes.ClusterFeed(clusterId));
-  };
-
   const appFetch = useAppFetch();
 
   const { data: clustersIds } = useQuery({
@@ -61,7 +50,7 @@ export const ClusterContext: React.FC<{
   });
 
   return (
-    <ClusterContextValue.Provider value={{ clustersIds, select }}>
+    <ClusterContextValue.Provider value={{ clustersIds }}>
       {children}
     </ClusterContextValue.Provider>
   );
