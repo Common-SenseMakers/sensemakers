@@ -1,8 +1,10 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { DataFactory } from 'n3';
+import { usePostHog } from 'posthog-js/react';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { AppCheckBoxMessage } from '../app/icons/AppCheckBoxMessage';
 import { InfoIcon } from '../app/icons/InfoIcon';
 import { PostEditKeys } from '../i18n/i18n.edit.post';
@@ -33,6 +35,7 @@ export const PublishButtons = (props: BoxExtendedProps) => {
   const { t } = useTranslation();
   const { updated, fetched } = usePost();
   const { connectedUser } = useAccountContext();
+  const posthog = usePostHog();
 
   const isAIDetected =
     updated.postMerged?.originalParsed &&
@@ -71,6 +74,7 @@ export const PublishButtons = (props: BoxExtendedProps) => {
       if (!updated.storeMerged) {
         throw new Error('Unexpected');
       }
+      posthog?.capture(POSTHOG_EVENTS.TOGGLE_SHARE_TO_HYPERFEED, { value });
 
       const newStore = cloneStore(updated.storeMerged);
       if (value) {
