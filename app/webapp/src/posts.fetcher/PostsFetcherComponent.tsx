@@ -14,7 +14,7 @@ import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface FilterOption {
   value: string;

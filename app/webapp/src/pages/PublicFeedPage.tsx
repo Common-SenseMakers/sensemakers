@@ -13,6 +13,7 @@ import {
   hasSearchParam,
   searchParamsKeyValueToEvent,
 } from '../overlays/overlay.utils';
+import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
 import {
   FetcherConfig,
   usePostsFetcher,
@@ -32,7 +33,10 @@ const getFeedConfig = (
     queryParams: {
       semantics: { tab: tabQuery.tab, topic: tabQuery.topic },
       hydrateConfig: { addAggregatedLabels: true },
-      clusterId: tabQuery.clusterId,
+      clusterId:
+        tabQuery.clusterId !== ALL_CLUSTER_NAME
+          ? tabQuery.clusterId
+          : undefined,
     },
     DEBUG_PREFIX,
   };
@@ -41,8 +45,6 @@ const getFeedConfig = (
 export const PublicFeedPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { clusterId: clusterSelected, tabId } = useParams();
-
-  console.log({ clusterSelected, tabId });
 
   const [overlayInit, setOverlayInit] = useState<
     OverlayValue | undefined | null
