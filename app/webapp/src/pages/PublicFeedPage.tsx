@@ -1,6 +1,6 @@
 import { Box } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
-import { Location, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
@@ -17,28 +17,11 @@ import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
+import { AbsoluteRoutes } from '../route.names';
 import { PostClickEvent } from '../semantics/patterns/patterns';
 import { TabQuery, feedTabs } from '../shared/utils/feed.config';
 
 const DEBUG = false;
-
-export const locationToFeedIx = (location: Location) => {
-  if (DEBUG) console.log(location);
-
-  const pageIx = feedTabs.findIndex((tab) =>
-    location.pathname.startsWith(`/feed/${tab.id}`)
-  );
-
-  if (pageIx === -1) {
-    return 0;
-  } else {
-    return pageIx;
-  }
-};
-
-export const feedIndexToPathname = (ix: number) => {
-  return `/feed/${feedTabs[ix].id}`;
-};
 
 const getFeedConfig = (
   tabQuery: TabQuery,
@@ -56,11 +39,10 @@ const getFeedConfig = (
 };
 
 export const PublicFeedPage = () => {
-  const location = useLocation();
-
   const [searchParams, setSearchParams] = useSearchParams();
+  const { clusterId: clusterSelected, tabId } = useParams();
 
-  const ixInit = useMemo(() => locationToFeedIx(location), [location]);
+  console.log({ clusterSelected, tabId });
 
   const [overlayInit, setOverlayInit] = useState<
     OverlayValue | undefined | null
@@ -177,18 +159,6 @@ export const PublicFeedPage = () => {
     }
   };
 
-  const clusterSelected = undefined;
-  /**  */
-  // const {
-  //   clustersIds,
-  //   selected: clusterSelected,
-  //   select: selectCluster,
-  // } = useCluster();
-
-  // const onClusterSelected = (value: string) => {
-  //   selectCluster(value);
-  // };
-
   const feed0Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
       {
@@ -252,6 +222,15 @@ export const PublicFeedPage = () => {
 
   const feeds = [feed0, feed1, feed2, feed3, feed4];
 
+  const navigate = useNavigate();
+
+  const onFeedIxChanged = (ix: number) => {
+    const tabId = feedTabs[ix].id;
+    navigate(AbsoluteRoutes.ClusterFeed(tabId, clusterSelected));
+  };
+
+  const feedIx = feedTabs.findIndex((tab) => tab.id === tabId);
+
   return (
     <ViewportPage
       fixed
@@ -265,7 +244,8 @@ export const PublicFeedPage = () => {
                 <MultiTabFeeds
                   feeds={feeds}
                   tabs={feedTabs}
-                  feedIxInit={ixInit}></MultiTabFeeds>
+                  feedIx={feedIx !== -1 ? feedIx : 0}
+                  onFeedIxChanged={(ix) => onFeedIxChanged(ix)}></MultiTabFeeds>
               </OverlayContext>
             )}
           </PublicFeedContext>

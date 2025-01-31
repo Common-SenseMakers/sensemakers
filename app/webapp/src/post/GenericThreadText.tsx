@@ -15,23 +15,23 @@ export const GenericThreadText = (props: {
 
   return (
     <div onClick={props.onClick} style={{ width: '100%', overflow: 'hidden' }}>
-      {thread.map((genericPost) => {
+      {thread.map((genericPost, ix) => {
         const textWithUrls: string = styleUrls(
           genericPost.content,
           constants.colors.links
         );
         return (
-          <p style={{ marginTop: '8px', marginBottom: '8px' }}>
-            <div
-              style={{
-                overflow: 'hidden',
-                overflowWrap: 'break-word',
-                wordWrap: 'break-word',
-                wordBreak: 'break-word',
-              }}
-              dangerouslySetInnerHTML={{ __html: textWithUrls }}
-            />
-          </p>
+          <p
+            key={ix}
+            style={{
+              marginTop: '8px',
+              marginBottom: '8px',
+              overflow: 'hidden',
+              overflowWrap: 'break-word',
+              wordWrap: 'break-word',
+              wordBreak: 'break-word',
+            }}
+            dangerouslySetInnerHTML={{ __html: textWithUrls }}></p>
         );
       })}
     </div>

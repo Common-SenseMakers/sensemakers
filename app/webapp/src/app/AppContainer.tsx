@@ -87,7 +87,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
                   element={<UserSettingsPage></UserSettingsPage>}></Route>
 
                 <Route
-                  path={`${RouteNames.Feed}/*`}
+                  path={`${RouteNames.Feed}/:clusterId/:tabId`}
                   element={<PublicFeedPage></PublicFeedPage>}></Route>
 
                 <Route

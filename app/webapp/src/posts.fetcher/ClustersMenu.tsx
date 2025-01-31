@@ -17,7 +17,10 @@ export const ClustersMenu = () => {
     <Box pad={{ horizontal: '16px' }} style={{ flexShrink: 0, flexGrow: 1 }}>
       {allClusters.map((clusterId) => {
         return (
-          <AppButton plain onClick={() => onClusterSelected(clusterId)}>
+          <AppButton
+            key={clusterId}
+            plain
+            onClick={() => onClusterSelected(clusterId)}>
             <Box height={'24px'} direction="row" gap="8px" align="center">
               {clusterId === ALL_CLUSTER_NAME ? (
                 <WorldIcon></WorldIcon>
