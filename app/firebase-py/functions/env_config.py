@@ -33,6 +33,8 @@ ref_tagger_model = os.environ.get("REF_MODEL", default_model)
 kw_model = os.environ.get("KW_MODEL", default_model)
 topic_model = os.environ.get("TOPIC_MODEL", default_model)
 
+min_instances = int(os.environ.get("MIN_INSTANCES", 0))
+
 logger.debug(f"ref_tagger_model={ref_tagger_model}")
 logger.debug(f"kw_model={kw_model}")
 logger.debug(f"topic_model={topic_model}")
