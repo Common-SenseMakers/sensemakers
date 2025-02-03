@@ -4,6 +4,7 @@ import { AppPostFull } from './types.posts';
 export interface HandleSignupResult {
   linkProfile: boolean;
   userId: string;
+  replaceLegacy?: { existingUserId: string; newUserId: string };
 }
 
 /** there are two fetch modes:

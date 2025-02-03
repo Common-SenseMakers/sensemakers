@@ -10,6 +10,7 @@ import {
 } from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
+  AccountDetailsBase,
   AccountDetailsRead,
   AppUserPublicRead,
   AppUserRead,
@@ -134,79 +135,95 @@ export class UsersService {
         manager
       );
 
-    const existingUserWithAccount = existingUserWithAccountId
-      ? await this.repo.getUser(existingUserWithAccountId, manager)
-      : undefined;
-
     if (DEBUG)
       logger.debug('UsersService: handleSignup', {
         authenticatedDetails,
         prefixed_user_id,
-        existingUserWithAccount,
+        existingUserWithAccountId,
       });
 
-    if (existingUserWithAccount) {
-      /**
-       * a user has already registered this platform user_id, then check which user registered it.
-       * */
-
-      if (existingUserWithAccount.userId !== userId) {
-        /**
-         * the user with this platform user_id is another userId then we have a problem. This person has two
-         *  user profiles on our app and the should be merged.
-         * */
-
-        throw new Error(
-          `Unexpected, existing user ${existingUserWithAccount.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${userId}`
-        );
-      }
-
-      /**
-       * the user with this platform user_id is the same authenticated userId, then simply return. The current
-       * ourAccessToken is valid and this is an unexpected call since there was no need to signup with this platform
-       * and user_id
-       * */
-      if (DEBUG)
-        logger.debug(
-          'the user with this platform user_id is the same authenticated userId'
-        );
-
-      return {
-        userId,
-        linkProfile: false,
-      };
-    } else {
-      /**
-       * the user has not registered this platform user_id, then store it as a new entry on the [platform] array
-       * of the AppUser object
-       * */
-      if (DEBUG)
-        logger.debug(
-          'the user has not registered this platform user_id, then store it',
-          { userId, platform, authenticatedDetails }
-        );
-
-      await this.repo.setAccountDetails(
+    if (existingUserWithAccountId) {
+      /** If existing user, we consider this a replace legacy user operation */
+      await this.replaceLegacyUser(
+        existingUserWithAccountId,
         userId,
         platform,
         authenticatedDetails,
         manager
       );
 
-      /** create the profile when adding that account */
-      const profileCreate: AccountProfileCreate = {
-        ...profile,
-        userId,
-        platformId: platform,
-      };
-
-      await this.profiles.upsertProfile(profileCreate, manager);
-
       return {
         userId,
-        linkProfile: true,
+        linkProfile: false,
+        replaceLegacy: {
+          existingUserId: existingUserWithAccountId,
+          newUserId: userId,
+        },
       };
     }
+
+    /**
+     * the user has not registered this platform user_id, then store it as a new entry on the [platform] array
+     * of the AppUser object
+     * */
+    if (DEBUG)
+      logger.debug(
+        'the user has not registered this platform user_id, then store it',
+        { userId, platform, authenticatedDetails }
+      );
+
+    await this.repo.setAccountDetails(
+      userId,
+      platform,
+      authenticatedDetails,
+      manager
+    );
+
+    /** create the profile when adding that account */
+    const profileCreate: AccountProfileCreate = {
+      ...profile,
+      userId,
+      platformId: platform,
+    };
+
+    await this.profiles.upsertProfile(profileCreate, manager);
+
+    return {
+      userId,
+      linkProfile: true,
+    };
+  }
+
+  protected async replaceLegacyUser(
+    existingUserId: string,
+    newUserId: string,
+    platform: PLATFORM,
+    details: AccountDetailsBase,
+    manager: TransactionManager
+  ) {
+    const existingUser = await this.repo.getUser(existingUserId, manager, true);
+
+    /** copy accounts from legacy user */
+    await this.repo.setAccounts(newUserId, existingUser.accounts, manager);
+
+    /** set the just-used account details */
+    await this.repo.setAccountDetails(newUserId, platform, details, manager);
+
+    /** update all profiles to be of the new userId */
+    const profiles = await this.profiles.repo.getOfUser(
+      existingUserId,
+      manager
+    );
+
+    await Promise.all(
+      profiles.map(async (profile) => {
+        await this.profiles.repo.update(
+          profile.id,
+          { userId: newUserId },
+          manager
+        );
+      })
+    );
   }
 
   public async updateAccountCredentials(

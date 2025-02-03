@@ -11,6 +11,10 @@ import {
   PARSE_POST_TASK,
   parsePostTask,
 } from '../posts/tasks/posts.parse.task';
+import {
+  REPLACE_USER_TASK,
+  replaceUserTask,
+} from '../posts/tasks/replace.user.task';
 
 const DEBUG = false;
 
@@ -39,6 +43,11 @@ export const enqueueTaskMockLocal = async (
         name === FETCH_ACCOUNT_TASKS[PLATFORM.Bluesky]
       ) {
         await fetchPlatformAccountTask({ data: params } as any, services);
+        return;
+      }
+
+      if (name === REPLACE_USER_TASK) {
+        await replaceUserTask({ data: params }, services);
         return;
       }
 

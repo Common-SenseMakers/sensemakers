@@ -66,12 +66,8 @@ export const Welcome = () => {
   }, [connectedUser]);
 
   const startLogin = () => {
-    openSignIn();
-  };
-
-  const handleGetStartedClick = () => {
     posthog?.capture(POSTHOG_EVENTS.CLICKED_GET_STARTED);
-    setLoginCase(LoginCase.signup);
+    openSignIn();
   };
 
   return (

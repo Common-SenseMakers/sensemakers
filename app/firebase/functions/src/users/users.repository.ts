@@ -5,6 +5,7 @@ import {
   AppUserCreate,
   DefinedIfTrue,
   EmailDetails,
+  UserAccounts,
   UserSettings,
   UserWithAccounts,
 } from '../@shared/types/types.user';
@@ -157,6 +158,62 @@ export class UsersRepository {
     return snap.docs[0].id as DefinedIfTrue<T, string>;
   }
 
+  private async appendPlatformAccount(
+    user: AppUser,
+    platform: PLATFORM,
+    details: AccountDetailsBase
+  ) {
+    if (platform === PLATFORM.Local) {
+      throw new Error('Unexpected');
+    }
+
+    const platformAccounts: AccountDetailsBase[] =
+      user.accounts[platform] || [];
+
+    if (DEBUG)
+      logger.debug(`setPlatformDetails accounts`, {
+        platformAccounts,
+        details,
+      });
+
+    /** find the specific account */
+    const ix = platformAccounts.findIndex((a) => a.user_id === details.user_id);
+
+    if (ix !== -1) {
+      /** set the new details of that account */
+      if (DEBUG)
+        logger.debug(`setPlatformDetails account found - overwritting`);
+      /** keep the fetched details */
+      platformAccounts[ix] = { ...platformAccounts[ix], ...details };
+    } else {
+      if (DEBUG)
+        logger.debug(`setPlatformDetails account not found - creating`);
+      platformAccounts.push(details);
+    }
+
+    return platformAccounts;
+  }
+
+  /** needed for legacy users migration */
+  public async setAccounts(
+    userId: string,
+    newAccounts: UserAccounts,
+    manager: TransactionManager
+  ) {
+    const userRef = await this.getUserRef(userId, manager, true);
+    const newAccountsIds = UsersHelper.accountsToAccountsIds(newAccounts);
+
+    /** store a redundant list of profileIds */
+    const update: Partial<AppUser> = {
+      accounts: newAccounts,
+      accountsIds: newAccountsIds,
+    };
+
+    if (DEBUG) logger.debug(`Updating user ${userId}`, { update });
+
+    manager.update(userRef, update);
+  }
+
   /** append or overwrite userDetails for an account of a given platform */
   public async setAccountDetails(
     userId: string,
@@ -165,67 +222,17 @@ export class UsersRepository {
     manager: TransactionManager
   ) {
     /**
-     * the user is either the existing with that account, or the
-     * one from userId
+     * the user derived from userId. The check of whether there is another user
+     * with the same platform account should be done outside this function
      */
-    const user = await (async () => {
-      const existWithAccountId = await this.getUserIdWithPlatformAccount(
-        platform,
-        details.user_id,
-        manager
-      );
-
-      const existWithAccount = existWithAccountId
-        ? await this.getUser(existWithAccountId, manager)
-        : undefined;
-
-      if (existWithAccount) {
-        if (DEBUG)
-          logger.debug(`setPlatformDetails existWithAccount`, {
-            existWithAccount,
-          });
-        return existWithAccount;
-      }
-
-      if (DEBUG) logger.debug(`setPlatformDetails new account`, { userId });
-      return this.getUser(userId, manager, true);
-    })();
+    const user = await this.getUser(userId, manager, true);
 
     /** set the user account */
-    const { platformAccounts } = await (async () => {
-      /**  overwrite previous details for that user account*/
-      if (platform === PLATFORM.Local) {
-        throw new Error('Unexpected');
-      }
-
-      const platformAccounts: AccountDetailsBase[] =
-        user.accounts[platform] || [];
-
-      if (DEBUG)
-        logger.debug(`setPlatformDetails accounts`, {
-          platformAccounts,
-          details,
-        });
-
-      /** find the specific account */
-      const ix = platformAccounts.findIndex(
-        (a) => a.user_id === details.user_id
-      );
-
-      if (ix !== -1) {
-        /** set the new details of that account */
-        if (DEBUG)
-          logger.debug(`setPlatformDetails account found - overwritting`);
-        /** keep the fetched details */
-        platformAccounts[ix] = { ...platformAccounts[ix], ...details };
-      } else {
-        if (DEBUG)
-          logger.debug(`setPlatformDetails account not found - creating`);
-        platformAccounts.push(details);
-      }
-
-      return { platformAccounts };
-    })();
+    const platformAccounts = await this.appendPlatformAccount(
+      user,
+      platform,
+      details
+    );
 
     if (DEBUG)
       logger.debug(`setPlatformDetails accounts and platformIds`, {

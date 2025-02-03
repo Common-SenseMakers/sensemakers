@@ -3,7 +3,7 @@ import { PropsWithChildren, createContext, useContext } from 'react';
 
 export type ClerkContextType = object;
 
-const clerkKey = process.env.PUBLIC_CLERK_KEY as string;
+const clerkKey = process.env.PUBLIC_CLERK_KEY;
 
 const ClerkContextValue = createContext<ClerkContextType | undefined>(
   undefined
@@ -11,6 +11,10 @@ const ClerkContextValue = createContext<ClerkContextType | undefined>(
 
 /** Manages the authentication process with Orcid */
 export const ClerkContext = (props: PropsWithChildren) => {
+  if (clerkKey === undefined) {
+    throw Error('Clerk key not found');
+  }
+
   return (
     <ClerkContextValue.Provider value={{}}>
       <ClerkProvider publishableKey={clerkKey}>{props.children}</ClerkProvider>

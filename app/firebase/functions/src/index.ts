@@ -45,6 +45,10 @@ import {
   triggerAutofetchPostsForNonUsers,
 } from './posts/tasks/posts.autofetch.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
+import {
+  REPLACE_USER_TASK,
+  replaceUserTask,
+} from './posts/tasks/replace.user.task';
 import { router } from './router';
 import { getConfig } from './services.config';
 
@@ -218,6 +222,11 @@ exports[FETCH_ACCOUNT_TASKS[PLATFORM.Bluesky]] = onTaskDispatched(
     },
   },
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
+);
+
+exports[REPLACE_USER_TASK] = onTaskDispatched(
+  { ...deployConfigTasks, secrets },
+  (req) => replaceUserTask(req, createServices(firestore, getConfig()))
 );
 
 const getBeforeAndAfterOnUpdate = <T>(

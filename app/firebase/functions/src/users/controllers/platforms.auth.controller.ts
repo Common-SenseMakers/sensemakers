@@ -6,6 +6,8 @@ import {
 } from '../../@shared/types/types.platforms';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
+import { REPLACE_USER_TASK } from '../../posts/tasks/replace.user.task';
+import { enqueueTask } from '../../tasksUtils/tasks.support';
 import {
   blueskySignupDataSchema,
   mastodonGetSignupContextSchema,
@@ -114,6 +116,10 @@ export const handleSignupController: RequestHandler = async (
       `handleSignupController ${debugId}`,
       DEBUG
     );
+
+    if (result?.replaceLegacy) {
+      await enqueueTask(REPLACE_USER_TASK, result.replaceLegacy, services);
+    }
 
     if (result?.linkProfile) {
       /** update userId of posts and profiles */
