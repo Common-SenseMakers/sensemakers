@@ -2,6 +2,8 @@ export const POSTHOG_EVENTS = {
   CLICKED_GET_STARTED: 'clicked_get_started',
   CLICKED_CONTINUE: 'clicked_continue',
   CLICKED_KEYWORD: 'clicked_keyword',
+  CLICKED_REF_LABEL: 'clicked_ref_label',
+  CLICKED_AGGREGATED_REF_LABEL: 'clicked_aggregated_ref_label',
   CLICKED_PROFILE_PAGE: 'clicked_profile_page',
   CLICKED_REFERENCE_PAGE: 'clicked_reference_page',
   CLICKED_FEED_TAB: 'clicked_feed_tab',
@@ -13,4 +15,5 @@ export const POSTHOG_EVENTS = {
   CLICKED_POST_VIEW: 'clicked_post_view',
   CLICKED_REF_URL: 'clicked_ref_url',
   CLICKED_PROFILE_URL: 'clicked_profile_url',
+  TOGGLE_SHARE_TO_HYPERFEED: 'toggle_share_to_hyperfeed',
 };

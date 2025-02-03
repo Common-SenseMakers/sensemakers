@@ -1,8 +1,11 @@
 import { Box } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { POSTHOG_EVENTS } from '../../../analytics/posthog.events';
 import { PostEditKeys } from '../../../i18n/i18n.edit.post';
+import { useOverlay } from '../../../overlays/OverlayContext';
 import { OntologyItem } from '../../../shared/types/types.parser';
 import { OEmbed, RefLabel } from '../../../shared/types/types.references';
 import {
@@ -12,6 +15,7 @@ import {
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { RefCard } from '../common/RefCard';
+import { PostClickTarget } from '../patterns';
 import { AggregatedRefLabels } from './AggregatedRefLabels';
 
 /** renders the labels for one ref */
@@ -30,6 +34,8 @@ export const RefWithLabels = (props: {
   ontology?: OntologyItem[];
 }) => {
   const { t } = useTranslation();
+  const posthog = usePostHog();
+  const overlay = useOverlay();
   const ontology = props.ontology;
   const showAggregatedLabels =
     props.showAggregatedLabels !== undefined
@@ -87,6 +93,23 @@ export const RefWithLabels = (props: {
     props.aggregatedLabels &&
     props.aggregatedLabels.length > 0;
 
+  const handleLabelClicked = (label: string, isAggregatedLabel: boolean) => {
+    posthog?.capture(
+      isAggregatedLabel
+        ? POSTHOG_EVENTS.CLICKED_REF_LABEL
+        : POSTHOG_EVENTS.CLICKED_REF_LABEL,
+      {
+        label,
+        postId: props.aggregatedLabels?.[0]?.postId,
+      }
+    );
+    overlay &&
+      overlay.onPostClick({
+        target: PostClickTarget.REF,
+        payload: props.oembed.url,
+      });
+  };
+
   return (
     <>
       {props.oembed ? (
@@ -120,6 +143,7 @@ export const RefWithLabels = (props: {
       {renderAggregateLabels ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
+            onLabelClick={(label) => handleLabelClicked(label, true)}
             refLabels={props.aggregatedLabels || []}
             ontology={props.ontology}></AggregatedRefLabels>
         </Box>
@@ -136,6 +160,7 @@ export const RefWithLabels = (props: {
               background: '#EDF7FF',
               border: '#CEE2F2',
             }}
+            onLabelClick={(label) => handleLabelClicked(label, false)}
             labels={authorLabelsNames}
             options={optionDisplayNames}
             removeLabel={(label) => removeLabel(label)}

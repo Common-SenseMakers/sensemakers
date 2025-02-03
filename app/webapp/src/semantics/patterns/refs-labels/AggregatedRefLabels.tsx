@@ -12,6 +12,7 @@ interface LabelDetails {
 
 export const AggregatedRefLabels = (props: {
   refLabels: RefLabel[];
+  onLabelClick?: (label: string) => void;
   ontology?: OntologyItem[];
 }) => {
   const labelsSummary = useMemo(() => {
@@ -67,6 +68,7 @@ export const AggregatedRefLabels = (props: {
     <AppLabelsEditor
       placeholder=""
       colors={colors}
+      onLabelClick={props.onLabelClick}
       labels={labelsSummary.map((labelDetails) => (
         <span>
           {`${labelDetails.label}`}
