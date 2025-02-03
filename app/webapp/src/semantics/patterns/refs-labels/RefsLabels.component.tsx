@@ -58,7 +58,6 @@ export const RefLabelsComponent = (
 
       target = target.parentNode as HTMLElement;
     }
-
     overlay &&
       overlay.onPostClick({ target: PostClickTarget.REF, payload: ref });
   };

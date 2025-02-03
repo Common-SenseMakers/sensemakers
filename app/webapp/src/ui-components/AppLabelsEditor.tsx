@@ -246,7 +246,19 @@ export const AppLabelsEditor = (props: {
                 cursor: onLabelClick ? 'pointer' : 'inherit',
               }}
               onClick={() => {
-                onLabelClick && !adding && onLabelClick(label as string);
+                if (onLabelClick && !adding) {
+                  if (typeof label === 'string') {
+                    onLabelClick(label);
+                  } else if (
+                    label.props &&
+                    (label.props as unknown as { children: any }).children
+                  ) {
+                    const spanText = (
+                      label as React.ReactElement<{ children: [string, any] }>
+                    ).props.children[0];
+                    onLabelClick(spanText);
+                  }
+                }
               }}>
               <AppLabel
                 underline={props.underline}
