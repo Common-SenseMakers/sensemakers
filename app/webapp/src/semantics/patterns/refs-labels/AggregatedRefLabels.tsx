@@ -1,5 +1,8 @@
+import { usePostHog } from 'posthog-js/react';
 import { useMemo } from 'react';
 
+import { POSTHOG_EVENTS } from '../../../analytics/posthog.events';
+// import { useOverlay } from '../../../overlays/OverlayContext';
 import { OntologyItem } from '../../../shared/types/types.parser';
 import { RefLabel } from '../../../shared/types/types.references';
 import { transformDisplayName } from '../../../shared/utils/semantics.helper';
@@ -14,6 +17,8 @@ export const AggregatedRefLabels = (props: {
   refLabels: RefLabel[];
   ontology?: OntologyItem[];
 }) => {
+  const posthog = usePostHog();
+
   const labelsSummary = useMemo(() => {
     const ontology = props.ontology;
 
@@ -62,11 +67,18 @@ export const AggregatedRefLabels = (props: {
     background: '#FFFFFF',
     border: '#D1D5DB',
   };
+  const handleLabelClicked = (label: string) => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_AGGREGATED_REF_LABEL, {
+      label,
+      postId: props.refLabels[0]?.postId,
+    });
+  };
 
   return (
     <AppLabelsEditor
       placeholder=""
       colors={colors}
+      onLabelClick={handleLabelClicked}
       labels={labelsSummary.map((labelDetails) => (
         <span>
           {`${labelDetails.label}`}

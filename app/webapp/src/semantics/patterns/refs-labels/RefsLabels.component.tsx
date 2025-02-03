@@ -12,7 +12,6 @@ import {
   parseRefDisplayMeta,
 } from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
-import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { splitArray } from '../../../ui-components/utils';
@@ -48,17 +47,6 @@ export const RefLabelsComponent = (
       ref,
       postId: props.post?.id,
     });
-    let target = event.target as HTMLElement;
-
-    // filter clicks on the ref semantics
-    while (target !== null) {
-      if (target.id === REF_LABELS_EDITOR_ID) {
-        return; // Stop further processing
-      }
-
-      target = target.parentNode as HTMLElement;
-    }
-
     overlay &&
       overlay.onPostClick({ target: PostClickTarget.REF, payload: ref });
   };

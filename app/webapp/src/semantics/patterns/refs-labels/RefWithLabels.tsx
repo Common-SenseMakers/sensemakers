@@ -1,7 +1,9 @@
 import { Box } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { POSTHOG_EVENTS } from '../../../analytics/posthog.events';
 import { PostEditKeys } from '../../../i18n/i18n.edit.post';
 import { OntologyItem } from '../../../shared/types/types.parser';
 import { OEmbed, RefLabel } from '../../../shared/types/types.references';
@@ -30,6 +32,7 @@ export const RefWithLabels = (props: {
   ontology?: OntologyItem[];
 }) => {
   const { t } = useTranslation();
+  const posthog = usePostHog();
   const ontology = props.ontology;
   const showAggregatedLabels =
     props.showAggregatedLabels !== undefined
@@ -87,6 +90,13 @@ export const RefWithLabels = (props: {
     props.aggregatedLabels &&
     props.aggregatedLabels.length > 0;
 
+  const handleLabelClicked = (label: string) => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_REF_LABEL, {
+      label,
+      postId: props.aggregatedLabels?.[0]?.postId,
+    });
+  };
+
   return (
     <>
       {props.oembed ? (
@@ -136,6 +146,7 @@ export const RefWithLabels = (props: {
               background: '#EDF7FF',
               border: '#CEE2F2',
             }}
+            onLabelClick={handleLabelClicked}
             labels={authorLabelsNames}
             options={optionDisplayNames}
             removeLabel={(label) => removeLabel(label)}
