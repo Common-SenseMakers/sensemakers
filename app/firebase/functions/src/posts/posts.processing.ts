@@ -371,6 +371,16 @@ export class PostsProcessing {
             const indexedRepo = new IndexedPostsRepo(
               cluster.collection(CollectionNames.Keywords)
             );
+            const keywordEntry = await indexedRepo.get(keyword, manager);
+            const nPosts = keywordEntry?.nPosts || 0;
+
+            indexedRepo.set(
+              keyword,
+              { nPosts: nPosts > 0 ? nPosts - 1 : 0 },
+              manager,
+              { merge: true }
+            );
+
             if (action === 'add' && postData) {
               /** delete the post of the removed keywords, still an add post action */
               await indexedRepo.deletePost(keyword, postData.id, manager);
@@ -386,10 +396,21 @@ export class PostsProcessing {
           const indexedRepo = new IndexedPostsRepo(
             cluster.collection(CollectionNames.Keywords)
           );
+          const keywordEntry = await indexedRepo.get(keyword, manager);
+          const nPosts = keywordEntry?.nPosts || 0;
+
           if (action === 'add' && postData) {
             await indexedRepo.setPost(keyword, postData, manager);
+            indexedRepo.set(keyword, { nPosts: nPosts + 1 }, manager, {
+              merge: true,
+            });
           } else {
             await indexedRepo.deletePost(keyword, postId, manager);
+            indexedRepo.set(
+              keyword,
+              { nPosts: nPosts > 0 ? nPosts - 1 : 0 },
+              manager
+            );
           }
         })
       );

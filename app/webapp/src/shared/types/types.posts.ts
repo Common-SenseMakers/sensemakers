@@ -193,3 +193,7 @@ export type IndexedPost = Pick<
   | 'createdAtMs'
   | 'structuredSemantics'
 >;
+
+export interface KeywordEntry {
+  nPosts: number;
+}

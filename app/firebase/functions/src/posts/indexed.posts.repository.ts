@@ -1,11 +1,16 @@
-import { IndexedPost } from '../@shared/types/types.posts';
+import { IndexedPost, KeywordEntry } from '../@shared/types/types.posts';
 import { CollectionNames } from '../@shared/utils/collectionNames';
-import { removeUndefined } from '../db/repo.base';
+import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
 /** a repository of a collection that has posts as a subcollection  */
-export class IndexedPostsRepo {
-  constructor(protected base: FirebaseFirestore.CollectionReference) {}
+export class IndexedPostsRepo extends BaseRepository<
+  KeywordEntry,
+  KeywordEntry
+> {
+  constructor(protected base: FirebaseFirestore.CollectionReference) {
+    super(base);
+  }
 
   public getPostsCollection(id: string) {
     return this.base
