@@ -160,6 +160,7 @@ class LLMOntologyConceptDefinition(OntologyConceptDefinition):
     valid_object_types: List[str] = Field(
         description="List of valid object entity types for this predicate"
     )
+    re_post: Optional[bool] = Field(default = False, description = "Indicates tags used in re-post parsing")
 
     def can_be_predicate(self):
         return "ref" in self.valid_object_types

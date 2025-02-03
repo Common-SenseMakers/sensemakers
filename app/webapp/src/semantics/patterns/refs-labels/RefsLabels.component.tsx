@@ -1,11 +1,16 @@
 import { Box } from 'grommet';
 import { DataFactory } from 'n3';
+import { usePostHog } from 'posthog-js/react';
 import { useMemo } from 'react';
 
+import { POSTHOG_EVENTS } from '../../../analytics/posthog.events';
 import { useOverlay } from '../../../overlays/OverlayContext';
 import { isPlatformPost } from '../../../shared/utils/links.utils';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
-import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
+import {
+  THIS_POST_NAME_URI,
+  parseRefDisplayMeta,
+} from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
 import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
@@ -25,6 +30,7 @@ export interface RefLabelsCustomProps {
 export const RefLabelsComponent = (
   props: PatternProps<RefLabelsCustomProps>
 ) => {
+  const posthog = usePostHog();
   const { store, originalStore } = useSemanticsStore(
     props.semantics,
     props.originalParsed
@@ -38,6 +44,10 @@ export const RefLabelsComponent = (
     event: React.MouseEvent<HTMLDivElement>,
     ref: string
   ) => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_REFERENCE_PAGE, {
+      ref,
+      postId: props.post?.id,
+    });
     let target = event.target as HTMLElement;
 
     // filter clicks on the ref semantics
@@ -141,12 +151,11 @@ export const RefLabelsComponent = (
                 throw new Error('Unexpected undefined');
 
               const refDisplayMeta = props.post?.meta?.references[ref];
+              const { postsIds } = parseRefDisplayMeta(refDisplayMeta);
 
-              const aggregatedLabelsWithoutAuthorLabels =
-                refDisplayMeta?.aggregatedLabels?.filter(
-                  (refLabel) =>
-                    refLabel.authorProfileId !== props.post?.authorProfileId
-                );
+              // here we get the author labels directly from the semantics of the post.
+              const authorLabels = refs.get(ref)?.labelsUris || [];
+              const hasOtherLabels = postsIds.length > 1;
 
               const isQuotedPost = isPlatformPost(ref);
 
@@ -172,12 +181,13 @@ export const RefLabelsComponent = (
                       <RefWithLabels
                         ix={index}
                         oembed={refDisplayMeta.oembed}
-                        authorLabels={refs.get(ref)?.labelsUris || []}
-                        aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+                        authorLabels={authorLabels}
+                        aggregatedLabels={refDisplayMeta.aggregatedLabels}
                         showAggregatedLabels={
-                          props.custom?.showAggregatedLabels
+                          props.custom?.showAggregatedLabels && hasOtherLabels
                         }
                         showDescription={isQuotedPost}
+                        showAllMentionsText={true}
                         editable={props.editable}
                         ontology={
                           props.originalParsed?.support?.ontology

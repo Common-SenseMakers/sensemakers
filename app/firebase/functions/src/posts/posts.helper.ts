@@ -11,7 +11,6 @@ import {
 import {
   AppPost,
   AppPostFull,
-  GenericPost,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import { AccountDetailsBase, DefinedIfTrue } from '../@shared/types/types.user';
@@ -23,13 +22,6 @@ export interface PlatformDetails {
 }
 
 export class PostsHelper {
-  static concatenateThread(generic: { thread: GenericPost[] }): string {
-    return generic.thread.reduce(
-      (_acc, post) => `${_acc} ${post.content}\n\n`,
-      ''
-    );
-  }
-
   static getPostUrl(postId: string): string {
     return `${APP_URL}/post/${postId}`;
   }

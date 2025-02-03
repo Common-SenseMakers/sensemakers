@@ -435,7 +435,12 @@ export class BlueskyService
     if (newSession) {
       newCredentials = { read: newSession };
     }
-    const { did, rkey } = parseBlueskyURI(post_id);
+    const { did, rkey, repostedByDid } = parseBlueskyURI(post_id);
+    if (repostedByDid) {
+      throw new Error(
+        `reposts cannot be fetched with getSinglePost. Tried to fetch ${post_id}`
+      );
+    }
     const result = await agent.getPost({ repo: did, rkey });
     const author = await agent.getProfile({ actor: did });
     const bskyPost: BlueskyPost = {

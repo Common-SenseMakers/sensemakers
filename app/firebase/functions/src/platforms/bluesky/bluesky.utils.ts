@@ -2,7 +2,7 @@ import { AppBskyEmbedExternal, AppBskyFeedPost } from '@atproto/api';
 import { Link } from '@atproto/api/dist/client/types/app/bsky/richtext/facet';
 
 import {
-  BLUESKY_REPOST_URI_PARAM,
+  BLUESKY_REPOST_URI_QUERY,
   BlueskyPost,
   BlueskyThread,
   QuotedBlueskyPost,
@@ -62,8 +62,7 @@ export const convertBlueskyPostsToThreads = (
         throw new Error('reposted by info not present');
       }
       return {
-        thread_id:
-          post.uri + `?${BLUESKY_REPOST_URI_PARAM}=${post.repostedBy.by.did}`,
+        thread_id: post.uri + BLUESKY_REPOST_URI_QUERY + post.repostedBy.by.did,
         posts: [cleanBlueskyPost(post)],
         author: {
           id: post.repostedBy.by.did,
@@ -129,7 +128,7 @@ export function cleanBlueskyContent(
   const textBytes = Buffer.from(text, 'utf-8');
 
   // Map of byte-offset substrings to their full URLs
-  const urlMap = new Map<string, string>();
+  const urlMap: [string, string][] = [];
 
   // Collect each link facet's byte-offset substring and map it to its full URL
   for (const facet of facets || []) {
@@ -150,12 +149,12 @@ export function cleanBlueskyContent(
       const urlSubstring = Buffer.from(urlBytes).toString('utf-8');
 
       // Map the decoded substring to the full URL
-      urlMap.set(urlSubstring, linkFeature.uri);
+      urlMap.push([urlSubstring, linkFeature.uri]);
     }
   }
 
   // Replace each substring with the full URL in the text
-  for (const [shortUrl, fullUrl] of urlMap.entries()) {
+  for (const [shortUrl, fullUrl] of urlMap) {
     text = text.replace(shortUrl, fullUrl);
   }
 

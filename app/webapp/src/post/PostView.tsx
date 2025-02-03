@@ -18,12 +18,11 @@ import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { GenericThreadText } from './GenericThreadText';
 import { CARD_BORDER } from './PostCard';
 import { PostHeader } from './PostHeader';
 import { PublishButtons } from './PostPublishButtons';
-import { PostTextEditable } from './PostTextEditable';
 import { usePost } from './post.context/PostContext';
-import { concatenateThread } from './posts.helper';
 
 /** extract the postId from the route and pass it to a PostContext */
 export const PostView = (props: {
@@ -37,10 +36,6 @@ export const PostView = (props: {
 
   const { constants } = useThemeContext();
   const { updated, fetched } = usePost();
-
-  const postText = updated.postMerged
-    ? concatenateThread(updated.postMerged.generic)
-    : undefined;
 
   const { connectedUser } = useAccountContext();
 
@@ -165,6 +160,7 @@ export const PostView = (props: {
       semanticsUpdated: semanticsUpdated,
       structuredSemantics: updated.postMerged?.structuredSemantics,
       post: updated.postMerged,
+      custom: { showAggregatedLabels: true },
     };
 
     return (
@@ -184,7 +180,8 @@ export const PostView = (props: {
               include={[PATTERN_ID.KEYWORDS]}></SemanticsEditor>
           )}
 
-          <PostTextEditable text={postText}></PostTextEditable>
+          <GenericThreadText
+            thread={updated.postMerged.generic.thread}></GenericThreadText>
 
           {!hideSemantics && (
             <Box margin={{ top: '24px' }}>

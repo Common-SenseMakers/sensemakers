@@ -1,10 +1,12 @@
 import { useClerk } from '@clerk/clerk-react';
 import { Box, Image } from 'grommet';
 import { t } from 'i18next';
+import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { WelcomeKeys } from '../i18n/i18n.welcome';
 import { AbsoluteRoutes } from '../route.names';
 import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
@@ -50,6 +52,7 @@ export const WelcomeBullet = ({
 
 export const Welcome = () => {
   const navigate = useNavigate();
+  const posthog = usePostHog();
 
   const { openSignIn } = useClerk();
   const { connectedUser } = useAccountContext();
@@ -64,6 +67,11 @@ export const Welcome = () => {
 
   const startLogin = () => {
     openSignIn();
+  };
+
+  const handleGetStartedClick = () => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_GET_STARTED);
+    setLoginCase(LoginCase.signup);
   };
 
   return (

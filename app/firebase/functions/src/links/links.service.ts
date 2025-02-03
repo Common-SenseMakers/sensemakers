@@ -165,13 +165,14 @@ export class LinksService {
         refPost?.structuredSemantics?.labels &&
         refPost.structuredSemantics.topic === SCIENCE_TOPIC_URI
       ) {
-        const thisRefLabels = refPost.structuredSemantics?.labels?.map(
-          (label): RefLabel => ({
-            label,
-            postId: refPost.id,
-            authorProfileId: refPost.authorProfileId,
-          })
-        );
+        const thisRefLabels =
+          refPost.structuredSemantics?.refsMeta?.[reference].labels?.map(
+            (label): RefLabel => ({
+              label,
+              postId: refPost.id,
+              authorProfileId: refPost.authorProfileId,
+            })
+          ) || [];
         refLabels.push(...thisRefLabels);
       }
     });
@@ -182,9 +183,8 @@ export class LinksService {
   async getAggregatedRefLabelsForDisplay(
     ref: string,
     manager: TransactionManager,
-    clusterId?: string
+    cluster: ClusterInstance
   ) {
-    const cluster = this.clusters.getInstance(clusterId);
     const refOEmbed = await this.getOEmbed(ref, manager);
     const refLabels = await this.getAggregatedRefLabels(ref, cluster, manager);
 
@@ -197,7 +197,6 @@ export class LinksService {
       logger.debug(`getAggregatedRefLabelsForDisplay ${ref}`, {
         refLabels,
         refOEmbed,
-        clusterId,
         ontology,
       });
     }

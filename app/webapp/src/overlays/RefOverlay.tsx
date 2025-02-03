@@ -12,7 +12,10 @@ import { RefWithLabels } from '../semantics/patterns/refs-labels/RefWithLabels';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { PlatformProfile } from '../shared/types/types.profiles';
 import { RefDisplayMeta } from '../shared/types/types.references';
-import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
+import {
+  SCIENCE_TOPIC_URI,
+  parseRefDisplayMeta,
+} from '../shared/utils/semantics.helper';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { OverlayContext } from './OverlayContext';
@@ -73,15 +76,10 @@ export const RefOverlay = (props: { refUrl: string }) => {
 
   const feed = usePostsFetcher(feedConfig);
 
-  const authorLabels =
-    (refDisplayMeta?.aggregatedLabels || [])
-      .filter((refLabel) => refLabel.authorProfileId === accountProfileId)
-      .map((refLabel) => refLabel.label)
-      .filter((label) => label !== 'https://sense-nets.xyz/quotesPost') || [];
-
-  const aggregatedLabelsWithoutAuthorLabels = (
-    refDisplayMeta?.aggregatedLabels || []
-  ).filter((refLabel) => refLabel.authorProfileId !== accountProfileId);
+  const { authorLabels, nonAuthorLabels } = parseRefDisplayMeta(
+    refDisplayMeta,
+    accountProfileId
+  );
 
   return (
     <OverlayContext>
@@ -96,8 +94,8 @@ export const RefOverlay = (props: { refUrl: string }) => {
             <RefWithLabels
               ix={1}
               oembed={refDisplayMeta.oembed}
-              authorLabels={authorLabels}
-              aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
+              authorLabels={authorLabels || []}
+              aggregatedLabels={nonAuthorLabels || []}
               showAggregatedLabels={true}
               showDescription={true}
               editable={false}

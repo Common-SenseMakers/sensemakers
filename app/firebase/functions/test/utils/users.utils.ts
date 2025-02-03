@@ -38,7 +38,7 @@ export const createUsers = async (
 
         await Promise.all(
           userData.clustersIds.map((clusterId) => {
-            return services.profiles.repo.addCluster(
+            return services.profiles.repo.addClusterToProfile(
               createdProfile.id,
               clusterId,
               manager
@@ -71,7 +71,7 @@ export const createProfiles = async (
 
       await Promise.all(
         clustersIds.map((clusterId) => {
-          return services.profiles.repo.addCluster(
+          return services.profiles.repo.addClusterToProfile(
             createdProfile.id,
             clusterId,
             manager

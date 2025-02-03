@@ -17,7 +17,8 @@
             ],
             "valid_object_types": [
                 "nan"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "disagreesWith",
@@ -37,7 +38,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "possibleMissingReference",
@@ -56,7 +58,8 @@
             ],
             "valid_object_types": [
                 "nan"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "reviews",
@@ -76,7 +79,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "question",
@@ -95,7 +99,8 @@
             ],
             "valid_object_types": [
                 "nan"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "announcesResource",
@@ -115,7 +120,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "endorses",
@@ -135,7 +141,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "discusses",
@@ -155,7 +162,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "mentionsListeningStatus",
@@ -175,7 +183,8 @@
             "valid_object_types": [
                 "ref",
                 "nan"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "recommends",
@@ -195,7 +204,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "mentionsCallForPapers",
@@ -215,7 +225,8 @@
             "valid_object_types": [
                 "ref",
                 "nan"
-            ]
+            ],
+            "re_post": true
         },
         {
             "name": "includesQuotationFrom",
@@ -235,7 +246,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "asksQuestionAbout",
@@ -255,7 +267,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "agreesWith",
@@ -275,7 +288,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "observation",
@@ -294,7 +308,8 @@
             ],
             "valid_object_types": [
                 "nan"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "claim",
@@ -313,7 +328,8 @@
             ],
             "valid_object_types": [
                 "nan"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "mentionsFundingOpportunity",
@@ -333,7 +349,8 @@
             "valid_object_types": [
                 "ref",
                 "nan"
-            ]
+            ],
+            "re_post": true
         },
         {
             "name": "summarizes",
@@ -353,7 +370,8 @@
             "valid_object_types": [
                 "ref",
                 "nan"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "mentionsWatchingStatus",
@@ -373,7 +391,8 @@
             "valid_object_types": [
                 "ref",
                 "nan"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "mentionsReadingStatus",
@@ -393,7 +412,8 @@
             "valid_object_types": [
                 "ref",
                 "nan"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "announcesEvent",
@@ -413,7 +433,8 @@
             "valid_object_types": [
                 "ref",
                 "nan"
-            ]
+            ],
+            "re_post": true
         },
         {
             "name": "announcesJob",
@@ -433,7 +454,8 @@
             "valid_object_types": [
                 "ref",
                 "nan"
-            ]
+            ],
+            "re_post": true
         },
         {
             "name": "indicatesInterest",
@@ -452,7 +474,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": false
         },
         {
             "name": "linksTo",
@@ -471,7 +494,8 @@
             ],
             "valid_object_types": [
                 "ref"
-            ]
+            ],
+            "re_post": true
         }
     ],
     "keyword_predicate": {

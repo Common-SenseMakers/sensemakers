@@ -1,8 +1,10 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Location, useLocation, useNavigate } from 'react-router-dom';
 
+import { POSTHOG_EVENTS } from '../../analytics/posthog.events';
 import { AppGeneralKeys } from '../../i18n/i18n.app.general';
 import { AbsoluteRoutes, RouteNames } from '../../route.names';
 import { AppButton } from '../../ui-components';
@@ -37,6 +39,7 @@ export const GlobalNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { constants } = useThemeContext();
+  const posthog = usePostHog();
 
   const pageIx = locationToPageIx(location);
 
@@ -71,6 +74,15 @@ export const GlobalNav = () => {
           plain
           style={{ height: '100%' }}
           onClick={() => {
+            if (route === AbsoluteRoutes.MyPosts) {
+              posthog?.capture(POSTHOG_EVENTS.CLICKED_YOUR_POSTS_TAB);
+            }
+            if (route === AbsoluteRoutes.Feed) {
+              posthog?.capture(POSTHOG_EVENTS.CLICKED_HYPERFEED_TAB);
+            }
+            if (route === AbsoluteRoutes.Settings) {
+              posthog?.capture(POSTHOG_EVENTS.CLICKED_SETTINGS_TAB);
+            }
             navigate(route);
           }}>
           <Box {...internalBoxProps}>
