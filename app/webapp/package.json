@@ -10,6 +10,7 @@
     "start": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start --config craco.config.js",
     "start-remote": "export REACT_APP_VERSION=$(git rev-parse HEAD) && FB_PROJECT=production craco start --config craco.config.prod.js",
     "start-clone": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco start --config craco.config.clone.js",
+    "start-posthog": "POSTHOG=true netlify dev",
     "build": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",
     "build-local": "FB_PROJECT=dev yarn build",
     "test": "craco test",
@@ -20,8 +21,7 @@
     "build-email-code": "rm -rf ./build && craco build --config craco.config.email.bundle.js",
     "build-email-types": "tsc -p tsconfig.dist.json",
     "copy-email-static": "cp ./build/**.* ./src/shared/emailRenderer",
-    "dev-email": "email dev -d ./src/email",
-    "netlify-dev": "netlify dev"
+    "dev-email": "email dev -d ./src/email"
   },
   "resolutions": {
     "strip-ansi": "6.0.1"
