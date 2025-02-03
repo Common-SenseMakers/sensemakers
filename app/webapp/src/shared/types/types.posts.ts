@@ -194,6 +194,10 @@ export type IndexedPost = Pick<
   | 'structuredSemantics'
 >;
 
-export interface KeywordEntry {
+export interface IndexedCollectionEntry {
   nPosts: number;
+}
+
+export interface GetKeywordsPayload {
+  clusterId?: string;
 }
