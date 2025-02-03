@@ -10,7 +10,6 @@ import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
-import { canReadPost } from '../posts.access.control';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
   getPostSchema,
@@ -33,10 +32,16 @@ export const getUserPostsController: RequestHandler = async (
     )) as PostsQuery;
 
     logger.debug(`${request.path} - query parameters`, { queryParams });
-    const userId = getAuthenticatedUser(request, true);
-    const { postsManager } = getServices(request);
 
-    const posts = await postsManager.getOfUser({ ...queryParams, userId });
+    const services = getServices(request);
+    const userId = await services.db.run(async (manager) => {
+      return getAuthenticatedUser(request, services.users, manager, true);
+    });
+
+    const posts = await services.postsManager.getOfUser({
+      ...queryParams,
+      userId,
+    });
 
     if (DEBUG) logger.debug(`${request.path}: posts`, { posts, userId });
     response.status(200).send({ success: true, data: posts });
@@ -51,8 +56,7 @@ export const getUserPostsController: RequestHandler = async (
  * */
 export const getPostController: RequestHandler = async (request, response) => {
   try {
-    const userId = getAuthenticatedUser(request);
-    const { postsManager } = getServices(request);
+    const services = getServices(request);
 
     const payload = (await getPostSchema.validate(
       request.body
@@ -63,28 +67,17 @@ export const getPostController: RequestHandler = async (request, response) => {
       addAggregatedLabels: true,
     };
 
-    const post = await postsManager.getPost(payload.postId, config, true);
+    const post = await services.postsManager.getPost(
+      payload.postId,
+      config,
+      true
+    );
 
-    const canRead = canReadPost(post, userId);
-
-    if (!canRead) {
-      if (DEBUG)
-        logger.debug(`${request.path}: getPost not authorize`, {
-          userId,
-          postId: payload.postId,
-        });
-      response.status(403).send({
-        success: false,
-        message: 'post are accessible to authors only',
+    if (DEBUG)
+      logger.debug(`${request.path}: getPost ${payload.postId} success`, {
+        post: post,
       });
-    } else {
-      if (DEBUG)
-        logger.debug(`${request.path}: getPost ${payload.postId} success`, {
-          userId,
-          post: post,
-        });
-      response.status(200).send({ success: true, data: post });
-    }
+    response.status(200).send({ success: true, data: post });
   } catch (error: any) {
     logger.error('error', error);
     response.status(500).send({ success: false, error: error.message });
@@ -129,15 +122,21 @@ export const updatePostController: RequestHandler = async (
   response
 ) => {
   try {
-    const userId = getAuthenticatedUser(request, true);
-    const { db, postsManager } = getServices(request);
+    const services = getServices(request);
 
     const payload = (await updatePostSchema.validate(
       request.body
     )) as PostUpdatePayload;
 
-    db.run(async (manager) => {
-      const post = await postsManager.processing.posts.get(
+    await services.db.run(async (manager) => {
+      const userId = await getAuthenticatedUser(
+        request,
+        services.users,
+        manager,
+        true
+      );
+
+      const post = await services.postsManager.processing.posts.get(
         payload.postId,
         manager,
         true
@@ -147,7 +146,7 @@ export const updatePostController: RequestHandler = async (
         throw new Error(`Post can only be edited by the author`);
       }
 
-      return postsManager.updatePost(
+      return services.postsManager.updatePost(
         payload.postId,
         payload.postUpdate,
         manager

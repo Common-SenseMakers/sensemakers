@@ -56,6 +56,7 @@ import {
 } from '../@shared/utils/semantics.helper';
 import { ClustersService } from '../clusters/clusters.service';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
+import { processInBatches } from '../db/db.utils';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
@@ -1137,5 +1138,38 @@ export class PostsManager {
       }
       this.profiles.repo.delete(profileId, manager);
     });
+  }
+
+  async replacePostsAuthor(existingUserId: string, newUserId: string) {
+    const cluster = this.clusters.getInstance();
+    const posts = await this.processing.posts.getAllOfQuery(
+      {
+        userId: existingUserId,
+        fetchParams: { expectedAmount: 100 },
+      },
+      cluster
+    );
+
+    await processInBatches(
+      posts.map(
+        (element) => () =>
+          (async (post: AppPost) => {
+            try {
+              if (DEBUG) console.log(`Processing ${post.id}`);
+
+              await this.db.run(async (manager) => {
+                await this.processing.posts.update(
+                  post.id,
+                  { authorUserId: newUserId },
+                  manager
+                );
+              });
+            } catch (error) {
+              console.error(`Error processing ${post.id}`, error);
+            }
+          })(element)
+      ),
+      10
+    );
   }
 }
