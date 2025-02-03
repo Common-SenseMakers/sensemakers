@@ -33,14 +33,14 @@ export const GenericThreadText = (props: {
 
   return (
     <div onClick={props.onClick} style={{ width: '100%', overflow: 'hidden' }}>
-      {thread.map((genericPost) => {
+      {thread.map((genericPost, i) => {
         const textWithUrls: string = styleUrls(
           genericPost.content,
           constants.colors.links
         );
         return (
-          <p style={{ marginTop: '8px', marginBottom: '8px' }}>
-            <div
+          <p style={{ marginTop: '8px', marginBottom: '8px' }} key={i}>
+            <span
               style={{
                 overflow: 'hidden',
                 overflowWrap: 'break-word',
