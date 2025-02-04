@@ -119,6 +119,7 @@ export const ViewportPageContextValue = createContext<
 export const ViewportPage = (props: {
   content: ReactNode;
   nav?: ReactNode;
+  suggestions?: ReactNode;
   justify?: BoxProps['justify'];
   fixed?: boolean;
   addLogo?: boolean;
@@ -182,9 +183,7 @@ export const ViewportPage = (props: {
                 </Box>
               )}
             </Box>
-            <Box gridArea="right-upper" background="blue">
-              <strong>Right Upper</strong>
-            </Box>
+            <Box gridArea="right-upper">{props.suggestions}</Box>
             <Box gridArea="left-lower" background="yellow"></Box>
             <Box gridArea="right-lower" background="purple">
               <strong>Right Lower</strong>

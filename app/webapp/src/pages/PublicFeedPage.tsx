@@ -21,6 +21,7 @@ import {
 import { AbsoluteRoutes } from '../route.names';
 import { PostClickEvent } from '../semantics/patterns/patterns';
 import { TabQuery, feedTabs } from '../shared/utils/feed.config';
+import { KeywordsSuggestions } from '../suggestions/keywords.suggestions';
 
 const DEBUG = false;
 
@@ -233,6 +234,11 @@ export const PublicFeedPage = () => {
 
   const feedIx = feedTabs.findIndex((tab) => tab.id === tabId);
 
+  const [showOverlay, setShowOverlay] = useState<OverlayValue>();
+  const onKeywordClick = (kw: string) => {
+    setShowOverlay({ keyword: kw });
+  };
+
   return (
     <ViewportPage
       fixed
@@ -242,6 +248,7 @@ export const PublicFeedPage = () => {
             {overlayInit !== undefined && (
               <OverlayContext
                 init={overlayInit}
+                triggerShowOverlay={showOverlay}
                 onOverlayNav={(overlay) => onOverlayNav(overlay)}>
                 <MultiTabFeeds
                   feeds={feeds}
@@ -254,6 +261,10 @@ export const PublicFeedPage = () => {
         </Box>
       }
       nav={<GlobalNav></GlobalNav>}
+      suggestions={
+        <KeywordsSuggestions
+          onKeywordClick={(kw) => onKeywordClick(kw)}></KeywordsSuggestions>
+      }
       justify="start"></ViewportPage>
   );
 };

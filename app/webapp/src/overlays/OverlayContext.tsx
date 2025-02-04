@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from 'react';
 
@@ -29,6 +30,7 @@ export interface OverlayContextType {
   onChildOverlayNav: (value: OverlayValue) => void;
   setIsLast: (isLast: boolean) => void;
   overlay: OverlayValue;
+  triggeredShowOverlay?: OverlayValue;
 }
 
 const OverlayContextValue = createContext<OverlayContextType | undefined>(
@@ -40,6 +42,7 @@ export const OverlayContext = (
     init?: OverlayValue | null;
     onOverlayNav?: (value: OverlayValue) => void;
     level?: number;
+    triggerShowOverlay?: OverlayValue; // if changed it is stacked on top
   }
 ) => {
   const [overlay, _setOverlay] = useState<OverlayValue>(props.init || {});
@@ -48,6 +51,25 @@ export const OverlayContext = (
   const parentOverlay = useOverlay();
 
   const level = parentOverlay ? parentOverlay.level + 1 : 0;
+
+  const [triggeredShowOverlay, setTriggeredShowOverlay] =
+    useState<OverlayValue>();
+
+  useEffect(() => {
+    setTriggeredShowOverlay(props.triggerShowOverlay);
+  }, [props.triggerShowOverlay]);
+
+  useEffect(() => {
+    setTriggeredShowOverlay(props.triggerShowOverlay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parentOverlay?.triggeredShowOverlay]);
+
+  useEffect(() => {
+    if (triggeredShowOverlay && isLast) {
+      setOverlay(triggeredShowOverlay);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggeredShowOverlay, isLast]);
 
   const setOverlay = (value: OverlayValue) => {
     _setOverlay(value);

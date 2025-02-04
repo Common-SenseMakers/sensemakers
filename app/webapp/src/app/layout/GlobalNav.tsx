@@ -8,7 +8,7 @@ import { POSTHOG_EVENTS } from '../../analytics/posthog.events';
 import { AppGeneralKeys } from '../../i18n/i18n.app.general';
 import { ClustersMenu } from '../../posts.fetcher/ClustersMenu';
 import { AbsoluteRoutes, RouteNames } from '../../route.names';
-import { AppButton, AppHeading } from '../../ui-components';
+import { AppButton } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { DraftsIcon } from '../icons/DraftsIcon';
@@ -110,9 +110,6 @@ export const GlobalNav = () => {
     return (
       <Box style={{ flexGrow: 1 }}>
         <Box style={{ flexGrow: 1 }}>
-          <AppHeading level="2" style={{ padding: '16px' }}>
-            Hyperfeeds
-          </AppHeading>
           <ClustersMenu></ClustersMenu>
         </Box>
         <Box align="start">
