@@ -40,7 +40,7 @@ export const PLATFORM_SESSION_REFRESH_ERROR = 'platform-session-refresh';
 
 export class PlatformSessionRefreshError extends Error {
   constructor(error: any) {
-    super(error);
+    super(String(error));
     this.name = PLATFORM_SESSION_REFRESH_ERROR;
   }
 }
