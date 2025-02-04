@@ -1,4 +1,4 @@
-import { KeywordEntry } from '../src/@shared/types/types.posts';
+import { IndexedCollectionEntry } from '../src/@shared/types/types.posts';
 import { CollectionNames } from '../src/@shared/utils/collectionNames';
 import { logger } from '../src/instances/logger';
 import { services } from './scripts.services';
@@ -13,7 +13,7 @@ import { services } from './scripts.services';
     logger.info(`Keywords: ${snapshot.size}`);
 
     snapshot.docs.map((doc) => {
-      const keywordEntry = doc.data() as KeywordEntry;
+      const keywordEntry = doc.data() as IndexedCollectionEntry;
       logger.info(`Keyword: ${doc.id}`, keywordEntry);
     });
   });

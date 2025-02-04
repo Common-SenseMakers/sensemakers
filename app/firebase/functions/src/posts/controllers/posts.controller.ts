@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 
 import {
-  GetKeywordsPayload,
+  GetIndexedEntries,
   GetPostPayload,
   PostUpdatePayload,
   PostsQuery,
@@ -175,34 +175,20 @@ export const getKeywordsController: RequestHandler = async (
 
     const payload = (await getKeywordsSchema.validate(
       request.body
-    )) as GetKeywordsPayload;
+    )) as GetIndexedEntries;
 
-    await services.db.run(async (manager) => {
-      const cluster = services.clusters.getInstance(payload.clusterId);
-      const indexedRepo = new IndexedPostsRepo(
-        cluster.collection(CollectionNames.Keywords)
-      );
-
-      const post = await services.postsManager.processing.posts.get(
-        payload.postId,
-        manager,
-        true
-      );
-
-      if (post.authorUserId !== userId) {
-        throw new Error(`Post can only be edited by the author`);
-      }
-
-      return services.postsManager.updatePost(
-        payload.postId,
-        payload.postUpdate,
-        manager
-      );
+    const cluster = services.clusters.getInstance(payload.clusterId);
+    const indexedRepo = new IndexedPostsRepo(
+      cluster.collection(CollectionNames.Keywords)
+    );
+    const keywords = await indexedRepo.getManyEntries({
+      expectedAmount: 10,
+      untilId: payload.afterId,
     });
 
     if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 
-    response.status(200).send({ success: true });
+    response.status(200).send({ success: true, data: keywords });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });

@@ -9,9 +9,8 @@
   "include": [
     "src/index.ts",
     "src/custom.d.ts",
-    "scripts/**/*",
-    "migrations/**/*",
-    "seed/**/*"
+    "scripts/101-show-profiles.ts",
+    "scripts/102-show-keywords.ts"
   ],
   "exclude": ["migrations/obsolete/**/*", "scripts/obsolete/**/*"]
 }

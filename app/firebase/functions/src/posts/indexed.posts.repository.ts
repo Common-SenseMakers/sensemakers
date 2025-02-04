@@ -1,5 +1,3 @@
-import { CollectionReference } from 'firebase-admin/firestore';
-
 import { FetchParams } from '../@shared/types/types.fetch';
 import {
   IndexedCollectionEntry,
@@ -18,15 +16,12 @@ export class IndexedPostsRepo extends BaseRepository<
     super(base);
   }
 
-  public async getManyEntries(
-    collection: CollectionReference,
-    fetchParams: FetchParams
-  ) {
+  public async getManyEntries(fetchParams: FetchParams) {
     const order_by: keyof IndexedCollectionEntry = 'nPosts';
-    const ordered = collection.orderBy(order_by, 'desc');
+    const ordered = this.base.orderBy(order_by, 'desc');
 
-    const paginated = fetchParams.sinceId
-      ? ordered.startAfter(fetchParams.sinceId)
+    const paginated = fetchParams.untilId
+      ? ordered.startAfter(fetchParams.untilId)
       : ordered;
 
     const results = await paginated

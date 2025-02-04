@@ -198,6 +198,7 @@ export interface IndexedCollectionEntry {
   nPosts: number;
 }
 
-export interface GetKeywordsPayload {
+export interface GetIndexedEntries {
   clusterId?: string;
+  afterId?: string;
 }

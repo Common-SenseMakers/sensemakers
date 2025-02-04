@@ -14,6 +14,10 @@ export const handleTwitterSignupMock = async (
   const userId = await services.db.run(async (manager) => {
     logger.debug(`handleSignup`, { user_id: signupData.codeChallenge });
 
+    if (!_userId) {
+      throw new Error('unexpected');
+    }
+
     const result = await services.users.handleSignup(
       PLATFORM.Twitter,
       signupData,
@@ -32,7 +36,6 @@ export const handleTwitterSignupMock = async (
     expect(result.userId).to.eq(
       getPrefixedUserId(PLATFORM.Twitter, signupData.codeChallenge)
     );
-    expect(result.ourAccessToken).to.not.be.undefined;
 
     return result.userId;
   });

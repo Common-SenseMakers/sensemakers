@@ -34,7 +34,7 @@ export const authenticateTwitterUser = async (
   );
 
   const signupContext: IOAuth2RequestTokenResult & TwitterGetContextParams =
-    await twitterService.getSignupContext(undefined, {
+    await twitterService.getSignupContext({
       callback_url: CALLBACK_URL,
       type: testAccount.type,
     });
@@ -56,6 +56,10 @@ export const authenticateTwitterUser = async (
     type: signupContext.type,
     url: signupContext.url,
   };
+
+  if (!_userId) {
+    throw new Error('Unexpected');
+  }
 
   /** create users using the Twitter profiles */
   /** store the user in the DB (build the user profile object and derive the ID) */
