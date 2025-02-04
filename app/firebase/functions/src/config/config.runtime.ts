@@ -28,6 +28,7 @@ mandatory.forEach((varName) => {
 export const NODE_ENV = envRuntime.NODE_ENV;
 export const PROJECT_ID = envRuntime.PROJECT_ID;
 export const APP_URL = envRuntime.APP_URL;
+export const APP_NAME = 'Cosmik';
 
 export const IS_EMULATOR = process.env.FIRESTORE_EMULATOR_HOST !== undefined;
 

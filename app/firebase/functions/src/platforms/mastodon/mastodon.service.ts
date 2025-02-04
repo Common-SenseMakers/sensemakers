@@ -42,6 +42,7 @@ import {
   parseMastodonGlobalUsername,
   parseMastodonPostURI,
 } from '../../@shared/utils/mastodon.utils';
+import { APP_NAME } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -84,7 +85,7 @@ export class MastodonService
     const scopes = params.type === 'write' ? 'read write' : 'read';
 
     const app = await client.v1.apps.create({
-      clientName: 'SenseNets',
+      clientName: APP_NAME,
       redirectUris: params.callback_url,
       scopes,
       website: `https://${params.mastodonServer}`,
@@ -97,15 +98,15 @@ export class MastodonService
 
   public getClient(server: string, credentials?: MastodonAccountCredentials) {
     try {
-    const accessTokenServer = this.config.accessTokens[server]
-      ? server
-      : 'mastodon.social';
-    return createRestAPIClient({
-      url: `https://${server}`,
-      accessToken: credentials
-        ? credentials.accessToken
-        : this.config.accessTokens[accessTokenServer],
-    });
+      const accessTokenServer = this.config.accessTokens[server]
+        ? server
+        : 'mastodon.social';
+      return createRestAPIClient({
+        url: `https://${server}`,
+        accessToken: credentials
+          ? credentials.accessToken
+          : this.config.accessTokens[accessTokenServer],
+      });
     } catch (e: any) {
       throw new PlatformSessionRefreshError(e);
     }
