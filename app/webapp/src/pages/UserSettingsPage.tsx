@@ -59,9 +59,9 @@ export const UserSettingsPage = () => {
   const { connect: connectTwitter, needConnect: needConnectTwitter } =
     useTwitterContext();
 
-  const twitterProfile = connectedUser?.profiles?.twitter;
-  const mastodonProfile = connectedUser?.profiles?.mastodon;
-  const blueskyProfile = connectedUser?.profiles?.bluesky;
+  const twitterProfile = connectedUser?.profiles?.twitter?.profile;
+  const mastodonProfile = connectedUser?.profiles?.mastodon?.profile;
+  const blueskyProfile = connectedUser?.profiles?.bluesky?.profile;
 
   const content = (() => {
     if (!connectedUser) {

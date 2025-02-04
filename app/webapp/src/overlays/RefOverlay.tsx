@@ -39,7 +39,7 @@ export const RefOverlay = (props: { refUrl: string }) => {
   useEffect(() => {
     Object.entries(connectedUser?.profiles || {}).forEach(([key, value]) => {
       if (key !== PLATFORM.Orcid && value) {
-        setAccountProfileId(`${key}-${(value as PlatformProfile).id}`);
+        setAccountProfileId(`${key}-${(value.profile as PlatformProfile).id}`);
       }
     });
   }, [connectedUser]);

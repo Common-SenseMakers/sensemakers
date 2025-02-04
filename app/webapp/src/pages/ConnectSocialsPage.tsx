@@ -45,9 +45,9 @@ export const ConnectSocialsPage = () => {
 
   const { connect: connectTwitter } = useTwitterContext();
 
-  const twitterProfile = connectedUser?.profiles?.twitter;
-  const mastodonProfile = connectedUser?.profiles?.mastodon;
-  const blueskyProfile = connectedUser?.profiles?.bluesky;
+  const twitterProfile = connectedUser?.profiles?.twitter?.profile;
+  const mastodonProfile = connectedUser?.profiles?.mastodon?.profile;
+  const blueskyProfile = connectedUser?.profiles?.bluesky?.profile;
 
   const buttonText =
     loginCase === LoginCase.login ? t(IntroKeys.login) : t(IntroKeys.connect);

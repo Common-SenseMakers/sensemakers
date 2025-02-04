@@ -21,7 +21,11 @@ import {
   PLATFORM,
 } from '../../shared/types/types.platforms';
 import { PlatformProfile } from '../../shared/types/types.profiles';
-import { AppUserRead, EmailDetails } from '../../shared/types/types.user';
+import {
+  AccountDetailsRead,
+  AppUserRead,
+  EmailDetails,
+} from '../../shared/types/types.user';
 import { HIDE_SHARE_INFO } from '../../user-home/UserPostsFeed';
 import { usePersist } from '../../utils/use.persist';
 
@@ -36,6 +40,8 @@ export type AccountContextType = {
   connectedUser?: ConnectedUser;
   connectedPlatforms: IDENTITY_PLATFORM[];
   isConnected: boolean;
+  hasDisconnectedAccount?: boolean;
+  disconnectedAccounts: IDENTITY_PLATFORM[];
   email?: EmailDetails;
   disconnect: () => void;
   refresh: () => Promise<void>;
@@ -63,12 +69,14 @@ const AccountContextValue = createContext<AccountContextType | undefined>(
 // assume one profile per platform for now
 export interface ConnectedUser extends Omit<AppUserRead, 'profiles'> {
   profiles?: {
-    [PLATFORM.Orcid]?: OrcidProfile;
-    [PLATFORM.Twitter]?: PlatformProfile;
-    [PLATFORM.Mastodon]?: PlatformProfile;
-    [PLATFORM.Bluesky]?: PlatformProfile;
+    [PLATFORM.Orcid]?: AccountDetailsRead<OrcidProfile>;
+    [PLATFORM.Twitter]?: AccountDetailsRead<PlatformProfile>;
+    [PLATFORM.Mastodon]?: AccountDetailsRead<PlatformProfile>;
+    [PLATFORM.Bluesky]?: AccountDetailsRead<PlatformProfile>;
   };
 }
+
+// export type ConnectedUser = AppUserRead;
 
 /** explicit status of the login/signup process */
 export enum LoginFlowState {
@@ -158,16 +166,16 @@ export const AccountContext = (props: PropsWithChildren) => {
             return {
               twitter:
                 user.profiles[PLATFORM.Twitter] &&
-                user.profiles[PLATFORM.Twitter][0].profile,
+                user.profiles[PLATFORM.Twitter][0],
               mastodon:
                 user.profiles[PLATFORM.Mastodon] &&
-                user.profiles[PLATFORM.Mastodon][0].profile,
+                user.profiles[PLATFORM.Mastodon][0],
               orcid:
                 user.profiles[PLATFORM.Orcid] &&
-                user.profiles[PLATFORM.Orcid][0].profile,
+                user.profiles[PLATFORM.Orcid][0],
               bluesky:
                 user.profiles[PLATFORM.Bluesky] &&
-                user.profiles[PLATFORM.Bluesky][0].profile,
+                user.profiles[PLATFORM.Bluesky][0],
             };
           }
           return {};
@@ -330,7 +338,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (connectedUser?.profiles) {
       for (const platform of ALL_SOURCE_PLATFORMS) {
         if (connectedUser.profiles[platform]) {
-          username = connectedUser.profiles[platform]?.username;
+          username = connectedUser.profiles[platform]?.profile.username;
           break;
         }
       }
@@ -345,6 +353,14 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
   }, [connectedUser, posthog]);
 
+  const disconnectedAccounts = Object.entries(connectedUser?.profiles || {})
+    .filter(([platform, account]) => {
+      return platform !== PLATFORM.Orcid && account?.isDisconnected;
+    })
+    .map(([platform]) => {
+      return platform as IDENTITY_PLATFORM;
+    });
+
   return (
     <AccountContextValue.Provider
       value={{
@@ -352,6 +368,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         connectedPlatforms,
         email,
         isConnected: connectedUser !== undefined && connectedUser !== null,
+        hasDisconnectedAccount: disconnectedAccounts.length > 0,
+        disconnectedAccounts,
         disconnect,
         refresh,
         token,
