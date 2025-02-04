@@ -1,3 +1,4 @@
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { usePostHog } from 'posthog-js/react';
 import {
   PropsWithChildren,
@@ -25,10 +26,8 @@ import { AppUserRead, EmailDetails } from '../../shared/types/types.user';
 import { HIDE_SHARE_INFO } from '../../user-home/UserPostsFeed';
 import { usePersist } from '../../utils/use.persist';
 
-const DEBUG = false;
+const DEBUG = true;
 
-export const OUR_TOKEN_NAME = 'ourToken';
-export const LOGIN_STATUS = 'loginStatus';
 export const PLATFORMS_LOGIN_STATUS = 'platformsLoginStatus';
 export const ALREADY_CONNECTED_KEY = 'already-connected';
 
@@ -41,11 +40,8 @@ export type AccountContextType = {
   refresh: () => Promise<void>;
   token?: string | null;
   setToken: (token: string) => void;
-  setOverallLoginStatus: (status: OverallLoginStatus) => void;
-  overallLoginStatus: OverallLoginStatus | undefined | null;
   setLoginFlowState: (status: LoginFlowState) => void;
   loginFlowState: LoginFlowState;
-  resetLogin: () => void;
   currentNotifications?: NotificationFreq;
   setPlatformConnectedStatus: (
     platform: IDENTITY_PLATFORM,
@@ -112,15 +108,32 @@ ALL_PUBLISH_PLATFORMS.forEach((platform) => {
  * in the localStorage
  */
 export const AccountContext = (props: PropsWithChildren) => {
+  /** clark does its things, then isSignedIn is tru, we call getToken, then token is defined,
+   * we refresh connected user (the backend will create the user in our DB, if the user does not exist)
+   */
+  const { isSignedIn } = useUser();
+  const { getToken, signOut } = useAuth();
+
+  const [token, setToken] = useState<string>();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      getToken()
+        .then((token) => {
+          if (token) {
+            setToken(token);
+          }
+        })
+        .catch(console.error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getToken, isSignedIn]);
+
   const [connectedUser, setConnectedUser] = useState<ConnectedUser | null>();
 
   const [loginFlowState, _setLoginFlowState] = useState<LoginFlowState>(
     LoginFlowState.Idle
   );
-
-  const [token, setToken] = usePersist<string>(OUR_TOKEN_NAME, null);
-  const [overallLoginStatus, _setOverallLoginStatus] =
-    usePersist<OverallLoginStatus>(LOGIN_STATUS, OverallLoginStatus.NotKnown);
 
   const [platformsConnectedStatus, setPlatformsConnectedStatus] =
     usePersist<PlatformsConnectedStatus>(
@@ -131,14 +144,6 @@ export const AccountContext = (props: PropsWithChildren) => {
   const [, setHideShareInfo] = usePersist<boolean>(HIDE_SHARE_INFO, false);
   const posthog = usePostHog();
   const identifiedRef = useRef(false);
-
-  const setOverallLoginStatus = useCallback(
-    (status: OverallLoginStatus) => {
-      if (DEBUG) console.log('setOverallLoginStatus', status);
-      _setOverallLoginStatus(status);
-    },
-    [_setOverallLoginStatus]
-  );
 
   const refresh = useCallback(async () => {
     try {
@@ -175,17 +180,12 @@ export const AccountContext = (props: PropsWithChildren) => {
 
         /** set user */
         setConnectedUser({ ...user, profiles });
-      } else {
-        if (DEBUG) console.log('setting connected user as null');
-        setOverallLoginStatus(OverallLoginStatus.LoggedOut);
-        setConnectedUser(null);
       }
     } catch (e) {
-      setOverallLoginStatus(OverallLoginStatus.LoggedOut);
-      setToken(null);
+      signOut().catch(console.error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setOverallLoginStatus, setToken, token]);
+  }, [setToken, token]);
 
   /** keep the conneccted user linkted to the current token */
   useEffect(() => {
@@ -197,11 +197,6 @@ export const AccountContext = (props: PropsWithChildren) => {
     _setLoginFlowState(status);
   };
 
-  const resetLogin = () => {
-    setLoginFlowState(LoginFlowState.Idle);
-    setOverallLoginStatus(OverallLoginStatus.NotKnown);
-  };
-
   /**
    * logged in status is strictly linked to the connected user,
    * this should be the only place on the app where the status is set to loggedIn
@@ -210,17 +205,7 @@ export const AccountContext = (props: PropsWithChildren) => {
     if (DEBUG)
       console.log('overallStatus update effect', {
         connectedUser,
-        overallLoginStatus,
       });
-
-    /**
-     * once connected user is defined and has an email, but there is no
-     * twitter, the user is partially logged in
-     */
-    if (connectedUser) {
-      /** connectedUser === loggedIn now */
-      setOverallLoginStatus(OverallLoginStatus.FullyLoggedIn);
-    }
 
     const isConnecting =
       ALL_PUBLISH_PLATFORMS.find((platform) => {
@@ -235,19 +220,13 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    connectedUser,
-    overallLoginStatus,
-    token,
-    loginFlowState,
-    setOverallLoginStatus,
-  ]);
+  }, [connectedUser, token, loginFlowState]);
 
   const disconnect = () => {
     if (DEBUG) console.log(`disconnect called`);
 
+    signOut().catch(console.error);
     setConnectedUser(undefined);
-    setToken(null);
 
     const disabledStatus: PlatformsConnectedStatus = {};
 
@@ -261,7 +240,6 @@ export const AccountContext = (props: PropsWithChildren) => {
 
     setHideShareInfo(null);
     _setLoginFlowState(LoginFlowState.Idle);
-    _setOverallLoginStatus(OverallLoginStatus.LoggedOut);
     posthog?.reset();
   };
 
@@ -315,11 +293,6 @@ export const AccountContext = (props: PropsWithChildren) => {
       if (modified) {
         setPlatformsConnectedStatus(newConnectedStatus);
       }
-
-      /** protection in case a logged user remains without accounts (beacuse of a hard account reset) */
-      if (connectedPlatforms.length === 0) {
-        disconnect();
-      }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -356,11 +329,8 @@ export const AccountContext = (props: PropsWithChildren) => {
         refresh,
         token,
         setToken,
-        setOverallLoginStatus,
-        overallLoginStatus,
         loginFlowState,
         setLoginFlowState,
-        resetLogin,
         setPlatformConnectedStatus,
         getPlatformConnectedStatus,
       }}>

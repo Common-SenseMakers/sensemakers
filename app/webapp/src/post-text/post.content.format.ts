@@ -78,5 +78,5 @@ const replaceUrlCallback = (url: string, color?: string) => {
       ? noParametersUrl.slice(0, 50) + '...'
       : noParametersUrl;
 
-  return `<a href="${url}" target="_blank" style="${color ? `color: ${color}` : ''}">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
+  return `<a href="${url}" target="_blank" style="${color ? `color: ${color}` : ''}" onclick="window.dispatchEvent(new CustomEvent('url-click', {detail: {url: '${url}'}})); return true;">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
 };
