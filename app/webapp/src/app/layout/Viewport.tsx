@@ -185,12 +185,7 @@ export const ViewportPage = (props: {
             </Box>
             <Box gridArea="right-upper">{props.suggestions}</Box>
             <Box gridArea="left-lower" background="yellow"></Box>
-            <Box gridArea="right-lower" background="purple">
-              <strong>Right Lower</strong>
-            </Box>
-            <Box gridArea="right-lower" background="purple">
-              <strong>Footer</strong>
-            </Box>
+            <Box gridArea="right-lower"></Box>
           </>
         )}
       </Grid>

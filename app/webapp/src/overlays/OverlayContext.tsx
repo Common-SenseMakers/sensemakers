@@ -14,7 +14,7 @@ import { useBack } from '../ui-components/hooks/useBack';
 import { Overlay, OverlayValue } from './Overlay';
 import { eventToOverlay } from './overlay.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export enum OverlayQueryParams {
   Post = 'p',
@@ -56,20 +56,24 @@ export const OverlayContext = (
   const [triggeredShowOverlay, setTriggeredShowOverlay] =
     useState<OverlayValue>();
 
-  /** if parent triggerShowOverlay changes, replicate that in this, the child context */
-  useEffect(() => {
-    setTriggeredShowOverlay(props.triggerShowOverlay);
-  }, [props.triggerShowOverlay]);
-
   /** if external prop changes, replicate that in this context */
   useEffect(() => {
-    setTriggeredShowOverlay(props.triggerShowOverlay);
+    if (props.triggerShowOverlay) {
+      setTriggeredShowOverlay(props.triggerShowOverlay);
+    }
+  }, [props.triggerShowOverlay]);
+
+  /** if parent triggerShowOverlay changes, replicate that in this, the child context */
+  useEffect(() => {
+    if (parentOverlay?.triggeredShowOverlay) {
+      setTriggeredShowOverlay(parentOverlay?.triggeredShowOverlay);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentOverlay?.triggeredShowOverlay]);
 
   /** if triggeredShowOverlay state changes the set that overlay */
   useEffect(() => {
-    if (triggeredShowOverlay && isLast) {
+    if (triggeredShowOverlay && (isLast || parentOverlay === undefined)) {
       setOverlay(triggeredShowOverlay);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,6 +126,7 @@ export const OverlayContext = (
   };
 
   const close = () => {
+    setTriggeredShowOverlay(undefined);
     setOverlay({});
   };
 
