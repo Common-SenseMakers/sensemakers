@@ -52,18 +52,22 @@ export const OverlayContext = (
 
   const level = parentOverlay ? parentOverlay.level + 1 : 0;
 
+  /** this level state var of whether we a new overlay should be added */
   const [triggeredShowOverlay, setTriggeredShowOverlay] =
     useState<OverlayValue>();
 
+  /** if parent triggerShowOverlay changes, replicate that in this, the child context */
   useEffect(() => {
     setTriggeredShowOverlay(props.triggerShowOverlay);
   }, [props.triggerShowOverlay]);
 
+  /** if external prop changes, replicate that in this context */
   useEffect(() => {
     setTriggeredShowOverlay(props.triggerShowOverlay);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentOverlay?.triggeredShowOverlay]);
 
+  /** if triggeredShowOverlay state changes the set that overlay */
   useEffect(() => {
     if (triggeredShowOverlay && isLast) {
       setOverlay(triggeredShowOverlay);
