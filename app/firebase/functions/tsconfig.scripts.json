@@ -10,7 +10,8 @@
     "src/index.ts",
     "src/custom.d.ts",
     "scripts/101-show-profiles.ts",
-    "scripts/102-show-keywords.ts"
+    "scripts/102-show-keywords.ts",
+    "migrations/011-count-kwds.ts"
   ],
   "exclude": ["migrations/obsolete/**/*", "scripts/obsolete/**/*"]
 }
