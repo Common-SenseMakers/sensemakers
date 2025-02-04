@@ -20,7 +20,10 @@ import {
   PlatformPostPublish,
   PlatformPostSignerType,
 } from '../../@shared/types/types.platform.posts';
-import { PLATFORM } from '../../@shared/types/types.platforms';
+import {
+  PLATFORM,
+  PlatformSessionRefreshError,
+} from '../../@shared/types/types.platforms';
 import {
   GenericAuthor,
   GenericPost,
@@ -93,6 +96,7 @@ export class MastodonService
   }
 
   public getClient(server: string, credentials?: MastodonAccountCredentials) {
+    try {
     const accessTokenServer = this.config.accessTokens[server]
       ? server
       : 'mastodon.social';
@@ -102,6 +106,9 @@ export class MastodonService
         ? credentials.accessToken
         : this.config.accessTokens[accessTokenServer],
     });
+    } catch (e: any) {
+      throw new PlatformSessionRefreshError(e);
+    }
   }
 
   public async getSignupContext(

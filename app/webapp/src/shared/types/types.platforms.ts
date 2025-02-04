@@ -35,3 +35,12 @@ export const ALL_IDENTITY_PLATFORMS: IDENTITY_PLATFORM[] = [
   PLATFORM.Mastodon,
   PLATFORM.Bluesky,
 ];
+
+export const PLATFORM_SESSION_REFRESH_ERROR = 'platform-session-refresh';
+
+export class PlatformSessionRefreshError extends Error {
+  constructor(error: any) {
+    super(error);
+    this.name = PLATFORM_SESSION_REFRESH_ERROR;
+  }
+}

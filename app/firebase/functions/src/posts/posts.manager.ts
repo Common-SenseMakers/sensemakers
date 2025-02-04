@@ -21,6 +21,7 @@ import {
   ALL_PUBLISH_PLATFORMS,
   IDENTITY_PLATFORM,
   PLATFORM,
+  PLATFORM_SESSION_REFRESH_ERROR,
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
 import {
@@ -304,6 +305,15 @@ export class PostsManager {
         this.initPlatformPost(platformId, fetchedPost)
       );
     } catch (err: any) {
+      if (userId && err.name === PLATFORM_SESSION_REFRESH_ERROR) {
+        await this.users.updateAccountDisconnectedStatus(
+          userId,
+          platformId,
+          user_id,
+          true,
+          manager
+        );
+      }
       logger.error(
         `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}`,
         { err }
