@@ -10,7 +10,7 @@ export const UserPostsPage = () => {
     <ViewportPage
       fixed
       content={
-        <Box style={{ position: 'relative', paddingTop: '16px' }}>
+        <Box style={{ position: 'relative' }}>
           <OverlayContext>
             <UserPostsFeed></UserPostsFeed>
           </OverlayContext>

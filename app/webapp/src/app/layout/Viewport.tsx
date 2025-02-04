@@ -8,73 +8,76 @@ import {
   GridColumnsType,
   GridExtendedProps,
   GridSizeType,
+  Layer,
   ResponsiveContext,
   Text,
 } from 'grommet';
-import { ReactNode, createContext, useContext } from 'react';
+import { ReactNode, createContext, useContext, useState } from 'react';
 
+import { ClustersMenu } from '../../posts.fetcher/ClustersMenu';
 import { AppHeading } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
-import { AppLogo } from '../brand/AppLogo';
 import { BUILD_ID } from '../config';
 import { AppIcon } from '../icons/AppIcon';
 
-export const MAX_WIDTH_LANDING = 1600;
-export const MAX_WIDTH_APP = 600;
 export const MAX_BUTTON_WIDTH = 1600;
 
-export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ViewportFooter = () => {
   const { constants } = useThemeContext();
-  const footerHeight = '48px';
+
+  return (
+    <Box
+      id="footer"
+      style={{
+        height: '100%',
+        backgroundColor: constants.colors.shade,
+      }}
+      pad="medium"
+      justify="center"
+      align="center">
+      <Box
+        direction="row"
+        justify="center"
+        fill
+        align="center"
+        style={{
+          position: 'relative',
+        }}>
+        <Anchor
+          href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT as string}`}
+          target="_blank">
+          <AppIcon size={22}></AppIcon>
+        </Anchor>
+        <Box
+          style={{
+            position: 'absolute',
+            right: '0px',
+            bottom: '0px',
+          }}>
+          <Text size="6px" color="white">
+            Build: {BUILD_ID?.substring(0, 7)}
+          </Text>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export const ViewportContainer = (props: React.HTMLProps<HTMLDivElement>) => {
   return (
     <>
       <Box
         id="viewport-container"
         style={{
-          height: `calc(100vh - ${footerHeight})`,
+          height: `calc(100vh`,
           width: '100vw',
           overflow: 'hidden',
-          maxWidth: `${MAX_WIDTH_LANDING}px`,
           margin: '0 auto',
           ...props.style,
         }}>
         {props.children}
-      </Box>
-      <Box
-        id="footer"
-        style={{
-          height: footerHeight,
-          flexShrink: 0,
-          backgroundColor: constants.colors.shade,
-        }}
-        pad="medium"
-        justify="center"
-        align="center">
-        <Box
-          direction="row"
-          justify="center"
-          fill
-          align="center"
-          style={{
-            position: 'relative',
-          }}>
-          <Anchor
-            href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT as string}`}
-            target="_blank">
-            <AppIcon size={14}></AppIcon>
-          </Anchor>
-          <Box
-            style={{
-              position: 'absolute',
-              right: '0px',
-              bottom: '0px',
-            }}>
-            <Text size="6px" color="white">
-              Build: {BUILD_ID?.substring(0, 7)}
-            </Text>
-          </Box>
-        </Box>
       </Box>
     </>
   );
@@ -120,54 +123,78 @@ export const ViewportPage = (props: {
   fixed?: boolean;
   addLogo?: boolean;
 }) => {
+  const [showLeftbar, setShowLeftbar] = useState(false);
   const { mobile } = useResponsive();
-  const pad = mobile ? 'none' : 'none';
-  const fixed = props.fixed !== undefined ? props.fixed : false;
-  const addLogo = props.addLogo !== undefined ? props.addLogo : false;
+
+  const columns = mobile
+    ? ['auto'] // Mobile: 1 column
+    : ['1fr', '2fr', '1fr']; // Desktop: 3 columns
+
+  const rows = mobile ? ['1fr', '48px', '68px'] : ['1fr', '1fr', '68px'];
+
+  const areas = mobile
+    ? [
+        { name: 'content', start: [0, 0], end: [0, 0] },
+        { name: 'nav', start: [0, 1], end: [0, 1] },
+        { name: 'footer', start: [0, 2], end: [0, 2] },
+      ]
+    : [
+        { name: 'left', start: [0, 0], end: [0, 1] },
+        { name: 'content', start: [1, 0], end: [1, 1] },
+        { name: 'right-upper', start: [2, 0], end: [2, 0] },
+        { name: 'right-lower', start: [2, 1], end: [2, 1] },
+        { name: 'footer', start: [0, 2], end: [2, 2] },
+      ];
 
   return (
     <ViewportPageContextValue.Provider value={{}}>
-      <Box
+      {showLeftbar && (
+        <Layer animate position="left">
+          <button onClick={() => setShowLeftbar(!showLeftbar)}>hide</button>
+          <ClustersMenu></ClustersMenu>
+        </Layer>
+      )}
+      <Grid
         id="viewport-page"
-        pad={pad}
-        style={{
-          height: '100%',
-          width: '100%',
-          maxWidth: `${MAX_WIDTH_APP}px`,
-          margin: '0 auto',
-          overflow: 'hidden',
-        }}>
-        <Box
-          id="content"
-          style={
-            fixed
-              ? { height: 'calc(100% - 48px)' }
-              : { flexGrow: 1, overflowY: 'auto' }
-          }>
-          <Box
-            style={fixed ? { height: '100%' } : { flexGrow: 1, flexShrink: 0 }}
-            justify={props.justify || 'center'}>
-            {addLogo ? (
-              <>
-                <Box pad={{ horizontal: '12px' }}>
-                  <AppLogo></AppLogo>
-                </Box>
-                <Box width="100%" height="40px"></Box>
-              </>
-            ) : (
-              <></>
-            )}
-            {props.content}
-          </Box>
+        style={{ height: '100%' }}
+        columns={columns}
+        rows={rows}
+        areas={areas}>
+        <Box gridArea="content">{props.content}</Box>
+        <Box gridArea="footer">
+          <ViewportFooter></ViewportFooter>
         </Box>
-        {props.nav ? (
-          <Box id="nav" style={{ height: '48px', flexShrink: 0 }}>
-            {props.nav}
-          </Box>
-        ) : (
-          <></>
+
+        {mobile && (
+          <>
+            <Box gridArea="nav">{props.nav}</Box>
+          </>
         )}
-      </Box>
+        {!mobile && (
+          <>
+            <Box gridArea="left">
+              {props.nav && (
+                <Box style={{ flexGrow: 1 }}>
+                  <Box pad={{ vertical: '12px', horizontal: '16px' }}>
+                    <AppIcon></AppIcon>
+                  </Box>
+                  {props.nav}
+                </Box>
+              )}
+            </Box>
+            <Box gridArea="right-upper" background="blue">
+              <strong>Right Upper</strong>
+            </Box>
+            <Box gridArea="left-lower" background="yellow"></Box>
+            <Box gridArea="right-lower" background="purple">
+              <strong>Right Lower</strong>
+            </Box>
+            <Box gridArea="right-lower" background="purple">
+              <strong>Footer</strong>
+            </Box>
+          </>
+        )}
+      </Grid>
     </ViewportPageContextValue.Provider>
   );
 };
