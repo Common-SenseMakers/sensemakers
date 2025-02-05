@@ -67,7 +67,7 @@
       "args": [
         "--project",
         "./tsconfig.migration.json",
-        "./migrations/010-to-clusters.ts"
+        "./migrations/011-reprocess-semantics.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

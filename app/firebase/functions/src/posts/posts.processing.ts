@@ -1,5 +1,5 @@
 import { ClusterInstance } from '../@shared/types/types.clusters';
-import { ParsePostResult, RefMeta } from '../@shared/types/types.parser';
+import { RefMeta } from '../@shared/types/types.parser';
 import {
   PlatformPost,
   PlatformPostCreate,
@@ -225,8 +225,7 @@ export class PostsProcessing {
   async processSemantics(
     postId: string,
     manager: TransactionManager,
-    semantics?: string,
-    originalParsed?: ParsePostResult
+    semantics?: string
   ): Promise<void> {
     if (!semantics) return undefined;
 
