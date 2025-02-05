@@ -3,6 +3,7 @@ import { FetchAndProcess, fetchAndProcess } from '../src/db/db.utils';
 import { servicesSource } from './migrations.services';
 
 const DEBUG = true;
+const BATCH_SIZE = 20;
 
 // Read posts from a source and create them in the target (uses new ids and creates the platform posts and profiles)
 (async () => {
@@ -15,7 +16,7 @@ const DEBUG = true;
       const cluster = servicesSource.clusters.getInstance();
       const posts = await servicesSource.postsManager.processing.posts.getMany(
         {
-          fetchParams: { expectedAmount: 100, untilId: lastElementId },
+          fetchParams: { expectedAmount: BATCH_SIZE, untilId: lastElementId },
         },
         cluster
       );
