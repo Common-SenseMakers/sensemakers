@@ -306,6 +306,10 @@ export class PostsManager {
       );
     } catch (err: any) {
       if (userId && err.name === PLATFORM_SESSION_REFRESH_ERROR) {
+        logger.warn(
+          `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}. Marking as disconnected.`,
+          { err }
+        );
         await this.users.updateAccountDisconnectedStatus(
           userId,
           platformId,
@@ -313,11 +317,12 @@ export class PostsManager {
           true,
           manager
         );
+      } else {
+        logger.error(
+          `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}`,
+          { err }
+        );
       }
-      logger.error(
-        `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}`,
-        { err }
-      );
 
       return undefined;
     }
