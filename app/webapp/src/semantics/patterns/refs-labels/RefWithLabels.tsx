@@ -143,7 +143,7 @@ export const RefWithLabels = (props: {
       {renderAggregateLabels ? (
         <Box margin={{ top: '22px' }}>
           <AggregatedRefLabels
-            onLabelClick={(label) => handleLabelClicked(label, true)}
+            onLabelClick={(label: string) => handleLabelClicked(label, true)}
             refLabels={props.aggregatedLabels || []}
             ontology={props.ontology}></AggregatedRefLabels>
         </Box>
