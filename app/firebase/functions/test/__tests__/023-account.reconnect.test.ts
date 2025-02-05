@@ -1,6 +1,9 @@
 import { expect } from 'chai';
 
-import { BlueskyCredentials } from '../../src/@shared/types/types.bluesky';
+import {
+  BlueskyCredentials,
+  BlueskySignupData,
+} from '../../src/@shared/types/types.bluesky';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
   AccountCredentials,
@@ -105,11 +108,31 @@ describe.only('023 Account Reconnect', () => {
       );
     });
 
-    const appUserRead = await services.db.run(async (manager) => {
+    let appUserRead = await services.db.run(async (manager) => {
       return services.users.getLoggedUserWithProfiles(user!.userId, manager);
     });
 
     expect(appUserRead.profiles[PLATFORM.Bluesky]?.[0].isDisconnected).to.be
       .true;
+
+    await services.db.run(async (manager) => {
+      const bskySignupData: BlueskySignupData = {
+        username: testUser.bluesky.username,
+        appPassword: testUser.bluesky.appPassword,
+        type: 'read',
+      };
+      return services.users.handleSignup(
+        PLATFORM.Bluesky,
+        bskySignupData,
+        manager,
+        user!.userId
+      );
+    });
+    appUserRead = await services.db.run(async (manager) => {
+      return services.users.getLoggedUserWithProfiles(user!.userId, manager);
+    });
+
+    expect(appUserRead.profiles[PLATFORM.Bluesky]?.[0].isDisconnected).to.be
+      .false;
   });
 });
