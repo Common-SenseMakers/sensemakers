@@ -142,8 +142,8 @@ export class UsersService {
         existingUserWithAccountId,
       });
 
-    if (existingUserWithAccountId) {
-      /** If existing user, we consider this a replace legacy user operation */
+    /** If existing user and the new userId is different, we consider this a replace legacy user operation */
+    if (existingUserWithAccountId && existingUserWithAccountId !== userId) {
       await this.replaceLegacyUser(
         existingUserWithAccountId,
         userId,
@@ -159,6 +159,20 @@ export class UsersService {
           existingUserId: existingUserWithAccountId,
           newUserId: userId,
         },
+      };
+    }
+
+    /** If existing user and the new userId is the same, we consider this a reconnect account operation */
+    if (existingUserWithAccountId && existingUserWithAccountId === userId) {
+      await this.repo.setAccountDetails(
+        userId,
+        platform,
+        { ...authenticatedDetails, isDisconnected: false },
+        manager
+      );
+      return {
+        userId,
+        linkProfile: false,
       };
     }
 
