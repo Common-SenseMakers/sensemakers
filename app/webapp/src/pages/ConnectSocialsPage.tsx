@@ -104,11 +104,7 @@ export const ConnectSocialsPage = () => {
           }}
           buttonText={twitterProfile ? '' : buttonText}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connected={!!twitterProfile}
-          connecting={
-            getPlatformConnectedStatus(PLATFORM.Twitter) ===
-            PlatformConnectedStatus.Connecting
-          }
+          platformStatus={getPlatformConnectedStatus(PLATFORM.Twitter)}
         />
 
         <PlatformSection
@@ -124,7 +120,7 @@ export const ConnectSocialsPage = () => {
           onButtonClicked={() => navigate(AbsoluteRoutes.ConnectMastodon)}
           buttonText={mastodonProfile ? '' : buttonText}
           username={mastodonProfile?.username || ''}
-          connected={!!mastodonProfile}
+          platformStatus={getPlatformConnectedStatus(PLATFORM.Mastodon)}
         />
 
         <PlatformSection
@@ -141,7 +137,7 @@ export const ConnectSocialsPage = () => {
           }}
           buttonText={blueskyProfile ? '' : buttonText}
           username={blueskyProfile ? `@${blueskyProfile.username}` : ''}
-          connected={!!blueskyProfile}
+          platformStatus={getPlatformConnectedStatus(PLATFORM.Bluesky)}
         />
       </Box>
 

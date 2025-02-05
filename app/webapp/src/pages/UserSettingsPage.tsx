@@ -138,11 +138,7 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connecting={
-            getPlatformConnectedStatus(PLATFORM.Twitter) ===
-            PlatformConnectedStatus.Connecting
-          }
-          connected={twitterProfile !== undefined}></PlatformSection>
+          platformStatus={getPlatformConnectedStatus(PLATFORM.Twitter)}></PlatformSection>
 
         <PlatformSection
           icon={
@@ -160,11 +156,7 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={mastodonProfile?.username || ''}
-          connecting={
-            getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-            PlatformConnectedStatus.Connecting
-          }
-          connected={mastodonProfile !== undefined}></PlatformSection>
+          platformStatus={getPlatformConnectedStatus(PLATFORM.Mastodon)}></PlatformSection>
 
         <PlatformSection
           icon={
@@ -184,11 +176,7 @@ export const UserSettingsPage = () => {
           username={
             blueskyProfile ? `@${blueskyProfile.username}` : '- not connected -'
           }
-          connecting={
-            getPlatformConnectedStatus(PLATFORM.Bluesky) ===
-            PlatformConnectedStatus.Connecting
-          }
-          connected={!!blueskyProfile}></PlatformSection>
+          platformStatus={getPlatformConnectedStatus(PLATFORM.Bluesky)}></PlatformSection>
 
         <Box
           direction="row"
