@@ -6,15 +6,15 @@ import { CheckIcon } from '../app/icons/FilterIcon copy';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
+import { PlatformConnectedStatus } from '../user-login/contexts/AccountContext';
+
 export const PlatformSection = (props: {
   icon: JSX.Element;
   platformName: string;
   username: string;
   buttonText: string;
   onButtonClicked: () => void;
-  connected: boolean;
-  needsReconnect?: boolean;
-  connecting?: boolean;
+  platformStatus: PlatformConnectedStatus;
   disabled?: boolean;
   isValidInput?: (input: string) => boolean;
 }) => {
@@ -43,7 +43,7 @@ export const PlatformSection = (props: {
           <Text>{props.platformName}</Text>
         </Box>
         <Box>
-          {props.connected && (
+          {props.platformStatus === PlatformConnectedStatus.Connected && (
             <Text
               style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
               {props.username}
@@ -52,10 +52,16 @@ export const PlatformSection = (props: {
         </Box>
       </Box>
       <Box style={{ position: 'absolute', right: 12 }}>
-        {!props.connected || props.needsReconnect ? (
+        {props.platformStatus !== PlatformConnectedStatus.Connected ? (
           <AppButton
-            disabled={props.connecting}
-            label={props.connecting ? 'connecting' : props.needsReconnect ? 'Reconnect' : props.buttonText}
+            disabled={props.platformStatus === PlatformConnectedStatus.Connecting}
+            label={
+              props.platformStatus === PlatformConnectedStatus.Connecting
+                ? 'connecting'
+                : props.platformStatus === PlatformConnectedStatus.ReconnectRequired
+                ? 'Reconnect'
+                : props.buttonText
+            }
             onClick={() => {
               posthog?.capture(
                 POSTHOG_EVENTS.CLICKED_CONNECT_PLATFORM_ACCOUNT,
@@ -65,10 +71,14 @@ export const PlatformSection = (props: {
               );
               props.onButtonClicked();
             }}
-            style={props.needsReconnect ? {
-              border: '2px solid #F2994A',
-              color: '#F2994A'
-            } : undefined}
+            style={
+              props.platformStatus === PlatformConnectedStatus.ReconnectRequired
+                ? {
+                    border: '2px solid #F2994A',
+                    color: '#F2994A',
+                  }
+                : undefined
+            }
           />
         ) : (
           <Box
