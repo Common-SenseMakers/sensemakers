@@ -102,6 +102,7 @@ export enum PlatformConnectedStatus {
   Disconnected = 'Disconnected',
   Connecting = 'Connecting',
   Connected = 'Connected',
+  ReconnectRequired = 'ReconnectRequired',
 }
 
 export type PlatformsConnectedStatus = Partial<
@@ -353,13 +354,14 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
   }, [connectedUser, posthog]);
 
-  const disconnectedAccounts = Object.entries(connectedUser?.profiles || {})
-    .filter(([platform, account]) => {
-      return platform !== PLATFORM.Orcid && account?.isDisconnected;
-    })
-    .map(([platform]) => {
-      return platform as IDENTITY_PLATFORM;
-    });
+  // const disconnectedAccounts = Object.entries(connectedUser?.profiles || {})
+  //   .filter(([platform, account]) => {
+  //     return platform !== PLATFORM.Orcid && !account?.isDisconnected;
+  //   })
+  //   .map(([platform]) => {
+  //     return platform as IDENTITY_PLATFORM;
+  //   });
+  const disconnectedAccounts = [PLATFORM.Bluesky] as IDENTITY_PLATFORM[];
 
   return (
     <AccountContextValue.Provider
