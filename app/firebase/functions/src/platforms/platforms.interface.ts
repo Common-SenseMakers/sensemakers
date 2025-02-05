@@ -33,7 +33,7 @@ export interface IdentityService<
     PlatformAccountProfile = PlatformAccountProfile,
 > {
   /** provides info needed by the frontend to start the signup flow */
-  getSignupContext: (userId?: string, params?: any) => Promise<SignupContext>;
+  getSignupContext: (params?: any) => Promise<SignupContext>;
   /** handles the data obtained by the frontend after the signup flow */
   handleSignupData: (signupData: SignupData) => Promise<{
     accountDetails: AccountDetails;

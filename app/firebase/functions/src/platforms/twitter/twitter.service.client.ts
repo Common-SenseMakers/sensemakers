@@ -171,10 +171,7 @@ export class TwitterServiceClient {
     return { client, credentials: newCredentials } as GetClientResult<T>;
   }
 
-  public async getSignupContext(
-    userId?: string,
-    params?: TwitterGetContextParams
-  ) {
+  public async getSignupContext(params?: TwitterGetContextParams) {
     const client = this.getAppClient();
 
     if (!params) {

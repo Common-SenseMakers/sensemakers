@@ -54,6 +54,7 @@ export interface AccountDetailsBase<
 
 /** The AppUser object combines the details of each platform */
 export interface UserWithId {
+  clerkId: string;
   userId: string;
 }
 
@@ -136,7 +137,7 @@ export interface AppUserRead
 }
 
 /** details publicly available about a user */
-export interface AppUserPublicRead extends UserWithId {
+export interface AppUserPublicRead extends Omit<UserWithId, 'clerkId'> {
   profiles: {
     [PLATFORM.Orcid]?: AccountProfileRead[];
     [PLATFORM.Twitter]?: AccountProfileRead[];

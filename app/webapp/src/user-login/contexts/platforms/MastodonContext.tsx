@@ -53,10 +53,9 @@ export const MastodonContext = (props: PropsWithChildren) => {
   const verifierHandled = useRef(false);
 
   const {
+    token,
     connectedUser,
-    setToken: setOurToken,
     refresh: refreshConnected,
-    overallLoginStatus,
     setLoginFlowState,
     setPlatformConnectedStatus,
     getPlatformConnectedStatus,
@@ -157,7 +156,6 @@ export const MastodonContext = (props: PropsWithChildren) => {
       if (DEBUG)
         console.log('was connecting true but no state params - logout', {
           code_param,
-          overallLoginStatus,
         });
 
       setPlatformConnectedStatus(
@@ -170,11 +168,11 @@ export const MastodonContext = (props: PropsWithChildren) => {
       if (
         code_param &&
         getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-          PlatformConnectedStatus.Connecting
+          PlatformConnectedStatus.Connecting &&
+        token
       ) {
         log('useEffect MastodonSignup', {
           code_param,
-          overallLoginStatus,
         });
 
         verifierHandled.current = true;
@@ -210,11 +208,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
                 localStorage.removeItem(LS_MASTODON_CONTEXT_KEY);
               }
 
-              if (result && result.ourAccessToken) {
-                setOurToken(result.ourAccessToken);
-              } else {
-                refreshConnected().catch(console.error);
-              }
+              refreshConnected().catch(console.error);
 
               searchParams.delete('code');
               setSearchParams(searchParams);
@@ -224,7 +218,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code_param, overallLoginStatus, searchParams, connectedUser]);
+  }, [code_param, searchParams, connectedUser]);
 
   return (
     <MastodonContextValue.Provider

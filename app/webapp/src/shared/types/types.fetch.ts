@@ -1,15 +1,10 @@
 import { PLATFORM } from './types.platforms';
 import { AppPostFull } from './types.posts';
 
-export interface OurTokenConfig {
-  tokenSecret: string;
-  expiresIn: string;
-}
-
 export interface HandleSignupResult {
   linkProfile: boolean;
   userId: string;
-  ourAccessToken?: string;
+  replaceLegacy?: { existingUserId: string; newUserId: string };
 }
 
 /** there are two fetch modes:

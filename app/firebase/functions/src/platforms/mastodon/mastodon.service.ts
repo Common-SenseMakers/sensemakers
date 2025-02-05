@@ -113,11 +113,9 @@ export class MastodonService
   }
 
   public async getSignupContext(
-    userId?: string,
     params?: MastodonGetContextParams
   ): Promise<MastodonSignupContext> {
-    if (DEBUG)
-      logger.debug('getSignupContext', { userId, params }, DEBUG_PREFIX);
+    if (DEBUG) logger.debug('getSignupContext', { params }, DEBUG_PREFIX);
 
     if (!params || !params.mastodonServer || !params.callback_url) {
       throw new Error('Mastodon server and callback URL are required');
