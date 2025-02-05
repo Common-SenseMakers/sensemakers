@@ -4,6 +4,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
+import { KeywordsSuggestions } from '../clusters/keywords.suggestions';
 import { MultiTabFeeds } from '../feed/MultiTabFeeds';
 import { OverlayValue } from '../overlays/Overlay';
 import { OverlayContext, OverlayQueryParams } from '../overlays/OverlayContext';
@@ -21,7 +22,6 @@ import {
 import { AbsoluteRoutes } from '../route.names';
 import { PostClickEvent } from '../semantics/patterns/patterns';
 import { TabQuery, feedTabs } from '../shared/utils/feed.config';
-import { KeywordsSuggestions } from '../suggestions/keywords.suggestions';
 
 const DEBUG = false;
 
