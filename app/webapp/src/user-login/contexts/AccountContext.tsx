@@ -120,6 +120,8 @@ export const AccountContext = (props: PropsWithChildren) => {
   /** clark does its things, then isSignedIn is tru, we call getToken, then token is defined,
    * we refresh connected user (the backend will create the user in our DB, if the user does not exist)
    */
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { isSignedIn } = useUser();
   const { getToken, signOut } = useAuth();
 
