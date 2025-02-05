@@ -17,7 +17,7 @@ export const ClusterProfiles = (props: {
   const clusterSelected =
     clusterId !== ALL_CLUSTER_NAME ? clusterId : undefined;
 
-  const { data: keywords } = useQuery({
+  const { data: profiles } = useQuery({
     queryKey: ['clusters-profiles', clusterSelected],
     queryFn: async () => {
       try {
@@ -38,7 +38,7 @@ export const ClusterProfiles = (props: {
   });
   return (
     <Box pad="18px">
-      {keywords && (
+      {profiles && (
         <AppLabelsEditor
           onLabelClick={(label) => props.onKeywordClick(label)}
           underline
