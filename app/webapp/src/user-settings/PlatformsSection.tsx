@@ -52,10 +52,10 @@ export const PlatformSection = (props: {
         </Box>
       </Box>
       <Box style={{ position: 'absolute', right: 12 }}>
-        {!props.connected ? (
+        {!props.connected || props.needsReconnect ? (
           <AppButton
             disabled={props.connecting}
-            label={props.connecting ? 'connecting' : props.buttonText}
+            label={props.connecting ? 'connecting' : props.needsReconnect ? 'Reconnect' : props.buttonText}
             onClick={() => {
               posthog?.capture(
                 POSTHOG_EVENTS.CLICKED_CONNECT_PLATFORM_ACCOUNT,
@@ -65,6 +65,10 @@ export const PlatformSection = (props: {
               );
               props.onButtonClicked();
             }}
+            style={props.needsReconnect ? {
+              border: '2px solid #F2994A',
+              color: '#F2994A'
+            } : undefined}
           />
         ) : (
           <Box
