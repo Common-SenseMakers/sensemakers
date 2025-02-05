@@ -1,7 +1,10 @@
 import { RequestHandler } from 'express';
 import { array, object, string } from 'yup';
 
-import { AddProfilesPayload } from '../@shared/types/types.profiles';
+import {
+  AddProfilesPayload,
+  GetProfilesPayload,
+} from '../@shared/types/types.profiles';
 import { GetProfilePayload } from '../@shared/types/types.user';
 import {
   parseProfileUrl,
@@ -16,6 +19,10 @@ export const getProfileSchema = object({
   platformId: string().required(),
   user_id: string().optional(),
   username: string().optional(),
+});
+
+export const getProfilesSchema = object({
+  clusterId: string().optional(),
 });
 
 export const addProfilesSchema = object({
@@ -44,6 +51,29 @@ export const getProfileController: RequestHandler = async (
       logger.debug(`${request.path}: profile`, { profile: publicProfile });
 
     response.status(200).send({ success: true, data: publicProfile });
+  } catch (error: any) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error: error.message });
+  }
+};
+
+export const getProfilesController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const payload = (await getProfilesSchema.validate(
+      request.body
+    )) as GetProfilesPayload;
+
+    logger.debug(`${request.path} - payload`, { payload });
+    const { profiles } = getServices(request);
+
+    const publicProfiles = await profiles.getProfiles(payload);
+
+    if (DEBUG) logger.debug(`${request.path}: profile`, { profiles });
+
+    response.status(200).send({ success: true, data: publicProfiles });
   } catch (error: any) {
     logger.error('error', error);
     response.status(500).send({ success: false, error: error.message });

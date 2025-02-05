@@ -7,6 +7,7 @@ import {
   AccountProfileCreate,
   AccountProfileRead,
   AddProfilesPayload,
+  GetProfilesPayload,
   PlatformAccountProfile,
   PlatformProfile,
   ProfileIdentifier,
@@ -49,7 +50,7 @@ export class ProfilesService {
     manager: TransactionManager,
     clusters?: string[]
   ) {
-    const id = this.repo.create(profileCreate, manager);
+    const id = this.repo.createProfile(profileCreate, manager);
     const profile = {
       id,
       ...profileCreate,
@@ -228,6 +229,17 @@ export class ProfilesService {
     return profile;
   }
 
+  toPublicProfile(profile?: AccountProfile): AccountProfileRead | undefined {
+    const publicProfile: AccountProfileRead | undefined = profile && {
+      platformId: profile.platformId,
+      user_id: profile.user_id,
+      profile: profile.profile,
+      userId: profile.userId,
+    };
+
+    return publicProfile;
+  }
+
   async getPublicProfile(payload: GetProfilePayload) {
     const profile = await this.db.run(async (manager) => {
       if (payload.user_id) {
@@ -250,14 +262,14 @@ export class ProfilesService {
       return this.repo.getByProfileId(profileId, manager, false);
     });
 
-    const publicProfile: AccountProfileRead | undefined = profile && {
-      platformId: profile.platformId,
-      user_id: profile.user_id,
-      profile: profile.profile,
-      userId: profile.userId,
-    };
+    return this.toPublicProfile(profile);
+  }
 
-    return publicProfile;
+  async getProfiles(payload: GetProfilesPayload) {
+    const profilesIds = await this.repo.getMany({
+      clusterId: payload.clusterId,
+    });
+    return this.repo.getFromIds(profilesIds);
   }
 
   async parseAndAdd(input: AddProfilesPayload): Promise<void> {
