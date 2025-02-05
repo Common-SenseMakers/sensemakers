@@ -20,10 +20,7 @@ import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import {
-  PlatformConnectedStatus,
-  useAccountContext,
-} from '../user-login/contexts/AccountContext';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useBlueskyContext } from '../user-login/contexts/platforms/BlueskyContext';
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
@@ -138,7 +135,9 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          platformStatus={getPlatformConnectedStatus(PLATFORM.Twitter)}></PlatformSection>
+          platformStatus={getPlatformConnectedStatus(
+            PLATFORM.Twitter
+          )}></PlatformSection>
 
         <PlatformSection
           icon={
@@ -156,7 +155,9 @@ export const UserSettingsPage = () => {
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={mastodonProfile?.username || ''}
-          platformStatus={getPlatformConnectedStatus(PLATFORM.Mastodon)}></PlatformSection>
+          platformStatus={getPlatformConnectedStatus(
+            PLATFORM.Mastodon
+          )}></PlatformSection>
 
         <PlatformSection
           icon={
@@ -176,7 +177,9 @@ export const UserSettingsPage = () => {
           username={
             blueskyProfile ? `@${blueskyProfile.username}` : '- not connected -'
           }
-          platformStatus={getPlatformConnectedStatus(PLATFORM.Bluesky)}></PlatformSection>
+          platformStatus={getPlatformConnectedStatus(
+            PLATFORM.Bluesky
+          )}></PlatformSection>
 
         <Box
           direction="row"

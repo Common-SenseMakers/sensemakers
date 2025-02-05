@@ -20,10 +20,7 @@ import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import {
-  PlatformConnectedStatus,
-  useAccountContext,
-} from '../user-login/contexts/AccountContext';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import { getAppUrl } from '../utils/general';
