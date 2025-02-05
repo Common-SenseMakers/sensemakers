@@ -311,7 +311,13 @@ export const AccountContext = (props: PropsWithChildren) => {
       const newConnectedStatus = { ...platformsConnectedStatus };
 
       ALL_IDENTITY_PLATFORMS.forEach((platform) => {
-        if (
+        const profile = connectedUser.profiles?.[platform];
+        if (profile?.isDisconnected) {
+          if (getPlatformConnectedStatus(platform) !== PlatformConnectedStatus.ReconnectRequired) {
+            newConnectedStatus[platform] = PlatformConnectedStatus.ReconnectRequired;
+            modified = true;
+          }
+        } else if (
           getPlatformConnectedStatus(platform) !==
             PlatformConnectedStatus.Connected &&
           connectedPlatforms.includes(platform)
