@@ -43,6 +43,7 @@ export const OverlayContext = (
     onOverlayNav?: (value: OverlayValue) => void;
     level?: number;
     triggerShowOverlay?: OverlayValue; // if changed it is stacked on top
+    triggerReset?: boolean; // if toggled, it resets the overlay
   }
 ) => {
   const [overlay, _setOverlay] = useState<OverlayValue>(props.init || {});
@@ -86,6 +87,21 @@ export const OverlayContext = (
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.triggerShowOverlay]);
+
+  useEffect(() => {
+    if (overlay) {
+      if (DEBUG) {
+        console.log(`OverlayContext useEffect triggerReset - close()`, {
+          triggeredShowOverlay,
+          parentOverlay,
+          overlay,
+          level,
+        });
+      }
+      close();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.triggerReset]);
 
   /** if parent triggerShowOverlay changes, replicate that in this, the child context */
   useEffect(() => {

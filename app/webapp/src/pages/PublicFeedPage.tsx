@@ -239,6 +239,14 @@ export const PublicFeedPage = () => {
     setShowOverlay({ keyword: kw });
   };
 
+  const [resetOverlays, setResetOverlays] = useState(false);
+
+  /** if the url params change, reset all overlays */
+  useEffect(() => {
+    setResetOverlays(!resetOverlays);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabId, clusterSelected]);
+
   return (
     <ViewportPage
       fixed
@@ -249,6 +257,7 @@ export const PublicFeedPage = () => {
               <OverlayContext
                 init={overlayInit}
                 triggerShowOverlay={showOverlay}
+                triggerReset={resetOverlays}
                 onOverlayNav={(overlay) => onOverlayNav(overlay)}>
                 <MultiTabFeeds
                   feeds={feeds}
