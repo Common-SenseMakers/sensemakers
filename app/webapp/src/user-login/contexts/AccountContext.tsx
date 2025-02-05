@@ -313,8 +313,14 @@ export const AccountContext = (props: PropsWithChildren) => {
       ALL_IDENTITY_PLATFORMS.forEach((platform) => {
         const profile = connectedUser.profiles?.[platform];
         if (profile?.isDisconnected) {
-          if (getPlatformConnectedStatus(platform) !== PlatformConnectedStatus.ReconnectRequired) {
-            newConnectedStatus[platform] = PlatformConnectedStatus.ReconnectRequired;
+          if (
+            getPlatformConnectedStatus(platform) !==
+              PlatformConnectedStatus.ReconnectRequired &&
+            getPlatformConnectedStatus(platform) !==
+              PlatformConnectedStatus.Connecting
+          ) {
+            newConnectedStatus[platform] =
+              PlatformConnectedStatus.ReconnectRequired;
             modified = true;
           }
         } else if (
@@ -360,14 +366,13 @@ export const AccountContext = (props: PropsWithChildren) => {
     }
   }, [connectedUser, posthog]);
 
-  // const disconnectedAccounts = Object.entries(connectedUser?.profiles || {})
-  //   .filter(([platform, account]) => {
-  //     return platform !== PLATFORM.Orcid && !account?.isDisconnected;
-  //   })
-  //   .map(([platform]) => {
-  //     return platform as IDENTITY_PLATFORM;
-  //   });
-  const disconnectedAccounts = [PLATFORM.Bluesky] as IDENTITY_PLATFORM[];
+  const disconnectedAccounts = Object.entries(connectedUser?.profiles || {})
+    .filter(([platform, account]) => {
+      return platform !== PLATFORM.Orcid && account?.isDisconnected;
+    })
+    .map(([platform]) => {
+      return platform as IDENTITY_PLATFORM;
+    });
 
   return (
     <AccountContextValue.Provider

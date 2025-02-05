@@ -43,7 +43,7 @@ export interface FetcherConfig {
  * fething newer and older posts as requested by a consuming component
  */
 export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
-  const { connectedUser, connectedPlatforms } = useAccountContext();
+  const { connectedUser, connectedPlatforms, refresh } = useAccountContext();
 
   const { endpoint, queryParams, onPostsAdded, PAGE_SIZE: _PAGE_SIZE } = input;
 
@@ -250,6 +250,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     fetchOlderCallback(oldestPostId)
       .then(() => {
         setIsFetchingOlder(false);
+        refresh().catch(console.error);
       })
       .catch((e) => {
         console.error(e);
@@ -344,6 +345,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     fetchNewerCallback(_newestPostId)
       .then(() => {
         setIsFetchingNewer(false);
+        refresh().catch(console.error);
       })
       .catch(console.error);
   };
