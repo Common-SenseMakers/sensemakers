@@ -16,12 +16,11 @@ export const updateUserSettings = async (
     throw new Error('user not created');
   }
 
-  await services.users.updateSettings(user.userId, newSettings);
-
   const userRead = await services.db.run(async (manager) => {
     if (!user) {
       throw new Error('user not created');
     }
+    await services.users.updateSettings(user.userId, newSettings, manager);
 
     return services.users.repo.getUser(user.userId, manager, true);
   });

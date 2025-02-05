@@ -148,6 +148,8 @@ export interface AppUserPublicRead extends Omit<UserWithId, 'clerkId'> {
 
 /** Test users support for mocks and tests */
 export interface TestUserCredentials {
+  userId: string;
+  clerkId: string;
   clustersIds: string[];
   twitter: TwitterSigninCredentials;
   mastodon: MastodonSigninCredentials;

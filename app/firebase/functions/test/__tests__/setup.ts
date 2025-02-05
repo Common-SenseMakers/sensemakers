@@ -107,8 +107,12 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       const users = await globalTestServices.db.run(async (manager) => {
         return Promise.all(
           testCredentials.map(async (accountCredentials) => {
+            const userId = await globalTestServices.users.createUser(
+              accountCredentials.clerkId,
+              manager
+            );
             return authenticateTestUser(
-              accountCredentials,
+              { ...accountCredentials, userId },
               globalTestServices,
               includePlatforms,
               manager
