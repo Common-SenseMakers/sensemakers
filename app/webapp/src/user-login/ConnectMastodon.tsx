@@ -32,7 +32,7 @@ export const ConnectMastodonPage = () => {
 
   useEffect(() => {
     const mastodonProfile = connectedUser?.profiles?.mastodon;
-    if (mastodonProfile) {
+    if (mastodonProfile && !mastodonProfile.isDisconnected) {
       navigate(AbsoluteRoutes.App);
     }
   }, [connectedUser, navigate]);
@@ -90,7 +90,11 @@ export const ConnectMastodonPage = () => {
       };
     }
 
-    if (!status || status === PlatformConnectedStatus.Disconnected) {
+    if (
+      !status ||
+      status === PlatformConnectedStatus.Disconnected ||
+      status === PlatformConnectedStatus.ReconnectRequired
+    ) {
       return {
         title: t(IntroKeys.connectMastodonTitle),
         content: (

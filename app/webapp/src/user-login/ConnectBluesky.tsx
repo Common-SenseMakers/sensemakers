@@ -25,7 +25,7 @@ export const ConnectBlueskyPage = () => {
   const blueskyProfile = connectedUser?.profiles?.bluesky;
 
   useEffect(() => {
-    if (blueskyProfile) {
+    if (blueskyProfile && !blueskyProfile.isDisconnected) {
       navigate(-1);
     }
   }, [blueskyProfile, navigate]);
@@ -40,14 +40,15 @@ export const ConnectBlueskyPage = () => {
       connect(cleanUsername, appPassword, 'read').catch(console.error);
     }
   };
+  const connectionStatus = getPlatformConnectedStatus(PLATFORM.Bluesky);
 
   return (
     <Box
       pad={{ horizontal: 'medium', vertical: 'large' }}
       style={{ flexGrow: 1 }}>
       <Box style={{ flexGrow: 1 }}>
-        {getPlatformConnectedStatus(PLATFORM.Bluesky) ===
-          PlatformConnectedStatus.Disconnected && (
+        {(connectionStatus === PlatformConnectedStatus.Disconnected ||
+          connectionStatus === PlatformConnectedStatus.ReconnectRequired) && (
           <>
             <AppHeading level="1">{'Connect to Bluesky'}</AppHeading>
             <Box width="100%" height="16px" />
