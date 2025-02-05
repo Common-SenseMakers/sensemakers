@@ -26,11 +26,7 @@ export const DisconnectUserContext = (props: PropsWithChildren) => {
   const navigate = useNavigate();
 
   const closedRoutes = useMemo(
-    () => [
-      AbsoluteRoutes.Settings,
-      AbsoluteRoutes.MyPosts,
-      AbsoluteRoutes.Feed,
-    ],
+    () => [AbsoluteRoutes.Settings, AbsoluteRoutes.MyPosts],
     []
   );
 

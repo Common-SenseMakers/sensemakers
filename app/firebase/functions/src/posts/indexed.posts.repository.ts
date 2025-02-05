@@ -1,11 +1,37 @@
-import { IndexedPost } from '../@shared/types/types.posts';
+import { FetchParams } from '../@shared/types/types.fetch';
+import {
+  IndexedCollectionEntry,
+  IndexedPost,
+} from '../@shared/types/types.posts';
 import { CollectionNames } from '../@shared/utils/collectionNames';
-import { removeUndefined } from '../db/repo.base';
+import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
 /** a repository of a collection that has posts as a subcollection  */
-export class IndexedPostsRepo {
-  constructor(protected base: FirebaseFirestore.CollectionReference) {}
+export class IndexedPostsRepo extends BaseRepository<
+  IndexedCollectionEntry,
+  IndexedCollectionEntry
+> {
+  constructor(protected base: FirebaseFirestore.CollectionReference) {
+    super(base);
+  }
+
+  public async getManyEntries(fetchParams: FetchParams) {
+    const order_by: keyof IndexedCollectionEntry = 'nPosts';
+    const ordered = this.base.orderBy(order_by, 'desc');
+
+    const paginated = fetchParams.untilId
+      ? ordered.startAfter(fetchParams.untilId)
+      : ordered;
+
+    const results = await paginated
+      .limit(fetchParams.expectedAmount)
+      .select('id')
+      .get();
+
+    const itemsIds = results.docs.map((doc) => doc.id);
+    return itemsIds;
+  }
 
   public getPostsCollection(id: string) {
     return this.base

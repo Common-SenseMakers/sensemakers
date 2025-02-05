@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { createContext } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
@@ -7,8 +7,6 @@ import { useAppFetch } from '../api/app.fetch';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ClusterContextType {
   clustersIds?: string[];
-  selected?: string;
-  select: (clusterId: string) => void;
 }
 
 export const ClusterContextValue = createContext<
@@ -26,16 +24,6 @@ const DEBUG = false;
 export const ClusterContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const [selected, setSelected] = useState<string | undefined>();
-
-  const select = (clusterId: string) => {
-    if (clusterId === ALL_CLUSTER_NAME) {
-      setSelected(undefined);
-    } else {
-      setSelected(clusterId);
-    }
-  };
-
   const appFetch = useAppFetch();
 
   const { data: clustersIds } = useQuery({
@@ -62,7 +50,7 @@ export const ClusterContext: React.FC<{
   });
 
   return (
-    <ClusterContextValue.Provider value={{ clustersIds, selected, select }}>
+    <ClusterContextValue.Provider value={{ clustersIds }}>
       {children}
     </ClusterContextValue.Provider>
   );
