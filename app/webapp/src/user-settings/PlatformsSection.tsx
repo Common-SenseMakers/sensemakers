@@ -13,6 +13,7 @@ export const PlatformSection = (props: {
   buttonText: string;
   onButtonClicked: () => void;
   connected: boolean;
+  needsReconnect?: boolean;
   connecting?: boolean;
   disabled?: boolean;
   isValidInput?: (input: string) => boolean;
