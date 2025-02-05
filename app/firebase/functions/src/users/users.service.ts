@@ -168,15 +168,20 @@ export class UsersService {
         }
 
         /**
-         * the user with this platform user_id is the same authenticated userId, then simply return. The current
-         * ourAccessToken is valid and this is an unexpected call since there was no need to signup with this platform
-         * and user_id
+         * the user with this platform user_id is the same authenticated userId, treat this as a reconnect
+         * and update isDisconnected status.
          * */
         if (DEBUG)
           logger.debug(
             'the user with this platform user_id is the same authenticated userId'
           );
 
+        await this.repo.setAccountDetails(
+          _userId,
+          platform,
+          { ...authenticatedDetails, isDisconnected: false },
+          manager
+        );
         return {
           userId: _userId,
           linkProfile: false,
@@ -195,7 +200,7 @@ export class UsersService {
         await this.repo.setAccountDetails(
           _userId,
           platform,
-          { ...authenticatedDetails, isDisconnected: false },
+          authenticatedDetails,
           manager
         );
 
