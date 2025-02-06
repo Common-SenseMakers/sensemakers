@@ -1,7 +1,7 @@
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import {
-  TwitterAccountDetails,
   TwitterSigninCredentials,
+  TwitterSignupData,
 } from '../../src/@shared/types/types.twitter';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { TransactionManager } from '../../src/db/transaction.manager';
@@ -26,23 +26,20 @@ export const authenticateTwitterUser = async (
   }
   if (DEBUG) logger.debug('authenticateTwitterUser', { testAccount });
 
-  const credentials: TwitterAccountDetails = {
-    credentials: {
-      read: {
-        accessToken: bearerToken,
-        refreshToken: bearerToken,
-        expiresAtMs: Date.now() + 24 * 60 * 60 * 1000,
-        expiresIn: 24 * 60 * 60,
-      },
-    },
-    signupDate: Date.now(),
-    user_id: testAccount.id,
+  const twitterSignupData: TwitterSignupData = {
+    url: 'callback_url',
+    code: '1234',
+    codeVerifier: '1234',
+    state: '1234',
+    codeChallenge: testAccount.id,
+    callback_url: 'callback_url',
+    type: 'read',
   };
-  await services.users.repo.setAccountDetails(
-    _userId,
+  await services.users.handleSignup(
     PLATFORM.Twitter,
-    credentials,
-    manager
+    twitterSignupData,
+    manager,
+    _userId
   );
 
   /** read the just created user (will fail if not found) */

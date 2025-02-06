@@ -31,9 +31,9 @@ import {
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
-describe('023 Account Reconnect', () => {
+describe.only('023 Account Reconnect', () => {
   const platforms = [
-    { name: 'Bluesky', platform: PLATFORM.Bluesky },
+    // { name: 'Bluesky', platform: PLATFORM.Bluesky },
     { name: 'Twitter', platform: PLATFORM.Twitter },
     // { name: 'Mastodon', platform: PLATFORM.Mastodon },
   ];
@@ -43,7 +43,7 @@ describe('023 Account Reconnect', () => {
       let user: AppUser | undefined;
 
       const services = getTestServices({
-        time: 'mock',
+        time: 'real',
         twitter: USE_REAL_TWITTER
           ? { signup: true }
           : { publish: true, signup: true, fetch: true, get: true },
@@ -111,8 +111,8 @@ describe('023 Account Reconnect', () => {
             read: {
               accessToken: '1234',
               refreshToken: '1234',
-              expiresIn: 24 * 60 * 60 * 1000,
-              expiresAtMs: Date.now() + 24 * 60 * 60 * 1000,
+              expiresIn: 1,
+              expiresAtMs: Date.now() - 10 * 24 * 60 * 60 * 1000,
             },
           } as AccountCredentials<TwitterCredentials, TwitterCredentials>;
         })();

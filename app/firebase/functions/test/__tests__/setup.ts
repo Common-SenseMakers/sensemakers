@@ -64,7 +64,7 @@ export const app = getApps().length
 export let globalTestServices = getTestServices({
   time: 'mock',
   twitter: USE_REAL_TWITTER
-    ? undefined
+    ? { signup: true }
     : { publish: true, signup: true, fetch: true, get: true },
   bluesky: USE_REAL_BLUESKY
     ? undefined
