@@ -229,9 +229,8 @@ export class MastodonService
       acct: localUsername,
     });
 
-    params.expectedAmount = 1;
     const fetchParams: any = {
-      limit: 10, // Default limit
+      limit: 40, // Default limit
       excludeReplies: true,
       excludeReblogs: true,
     };
