@@ -96,17 +96,23 @@ export class MastodonService
     return app;
   }
 
-  public getClient(server: string, credentials?: MastodonAccountCredentials) {
+  public async getClient(
+    server: string,
+    credentials?: MastodonAccountCredentials
+  ) {
     try {
       const accessTokenServer = this.config.accessTokens[server]
         ? server
         : 'mastodon.social';
-      return createRestAPIClient({
+      const client = createRestAPIClient({
         url: `https://${server}`,
         accessToken: credentials
           ? credentials.accessToken
           : this.config.accessTokens[accessTokenServer],
       });
+      /** Verify the credentials are valid. Consider removing if this adds too many API calls. */
+      if (credentials) await client.v1.accounts.verifyCredentials();
+      return client;
     } catch (e: any) {
       throw new PlatformSessionRefreshError(e);
     }
@@ -165,7 +171,7 @@ export class MastodonService
 
     if (DEBUG) logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
 
-    const mastoClient = this.getClient(signupData.mastodonServer, {
+    const mastoClient = await this.getClient(signupData.mastodonServer, {
       server: signupData.mastodonServer,
       accessToken: token.accessToken,
     });
@@ -219,14 +225,15 @@ export class MastodonService
   ): Promise<FetchedResult<MastodonThread>> {
     if (DEBUG) logger.debug('fetch', { params, credentials }, DEBUG_PREFIX);
     const { server, localUsername } = parseMastodonGlobalUsername(user_id);
-    const client = this.getClient(server, credentials?.read);
+    const client = await this.getClient(server, credentials?.read);
 
     const account = await client.v1.accounts.lookup({
       acct: localUsername,
     });
 
+    params.expectedAmount = 1;
     const fetchParams: any = {
-      limit: 40, // Default limit
+      limit: 10, // Default limit
       excludeReplies: true,
       excludeReblogs: true,
     };
@@ -474,7 +481,7 @@ export class MastodonService
     }
 
     const { server, postId } = parseMastodonPostURI(post_id);
-    const client = this.getClient(server, credentials?.read);
+    const client = await this.getClient(server, credentials?.read);
 
     const context = await client.v1.statuses.$select(postId).context.fetch();
     const rootStatus = await (async () => {
@@ -537,7 +544,7 @@ export class MastodonService
   ): Promise<PlatformAccountProfile> {
     try {
       const { server } = parseMastodonGlobalUsername(username);
-      const client = this.getClient(server, credentials);
+      const client = await this.getClient(server, credentials);
 
       const mdProfile = await client.v1.accounts.lookup({
         acct: username,
@@ -564,7 +571,7 @@ export class MastodonService
     credentials?: MastodonAccountCredentials
   ): Promise<PlatformAccountProfile> {
     const { server, localUsername } = parseMastodonGlobalUsername(user_id);
-    const client = this.getClient(server, credentials);
+    const client = await this.getClient(server, credentials);
 
     const mdProfile = await client.v1.accounts.lookup({
       acct: localUsername,
@@ -634,7 +641,7 @@ export class MastodonService
     }
 
     const { server, postId, username } = parseMastodonPostURI(post.uri);
-    const client = this.getClient(server, credentials?.read);
+    const client = await this.getClient(server, credentials?.read);
 
     const context = await client.v1.statuses.$select(postId).context.fetch();
     const rootPostId = context.ancestors.find(
