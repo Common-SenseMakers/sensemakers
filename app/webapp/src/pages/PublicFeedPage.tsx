@@ -19,6 +19,7 @@ import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
+import { ClusterProfiles } from '../profiles/ClusterProfiles';
 import { AbsoluteRoutes } from '../route.names';
 import { PostClickEvent } from '../semantics/patterns/patterns';
 import { TabQuery, feedTabs } from '../shared/utils/feed.config';
@@ -247,6 +248,10 @@ export const PublicFeedPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabId, clusterSelected]);
 
+  const onProfileClick = (profileId: string) => {
+    setShowOverlay({ profileId });
+  };
+
   return (
     <ViewportPage
       fixed
@@ -273,6 +278,10 @@ export const PublicFeedPage = () => {
       suggestions={
         <KeywordsSuggestions
           onKeywordClick={(kw) => onKeywordClick(kw)}></KeywordsSuggestions>
+      }
+      profiles={
+        <ClusterProfiles
+          onProfileClick={(p) => onProfileClick(p)}></ClusterProfiles>
       }
       justify="start"></ViewportPage>
   );

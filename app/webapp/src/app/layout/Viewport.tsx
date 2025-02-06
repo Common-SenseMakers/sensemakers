@@ -120,6 +120,7 @@ export const ViewportPage = (props: {
   content: ReactNode;
   nav?: ReactNode;
   suggestions?: ReactNode;
+  profiles?: ReactNode;
   justify?: BoxProps['justify'];
   fixed?: boolean;
   addLogo?: boolean;
@@ -184,8 +185,7 @@ export const ViewportPage = (props: {
               )}
             </Box>
             <Box gridArea="right-upper">{props.suggestions}</Box>
-            <Box gridArea="left-lower" background="yellow"></Box>
-            <Box gridArea="right-lower"></Box>
+            <Box gridArea="right-lower">{props.profiles}</Box>
           </>
         )}
       </Grid>

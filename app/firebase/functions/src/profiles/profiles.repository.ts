@@ -14,24 +14,19 @@ import { DefinedIfTrue } from '../@shared/types/types.user';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { getProfileId } from '../@shared/utils/profiles.utils';
 import { DBInstance, Query } from '../db/instance';
-import { removeUndefined } from '../db/repo.base';
+import { BaseRepository, removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 
-export class ProfilesRepository {
-  constructor(protected db: DBInstance) {}
-
-  public async getAll(): Promise<AccountProfile[]> {
-    const snapshot = await this.db.collections.profiles.get();
-    return snapshot.docs.map((doc) => {
-      return {
-        id: doc.id,
-        ...doc.data(),
-      } as AccountProfile;
-    });
+export class ProfilesRepository extends BaseRepository<
+  AccountProfile,
+  AccountProfile
+> {
+  constructor(protected db: DBInstance) {
+    super(db.firestore.collection(CollectionNames.Profiles));
   }
 
   /**  creates an AccountProfile. It does not set the fetched property */
-  public create(
+  public createProfile(
     accountProfile: AccountProfileCreate,
     manager: TransactionManager
   ) {
@@ -49,25 +44,8 @@ export class ProfilesRepository {
     return profileRef.id;
   }
 
-  protected async getRef(
-    profileId: string,
-    manager: TransactionManager,
-    onlyIfExists: boolean = false
-  ) {
-    const ref = this.db.collections.profiles.doc(profileId);
-    if (onlyIfExists) {
-      const doc = await this.getDoc(profileId, manager);
-
-      if (!doc.exists) {
-        throw new Error(`Profile ${profileId} not found`);
-      }
-    }
-
-    return ref;
-  }
-
   protected async getDoc(profileId: string, manager: TransactionManager) {
-    const ref = await this.getRef(profileId, manager);
+    const ref = this.getRef(profileId);
     return manager.get(ref);
   }
 
@@ -210,11 +188,7 @@ export class ProfilesRepository {
 
     current.fetched = newFetched;
 
-    const profileRef = await this.getRef(
-      getProfileId(platform, user_id),
-      manager,
-      true
-    );
+    const profileRef = await this.getRef(getProfileId(platform, user_id));
 
     /** overwrite all the user account credentials */
     manager.update(profileRef, { fetched: newFetched });
@@ -225,7 +199,7 @@ export class ProfilesRepository {
     update: ProfileUpdate,
     manager: TransactionManager
   ) {
-    const profileRef = await this.getRef(profileId, manager, true);
+    const profileRef = this.getRef(profileId);
     manager.update(profileRef, update);
   }
 
@@ -239,12 +213,16 @@ export class ProfilesRepository {
     const platformId_property: keyof ProfilesQueryParams = 'platformId';
     const userId_property: keyof ProfilesQueryParams = 'userId';
 
+    const start = queryParams.clusterId
+      ? this.getClusterProfilesCollection(queryParams.clusterId)
+      : this.db.collections.profiles;
+
     let baseQuery = ((_base: Query) => {
       if (queryParams.autofetch !== undefined) {
         return _base.where(autofetch_property, '==', queryParams.autofetch);
       }
       return _base;
-    })(this.db.collections.profiles);
+    })(start);
 
     baseQuery = ((_base: Query) => {
       if (queryParams.platformId) {
@@ -309,7 +287,7 @@ export class ProfilesRepository {
     clusterId: string,
     manager: TransactionManager
   ) {
-    const profileRef = await this.getRef(profileId, manager);
+    const profileRef = this.getRef(profileId);
     manager.update(profileRef, { clusters: FieldValue.arrayUnion(clusterId) });
 
     const clusterRef = this.getClusterRef(clusterId);
@@ -326,7 +304,7 @@ export class ProfilesRepository {
     clusterId: string,
     manager: TransactionManager
   ) {
-    const ref = await this.getRef(profileId, manager, true);
+    const ref = this.getRef(profileId);
     manager.update(ref, { clusters: FieldValue.arrayRemove(clusterId) });
 
     const clusterRef = this.getClusterRef(clusterId);
