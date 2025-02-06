@@ -14,7 +14,7 @@ import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { SettingsKeys } from '../i18n/i18n.settings';
-import { AbsoluteRoutes, RouteNames } from '../route.names';
+import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
@@ -149,7 +149,7 @@ export const UserSettingsPage = () => {
           }
           platformName={'Mastodon'}
           onButtonClicked={() => {
-            navigate(RouteNames.ConnectMastodon);
+            navigate(AbsoluteRoutes.ConnectMastodon);
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={mastodonProfile?.username || ''}
