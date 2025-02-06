@@ -132,7 +132,7 @@ export const ViewportPage = (props: {
     ? ['auto'] // Mobile: 1 column
     : ['1fr', '2fr', '1fr']; // Desktop: 3 columns
 
-  const rows = mobile ? ['1fr', '48px', '68px'] : ['1fr', '1fr', '68px'];
+  const rows = mobile ? ['1fr', '68px'] : ['1fr', '68px'];
 
   const areas = mobile
     ? [
@@ -142,10 +142,9 @@ export const ViewportPage = (props: {
       ]
     : [
         { name: 'left', start: [0, 0], end: [0, 1] },
-        { name: 'content', start: [1, 0], end: [1, 1] },
-        { name: 'right-upper', start: [2, 0], end: [2, 0] },
-        { name: 'right-lower', start: [2, 1], end: [2, 1] },
-        { name: 'footer', start: [0, 2], end: [2, 2] },
+        { name: 'content', start: [1, 0], end: [1, 0] },
+        { name: 'right', start: [2, 0], end: [2, 0] },
+        { name: 'footer', start: [0, 1], end: [2, 1] },
       ];
 
   return (
@@ -184,8 +183,12 @@ export const ViewportPage = (props: {
                 </Box>
               )}
             </Box>
-            <Box gridArea="right-upper">{props.suggestions}</Box>
-            <Box gridArea="right-lower">{props.profiles}</Box>
+            <Box gridArea="right">
+              <Box style={{ flexShrink: 0 }}>{props.suggestions}</Box>
+              <Box style={{ flexGrow: 1, overflow: 'auto' }}>
+                {props.profiles}
+              </Box>
+            </Box>
           </>
         )}
       </Grid>

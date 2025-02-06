@@ -6,6 +6,7 @@ import { useAppFetch } from '../api/app.fetch';
 import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
 import { KEYWORDS_COLORS } from '../semantics/patterns/keywords/Keywords.component';
 import { GetIndexedEntries } from '../shared/types/types.posts';
+import { AppHeading } from '../ui-components';
 import { AppLabelsEditor } from '../ui-components/AppLabelsEditor';
 
 export const KeywordsSuggestions = (props: {
@@ -39,6 +40,8 @@ export const KeywordsSuggestions = (props: {
   });
   return (
     <Box pad="18px">
+      <AppHeading level={4}>{`keywords`}</AppHeading>
+      <Box margin={{ top: '16px' }}></Box>
       {keywords && (
         <AppLabelsEditor
           onLabelClick={(label) => props.onKeywordClick(label)}

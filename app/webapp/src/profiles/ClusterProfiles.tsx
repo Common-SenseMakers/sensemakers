@@ -43,7 +43,7 @@ export const ClusterProfiles = (props: {
 
   return (
     <Box pad="18px">
-      <AppHeading level={3}>{`${clusterId || 'all'} profiles`}</AppHeading>
+      <AppHeading level={4}>{`profiles`}</AppHeading>
       <Box gap="12px" margin={{ top: '16px' }}>
         {profiles &&
           profiles.map((profile) => {
