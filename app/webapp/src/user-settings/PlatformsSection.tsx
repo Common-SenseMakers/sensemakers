@@ -42,7 +42,9 @@ export const PlatformSection = (props: {
           <Text>{props.platformName}</Text>
         </Box>
         <Box>
-          {props.platformStatus === PlatformConnectedStatus.Connected && (
+          {(props.platformStatus === PlatformConnectedStatus.Connected ||
+            props.platformStatus ===
+              PlatformConnectedStatus.ReconnectRequired) && (
             <Text
               style={{ fontWeight: 500, color: constants.colors.textLight2 }}>
               {props.username}
