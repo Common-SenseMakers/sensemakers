@@ -110,8 +110,6 @@ export class MastodonService
           ? credentials.accessToken
           : this.config.accessTokens[accessTokenServer],
       });
-      /** Verify the credentials are valid. Consider removing if this adds too many API calls. */
-      if (credentials) await client.v1.accounts.verifyCredentials();
       return client;
     } catch (e: any) {
       throw new PlatformSessionRefreshError(e);

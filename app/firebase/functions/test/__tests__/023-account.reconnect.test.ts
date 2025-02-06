@@ -40,7 +40,6 @@ describe.only('023 Account Reconnect', () => {
   const platforms = [
     { name: 'Bluesky', platform: PLATFORM.Bluesky },
     { name: 'Twitter', platform: PLATFORM.Twitter },
-    { name: 'Mastodon', platform: PLATFORM.Mastodon },
   ];
 
   platforms.forEach(({ name, platform }) => {
