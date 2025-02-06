@@ -5,6 +5,10 @@ import {
   BlueskySignupData,
 } from '../../src/@shared/types/types.bluesky';
 import {
+  MastodonAccessTokenSignupData,
+  MastodonAccountCredentials,
+} from '../../src/@shared/types/types.mastodon';
+import {
   IDENTITY_PLATFORM,
   PLATFORM,
   PUBLISHABLE_PLATFORM,
@@ -17,6 +21,7 @@ import {
   AccountCredentials,
   AppUser,
 } from '../../src/@shared/types/types.user';
+import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.utils';
 import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
@@ -33,9 +38,9 @@ import { getTestServices } from './test.services';
 
 describe.only('023 Account Reconnect', () => {
   const platforms = [
-    // { name: 'Bluesky', platform: PLATFORM.Bluesky },
+    { name: 'Bluesky', platform: PLATFORM.Bluesky },
     { name: 'Twitter', platform: PLATFORM.Twitter },
-    // { name: 'Mastodon', platform: PLATFORM.Mastodon },
+    { name: 'Mastodon', platform: PLATFORM.Mastodon },
   ];
 
   platforms.forEach(({ name, platform }) => {
@@ -79,7 +84,7 @@ describe.only('023 Account Reconnect', () => {
         });
       });
 
-      it('marks an account as disconnected if the client fails to instantiate', async () => {
+      it('marks an account as disconnected if the client fails to instantiate then updates it after reconnecting', async () => {
         if (!user) {
           throw new Error('appUser not created');
         }
@@ -107,14 +112,29 @@ describe.only('023 Account Reconnect', () => {
               },
             } as AccountCredentials<BlueskyCredentials, BlueskyCredentials>;
           }
-          return {
-            read: {
-              accessToken: '1234',
-              refreshToken: '1234',
-              expiresIn: 1,
-              expiresAtMs: Date.now() - 10 * 24 * 60 * 60 * 1000,
-            },
-          } as AccountCredentials<TwitterCredentials, TwitterCredentials>;
+          if (platform === PLATFORM.Twitter)
+            return {
+              read: {
+                accessToken: '1234',
+                refreshToken: '1234',
+                expiresIn: 1,
+                expiresAtMs: Date.now() - 10 * 24 * 60 * 60 * 1000,
+              },
+            } as AccountCredentials<TwitterCredentials, TwitterCredentials>;
+          if (platform === PLATFORM.Mastodon) {
+            const mstdCred: AccountCredentials<
+              MastodonAccountCredentials,
+              MastodonAccountCredentials
+            > = {
+              read: {
+                server: parseMastodonGlobalUsername(testUser.mastodon.username)
+                  .server,
+                accessToken: '1234',
+              },
+            };
+            return mstdCred;
+          }
+          throw new Error('Unexpected platform');
         })();
 
         await services.db.run(async (manager) => {
@@ -162,16 +182,29 @@ describe.only('023 Account Reconnect', () => {
               };
               return bskySignupData;
             }
-            const twitterSignupData: TwitterSignupData = {
-              url: 'callback_url',
-              code: '1234',
-              codeVerifier: '1234',
-              state: '1234',
-              codeChallenge: testUser.twitter.id,
-              callback_url: 'callback_url',
-              type: 'read',
-            };
-            return twitterSignupData;
+            if (platform === PLATFORM.Twitter) {
+              const twitterSignupData: TwitterSignupData = {
+                url: 'callback_url',
+                code: '1234',
+                codeVerifier: '1234',
+                state: '1234',
+                codeChallenge: testUser.twitter.id,
+                callback_url: 'callback_url',
+                type: 'read',
+              };
+              return twitterSignupData;
+            }
+            if (platform === PLATFORM.Mastodon) {
+              const mstdSignupData: MastodonAccessTokenSignupData = {
+                mastodonServer: parseMastodonGlobalUsername(
+                  testUser.mastodon.username
+                ).server,
+                accessToken: testUser.mastodon.accessToken,
+                type: 'read',
+              };
+              return mstdSignupData;
+            }
+            throw new Error('Unexpected platform');
           })();
           return services.users.handleSignup(
             platform as IDENTITY_PLATFORM,
