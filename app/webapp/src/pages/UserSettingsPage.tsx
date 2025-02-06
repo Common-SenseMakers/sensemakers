@@ -130,7 +130,7 @@ export const UserSettingsPage = () => {
             connectTwitter &&
               connectTwitter(
                 'read',
-                `${getAppUrl()}${AbsoluteRoutes.Settings}/${RouteNames.ConnectTwitter}`
+                `${getAppUrl()}${AbsoluteRoutes.ConnectTwitter}`
               ).catch(console.error);
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
@@ -149,9 +149,7 @@ export const UserSettingsPage = () => {
           }
           platformName={'Mastodon'}
           onButtonClicked={() => {
-            navigate(AbsoluteRoutes.ConnectMastodon, {
-              state: { callbackUrl: window.location.href },
-            });
+            navigate(RouteNames.ConnectMastodon);
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={mastodonProfile?.username || ''}
@@ -169,9 +167,7 @@ export const UserSettingsPage = () => {
           }
           platformName={'Bluesky'}
           onButtonClicked={() => {
-            navigate(AbsoluteRoutes.ConnectBluesky, {
-              state: { callbackUrl: window.location.href },
-            });
+            navigate(AbsoluteRoutes.ConnectBluesky);
           }}
           buttonText={needConnectBluesky ? 'connect' : ''}
           username={
