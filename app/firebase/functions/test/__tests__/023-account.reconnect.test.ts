@@ -29,7 +29,7 @@ describe.only('023 Account Reconnect', () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
-      ? undefined
+      ? { signup: true }
       : { publish: true, signup: true, fetch: true, get: true },
     bluesky: USE_REAL_BLUESKY
       ? undefined
