@@ -9,6 +9,7 @@
   "scripts": {
     "start": "export REACT_APP_VERSION=$(git rev-parse HEAD) && HOST=127.0.0.1 PORT=3000 craco start --config craco.config.js",
     "start-remote": "export REACT_APP_VERSION=$(git rev-parse HEAD) && FB_PROJECT=production craco start --config craco.config.prod.js",
+    "start-remote-dev": "export REACT_APP_VERSION=$(git rev-parse HEAD) && FB_PROJECT=dev craco start --config craco.config.prod.js",
     "start-clone": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco start --config craco.config.clone.js",
     "start-posthog": "POSTHOG=true netlify dev",
     "build": "export REACT_APP_VERSION=$(git rev-parse HEAD) && craco build --config craco.config.prod.js",

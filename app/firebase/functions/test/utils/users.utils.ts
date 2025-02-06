@@ -17,7 +17,6 @@ export const createUsers = async (
     testUsers.map(async (userData) => {
       /** create the user */
       const userId = await services.users.repo.createUser(
-        userData.user.userId,
         userData.user,
         manager
       );

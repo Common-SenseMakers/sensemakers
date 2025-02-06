@@ -1,3 +1,5 @@
+import { ALL_CLUSTER_NAME } from './posts.fetcher/cluster.context';
+
 export const RouteNames = {
   AppHome: '',
   Start: 'start',
@@ -18,9 +20,12 @@ export const AbsoluteRoutes = {
   Connect: `/${RouteNames.Connect}`,
   MyPosts: `/${RouteNames.MyPosts}`,
   Start: `/${RouteNames.Start}`,
-  Feed: `/${RouteNames.Feed}`,
   Settings: `/${RouteNames.Settings}`,
   ConnectTwitter: `/${RouteNames.Connect}/${RouteNames.ConnectTwitter}`,
   ConnectMastodon: `/${RouteNames.Connect}/${RouteNames.ConnectMastodon}`,
   ConnectBluesky: `/${RouteNames.Connect}/${RouteNames.ConnectBluesky}`,
+  ClusterFeed: (tabId: string, _clusterId?: string) => {
+    const clusterId = _clusterId || ALL_CLUSTER_NAME;
+    return `/${RouteNames.Feed}/${clusterId}/${tabId}`;
+  },
 };

@@ -114,7 +114,6 @@ export const getTestServices = (config: TestServicesConfig) => {
     Date.now() + 3 * 60 * 60 * 1000
   );
 
-  
   /** mocked twitter */
   const _twitter = new TwitterService(time, userRepo, {
     clientId: process.env.TWITTER_CLIENT_ID as string,
@@ -163,11 +162,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     profilesService,
     identityServices,
     platformsMap,
-    time,
-    {
-      tokenSecret: process.env.OUR_TOKEN_SECRET as string,
-      expiresIn: '30d',
-    }
+    time
   );
 
   /** platforms service */
@@ -232,7 +227,7 @@ export const getTestServices = (config: TestServicesConfig) => {
     links,
     ontology: ontologiesService,
     profiles: profilesService,
-    clusters
+    clusters,
   };
 
   return services;

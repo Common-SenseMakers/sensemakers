@@ -3,6 +3,7 @@ import express from 'express';
 import { getPublicFeedController } from './feed/feed.controller';
 import { getRefMetaController } from './links/links.controller';
 import {
+  getKeywordsController,
   getPostController,
   getUserPostsController,
   parsePostController,
@@ -11,6 +12,7 @@ import {
 import {
   getClustersController,
   getProfileController,
+  getProfilesController,
 } from './profiles/profiles.controller';
 import {
   getLoggedUserController,
@@ -42,5 +44,8 @@ router.post('/feed/get', getPublicFeedController);
 router.post('/refs/get', getRefMetaController);
 router.post('/users/get', getUserController);
 
+router.post('/keywords/getMany', getKeywordsController);
+
 router.post('/profiles/get', getProfileController);
+router.post('/profiles/getMany', getProfilesController);
 router.post('/profiles/getClusters', getClustersController);
