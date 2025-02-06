@@ -4,12 +4,16 @@ import { useParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
 import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
-import { KEYWORDS_COLORS } from '../semantics/patterns/keywords/Keywords.component';
 import { GetIndexedEntries } from '../shared/types/types.posts';
-import { AppLabelsEditor } from '../ui-components/AppLabelsEditor';
+import {
+  AccountProfile,
+  GetClusterProfiles,
+} from '../shared/types/types.profiles';
+import { AppButton, AppHeading } from '../ui-components';
+import { AccountProfileHeader } from './AccountProfileHeader';
 
 export const ClusterProfiles = (props: {
-  onKeywordClick: (kw: string) => void;
+  onProfileClick: (profileId: string) => void;
 }) => {
   const appFetch = useAppFetch();
 
@@ -24,7 +28,7 @@ export const ClusterProfiles = (props: {
         const payload: GetClusterProfiles = {
           clusterId: clusterSelected,
         };
-        const result = await appFetch<string[], GetIndexedEntries>(
+        const result = await appFetch<AccountProfile[], GetIndexedEntries>(
           '/api/profiles/getMany',
           payload
         );
@@ -36,16 +40,22 @@ export const ClusterProfiles = (props: {
       }
     },
   });
+
   return (
     <Box pad="18px">
-      {profiles && (
-        <AppLabelsEditor
-          onLabelClick={(label) => props.onKeywordClick(label)}
-          underline
-          colors={KEYWORDS_COLORS}
-          labels={keywords}
-          placeholder={''}></AppLabelsEditor>
-      )}
+      <AppHeading level={3}>{`${clusterId || 'all'} profiles`}</AppHeading>
+      <Box gap="12px" margin={{ top: '16px' }}>
+        {profiles &&
+          profiles.map((profile) => {
+            return (
+              <AppButton plain onClick={() => props.onProfileClick(profile.id)}>
+                <AccountProfileHeader
+                  size="small"
+                  accounts={[profile]}></AccountProfileHeader>
+              </AppButton>
+            );
+          })}
+      </Box>
     </Box>
   );
 };

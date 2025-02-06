@@ -3,9 +3,9 @@ import { array, object, string } from 'yup';
 
 import {
   AddProfilesPayload,
-  GetProfilesPayload,
+  GetClusterProfiles,
 } from '../@shared/types/types.profiles';
-import { GetProfilePayload } from '../@shared/types/types.user';
+import { GetProfilePayload } from '../@shared/types/types.profiles';
 import {
   parseProfileUrl,
   splitProfileId,
@@ -64,7 +64,7 @@ export const getProfilesController: RequestHandler = async (
   try {
     const payload = (await getProfilesSchema.validate(
       request.body
-    )) as GetProfilesPayload;
+    )) as GetClusterProfiles;
 
     logger.debug(`${request.path} - payload`, { payload });
     const { profiles } = getServices(request);

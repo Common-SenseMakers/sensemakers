@@ -12,6 +12,7 @@ import {
 import {
   getClustersController,
   getProfileController,
+  getProfilesController,
 } from './profiles/profiles.controller';
 import {
   getLoggedUserController,
@@ -46,4 +47,5 @@ router.post('/users/get', getUserController);
 router.post('/keywords/getMany', getKeywordsController);
 
 router.post('/profiles/get', getProfileController);
+router.post('/profiles/getMany', getProfilesController);
 router.post('/profiles/getClusters', getClustersController);

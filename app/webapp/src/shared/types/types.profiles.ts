@@ -4,7 +4,7 @@
  * Other AccountProfile can be created for non singed-up users whose timelines/posts we fetch.
  * All fetch-status-related data is associated to an AccountProfile, not to a User.
  */
-import { IDENTITY_PLATFORM } from './types.platforms';
+import { IDENTITY_PLATFORM, PLATFORM } from './types.platforms';
 
 export interface WithPlatformUserId {
   /** We are using user_id to refer the id of the user on a given platform and leave
@@ -92,6 +92,6 @@ export interface GetProfilePayload {
   username?: string;
 }
 
-export interface GetProfilesPayload {
+export interface GetClusterProfiles {
   clusterId?: string;
 }

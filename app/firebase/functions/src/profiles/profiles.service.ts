@@ -7,12 +7,13 @@ import {
   AccountProfileCreate,
   AccountProfileRead,
   AddProfilesPayload,
-  GetProfilesPayload,
+  GetClusterProfiles,
+  GetProfilePayload,
   PlatformAccountProfile,
   PlatformProfile,
   ProfileIdentifier,
 } from '../@shared/types/types.profiles';
-import { DefinedIfTrue, GetProfilePayload } from '../@shared/types/types.user';
+import { DefinedIfTrue } from '../@shared/types/types.user';
 import {
   ParsedProfile,
   getProfileId,
@@ -265,7 +266,7 @@ export class ProfilesService {
     return this.toPublicProfile(profile);
   }
 
-  async getProfiles(payload: GetProfilesPayload) {
+  async getProfiles(payload: GetClusterProfiles) {
     const profilesIds = await this.repo.getMany({
       clusterId: payload.clusterId,
     });
