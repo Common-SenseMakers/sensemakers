@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
 How to use:
+must specify the list url to run the code by --list_url<URL string> 
+to name the cluster use --cluster_name<str>
 Optional: --notion_db_id <UUID> to override what’s in .env.
 If you omit --notion_db_id, it’ll use whatever is in NOTION_DB_ID from .env.
 """
@@ -214,14 +216,15 @@ class BskyListToNotionConverter:
                         ]
                     },
                     "Clusters": {"multi_select": []},
-                    "list/starter_name": {"multi_select": []}
+                    "list/starter_name": {"multi_select": []},
+                    "list_url": {"multi_select": []}
                 }
 
                 # Add cluster, list name
                 if cluster_name:
                     new_props["Clusters"]["multi_select"].append({"name": cluster_name})
                 new_props["list/starter_name"]["multi_select"].append({"name": list_name})
-
+                new_props["list_url"]["multi_select"].append({"name": self.LIST_URL})
                 new_page_id = self.notion.create_page(self.NOTION_DB_ID, new_props)
                 print(f"[CREATE] => ID={new_page_id}, handle={user_handle}, DID={user_did}")
             else:
