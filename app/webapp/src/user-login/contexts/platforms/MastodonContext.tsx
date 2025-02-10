@@ -135,7 +135,7 @@ export const MastodonContext = (props: PropsWithChildren) => {
         }
       } catch (err) {
         log('Error connecting to Mastodon', err);
-        setError(t(IntroKeys.errorConnectMastodon, { domain }));
+        setError(t(IntroKeys.errorConnectMastodon, { mastodonServer: domain }));
         setLoginFlowState(LoginFlowState.Idle);
         setPlatformConnectedStatus(
           PLATFORM.Mastodon,

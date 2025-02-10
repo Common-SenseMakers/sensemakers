@@ -49,6 +49,7 @@ export interface AccountDetailsBase<
 > extends WithPlatformUserId {
   signupDate: number;
   credentials: C;
+  isDisconnected?: boolean;
 }
 
 /** The AppUser object combines the details of each platform */
@@ -117,6 +118,7 @@ export interface AccountDetailsRead<
   profile: P;
   read: boolean;
   write: boolean;
+  isDisconnected?: boolean;
 }
 
 /** accounts include the readable details (not sensitive details) */
@@ -146,6 +148,8 @@ export interface AppUserPublicRead extends Omit<UserWithId, 'clerkId'> {
 
 /** Test users support for mocks and tests */
 export interface TestUserCredentials {
+  userId: string;
+  clerkId: string;
   clustersIds: string[];
   twitter: TwitterSigninCredentials;
   mastodon: MastodonSigninCredentials;

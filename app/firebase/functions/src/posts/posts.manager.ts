@@ -21,6 +21,7 @@ import {
   ALL_PUBLISH_PLATFORMS,
   IDENTITY_PLATFORM,
   PLATFORM,
+  PLATFORM_SESSION_REFRESH_ERROR,
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
 import {
@@ -305,10 +306,24 @@ export class PostsManager {
         this.initPlatformPost(platformId, fetchedPost)
       );
     } catch (err: any) {
-      logger.error(
-        `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}`,
-        { err }
-      );
+      if (userId && err.name === PLATFORM_SESSION_REFRESH_ERROR) {
+        logger.warn(
+          `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}. Marking as disconnected.`,
+          { err }
+        );
+        await this.users.updateAccountDisconnectedStatus(
+          userId,
+          platformId,
+          user_id,
+          true,
+          manager
+        );
+      } else {
+        logger.error(
+          `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}`,
+          { err }
+        );
+      }
 
       return undefined;
     }

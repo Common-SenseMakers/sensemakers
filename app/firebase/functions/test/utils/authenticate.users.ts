@@ -1,7 +1,6 @@
 import { BlueskySignupData } from '../../src/@shared/types/types.bluesky';
 import { MastodonAccessTokenSignupData } from '../../src/@shared/types/types.mastodon';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
-import { TwitterSignupContext } from '../../src/@shared/types/types.twitter';
 import {
   AppUser,
   TestUserCredentials,
@@ -10,8 +9,6 @@ import { parseMastodonGlobalUsername } from '../../src/@shared/utils/mastodon.ut
 import { getProfileId } from '../../src/@shared/utils/profiles.utils';
 import { TransactionManager } from '../../src/db/transaction.manager';
 import { getPrefixedUserId } from '../../src/users/users.utils';
-import { handleTwitterSignupMock } from '../__tests__/reusable/mocked.singup';
-import { USE_REAL_TWITTER } from '../__tests__/setup';
 import { TestServices } from '../__tests__/test.services';
 import { authenticateTwitterUser } from './authenticate.twitter';
 
@@ -34,7 +31,14 @@ export const authenticateTestUser = async (
   includePlatforms: PLATFORM[],
   manager: TransactionManager
 ): Promise<AppUser> => {
-  let user: AppUser | undefined;
+  let user: AppUser = {
+    userId: credentials.userId,
+    clerkId: credentials.clerkId,
+    settings: {},
+    signupDate: Date.now(),
+    accounts: {},
+    accountsIds: [],
+  };
 
   if (includePlatforms.includes(PLATFORM.Twitter)) {
     const twitterUser = await authenticateTwitterForUser(
@@ -87,11 +91,11 @@ const authenticateBlueskyForUser = async (
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
-      clerkId: '',
       settings: {},
       signupDate: Date.now(),
       accounts: {},
       accountsIds: [getProfileId(PLATFORM.Bluesky, credentials.bluesky.id)],
+      clerkId: 'clerk-id',
     };
   }
 
@@ -117,33 +121,14 @@ export const authenticateTwitterForUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
   manager: TransactionManager,
-  user?: AppUser
+  user: AppUser
 ): Promise<AppUser> => {
-  if (USE_REAL_TWITTER) {
-    return authenticateTwitterUser(
-      credentials.twitter,
-      services,
-      manager,
-      user?.userId
-    );
-  } else {
-    const twitterSignupContext: TwitterSignupContext =
-      await services.users.getSignupContext(
-        PLATFORM.Twitter,
-        credentials.twitter.id
-      );
-    const userId = await handleTwitterSignupMock(
-      services,
-      {
-        ...twitterSignupContext,
-        code: 'mocked',
-      },
-      user?.userId
-    );
-
-    const userRead = await services.users.repo.getUser(userId, manager, true);
-    return userRead;
-  }
+  return authenticateTwitterUser(
+    credentials.twitter,
+    services,
+    manager,
+    user.userId
+  );
 };
 
 const authenticateMastodonForUser = async (
@@ -154,12 +139,12 @@ const authenticateMastodonForUser = async (
 ): Promise<AppUser> => {
   if (!user) {
     user = {
-      clerkId: '',
       userId: getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id),
       settings: {},
       signupDate: Date.now(),
       accounts: {},
       accountsIds: [getProfileId(PLATFORM.Mastodon, credentials.mastodon.id)],
+      clerkId: 'clerk-id',
     };
   }
 

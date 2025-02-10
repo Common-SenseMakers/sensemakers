@@ -46,7 +46,8 @@ export const createUsers = async (
         );
       });
 
-      return services.users.repo.getUser(userId, manager, true);
+      const user = await services.users.repo.getUser(userId, manager, true);
+      return { ...user, userId };
     })
   );
 

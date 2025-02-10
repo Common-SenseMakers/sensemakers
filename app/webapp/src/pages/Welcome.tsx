@@ -54,6 +54,7 @@ export const Welcome = () => {
   const navigate = useNavigate();
   const posthog = usePostHog();
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { openSignIn } = useClerk();
   const { connectedUser } = useAccountContext();
 

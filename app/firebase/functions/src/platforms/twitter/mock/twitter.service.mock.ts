@@ -338,11 +338,13 @@ export const getTwitterMock = (
           credentials: {
             read: {
               accessToken:
+                process.env.TWITTER_BEARER_TOKEN ||
                 'ZWJzaEJCU1BSaFZvLUIwRFNCNHNXVlQtTV9mY2VSaDlOSk5ETjJPci0zbmJtOjE3MTk0MzM5ODkyNTM6MTowOmF0OjE',
               refreshToken:
+                process.env.TWITTER_BEARER_TOKEN ||
                 'U2xBMGpRSkFucE9yQzAxSnJlM0pRci1tQzJlR2dfWEY2MEpNc2daYkF6VjZSOjE3MTk0MzM5ODkyNTM6MTowOnJ0OjE',
               expiresIn: 7200,
-              expiresAtMs: 1719441189590,
+              expiresAtMs: 2054341070000,
             },
           },
         };

@@ -142,8 +142,8 @@ export class UsersService {
         existingUserWithAccountId,
       });
 
-    if (existingUserWithAccountId) {
-      /** If existing user, we consider this a replace legacy user operation */
+    /** If existing user and the new userId is different, we consider this a replace legacy user operation */
+    if (existingUserWithAccountId && existingUserWithAccountId !== userId) {
       await this.replaceLegacyUser(
         existingUserWithAccountId,
         userId,
@@ -159,6 +159,20 @@ export class UsersService {
           existingUserId: existingUserWithAccountId,
           newUserId: userId,
         },
+      };
+    }
+
+    /** If existing user and the new userId is the same, we consider this a reconnect account operation */
+    if (existingUserWithAccountId && existingUserWithAccountId === userId) {
+      await this.repo.setAccountDetails(
+        userId,
+        platform,
+        { ...authenticatedDetails, isDisconnected: false },
+        manager
+      );
+      return {
+        userId,
+        linkProfile: false,
       };
     }
 
@@ -268,6 +282,48 @@ export class UsersService {
 
     await this.repo.setAccountDetails(userId, platformId, account, manager);
   }
+  public async updateAccountDisconnectedStatus(
+    userId: string,
+    platformId: PLATFORM,
+    user_id: string,
+    isDisconnected: boolean,
+    manager: TransactionManager
+  ) {
+    if (DEBUG)
+      logger.debug(
+        'updateAccountDisconnectedStatus - isDisconnected status',
+        isDisconnected,
+        DEBUG_PREFIX
+      );
+
+    const user = await this.repo.getUser(userId, manager, true);
+
+    if (platformId === PLATFORM.Local) {
+      throw new Error('Cannot update local account status');
+    }
+
+    const accounts = user.accounts[platformId];
+    if (!accounts) {
+      throw new Error('Unexpected accounts not found');
+    }
+
+    const account = accounts.find((c) => c.user_id === user_id);
+    if (!account) {
+      throw new Error(`Unexpected account for user_id ${user_id} not found`);
+    }
+
+    /** update the credentials */
+    account.isDisconnected = isDisconnected;
+
+    if (DEBUG)
+      logger.debug(
+        'getUserClientAndUpdateDetails - newDetails',
+        account,
+        DEBUG_PREFIX
+      );
+
+    await this.repo.setAccountDetails(userId, platformId, account, manager);
+  }
 
   public async getUserReadProfiles(
     userId: string,
@@ -298,6 +354,7 @@ export class UsersService {
                 profile: profile.profile,
                 read: account.credentials.read !== undefined,
                 write: account.credentials.write !== undefined,
+                isDisconnected: account.isDisconnected,
               });
 
               profiles[platform] = current as AccountDetailsRead<any>[];
