@@ -13,6 +13,7 @@ import {
   Text,
 } from 'grommet';
 import { ReactNode, createContext, useContext, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { ClustersMenu } from '../../posts.fetcher/ClustersMenu';
 import { AppHeading } from '../../ui-components';
@@ -127,6 +128,7 @@ export const ViewportPage = (props: {
 }) => {
   const [showLeftbar, setShowLeftbar] = useState(false);
   const { mobile } = useResponsive();
+  const [searchParams] = useSearchParams();
 
   const columns = mobile
     ? ['auto'] // Mobile: 1 column
@@ -137,8 +139,7 @@ export const ViewportPage = (props: {
   const areas = mobile
     ? [
         { name: 'content', start: [0, 0], end: [0, 0] },
-        { name: 'nav', start: [0, 1], end: [0, 1] },
-        { name: 'footer', start: [0, 2], end: [0, 2] },
+        { name: 'footer', start: [0, 1], end: [0, 1] },
       ]
     : [
         { name: 'left', start: [0, 0], end: [0, 1] },
@@ -146,6 +147,13 @@ export const ViewportPage = (props: {
         { name: 'right', start: [2, 0], end: [2, 0] },
         { name: 'footer', start: [0, 1], end: [2, 1] },
       ];
+
+  const clusterDetails = (
+    <>
+      <Box style={{ flexShrink: 0 }}>{props.suggestions}</Box>
+      <Box style={{ flexGrow: 1, overflow: 'auto' }}>{props.profiles}</Box>
+    </>
+  );
 
   return (
     <ViewportPageContextValue.Provider value={{}}>
@@ -161,16 +169,29 @@ export const ViewportPage = (props: {
         columns={columns}
         rows={rows}
         areas={areas}>
-        <Box gridArea="content">{props.content}</Box>
+        <Box gridArea="content" style={{ position: 'relative' }}>
+          {searchParams.get('details') === 'true'
+            ? clusterDetails
+            : props.content}
+          {mobile && (
+            <Box
+              style={{
+                position: 'absolute',
+                bottom: '0px',
+                height: '80px',
+                width: '100%',
+                backgroundImage:
+                  'linear-gradient(180deg, rgba(255,255,255,0) 0,  rgba(255,255,255,0.8) 50%, rgba(255,255,255,1) 100%)',
+              }}
+              justify="center">
+              {props.nav}
+            </Box>
+          )}
+        </Box>
         <Box gridArea="footer">
           <ViewportFooter></ViewportFooter>
         </Box>
 
-        {mobile && (
-          <>
-            <Box gridArea="nav">{props.nav}</Box>
-          </>
-        )}
         {!mobile && (
           <>
             <Box gridArea="left">
@@ -183,12 +204,7 @@ export const ViewportPage = (props: {
                 </Box>
               )}
             </Box>
-            <Box gridArea="right">
-              <Box style={{ flexShrink: 0 }}>{props.suggestions}</Box>
-              <Box style={{ flexGrow: 1, overflow: 'auto' }}>
-                {props.profiles}
-              </Box>
-            </Box>
+            <Box gridArea="right">{clusterDetails}</Box>
           </>
         )}
       </Grid>
