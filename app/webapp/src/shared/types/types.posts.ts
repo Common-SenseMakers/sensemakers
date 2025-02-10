@@ -193,3 +193,12 @@ export type IndexedPost = Pick<
   | 'createdAtMs'
   | 'structuredSemantics'
 >;
+
+export interface IndexedCollectionEntry {
+  nPosts: number;
+}
+
+export interface GetIndexedEntries {
+  clusterId?: string;
+  afterId?: string;
+}

@@ -46,5 +46,6 @@ export const Overlay = () => {
       );
     }
   }, [overlay]);
+
   return <>{content}</>;
 };

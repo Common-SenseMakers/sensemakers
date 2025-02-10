@@ -84,11 +84,14 @@ const authenticateBlueskyForUser = async (
   credentials: TestUserCredentials,
   services: TestServices,
   manager: TransactionManager,
-  user?: AppUser
+  _user?: AppUser
 ): Promise<AppUser> => {
+  let user: AppUser | undefined = _user;
+
   if (!user) {
     user = {
       userId: getPrefixedUserId(PLATFORM.Bluesky, credentials.bluesky.id),
+      clerkId: '',
       settings: {},
       signupDate: Date.now(),
       accounts: {},
@@ -137,6 +140,7 @@ const authenticateMastodonForUser = async (
 ): Promise<AppUser> => {
   if (!user) {
     user = {
+      clerkId: '',
       userId: getPrefixedUserId(PLATFORM.Mastodon, credentials.mastodon.id),
       settings: {},
       signupDate: Date.now(),

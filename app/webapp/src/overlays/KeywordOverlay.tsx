@@ -27,7 +27,7 @@ export const KeywordOverlay = (props: { keyword: string }) => {
       DEBUG_PREFIX: 'REF FEED',
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.keyword]);
 
   const feed = usePostsFetcher(feedConfig);
 

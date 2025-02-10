@@ -15,6 +15,7 @@ import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { MAX_BUTTON_WIDTH, ViewportPage } from '../app/layout/Viewport';
 import { IntroKeys } from '../i18n/i18n.intro';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
+import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
 import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';
@@ -52,7 +53,7 @@ export const ConnectSocialsPage = () => {
   const handleContinue = () => {
     posthog?.capture(POSTHOG_EVENTS.CLICKED_CONTINUE);
     appFetch('/api/auth/setOnboarded', {}, true).catch(console.error);
-    navigate(AbsoluteRoutes.Feed);
+    navigate(AbsoluteRoutes.ClusterFeed(ALL_CLUSTER_NAME));
   };
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export const ConnectSocialsPage = () => {
       connectedUser && connectedUser.details && connectedUser.details.onboarded;
 
     if (alreadyConnected) {
-      navigate(AbsoluteRoutes.Feed);
+      navigate(AbsoluteRoutes.ClusterFeed(ALL_CLUSTER_NAME));
     }
   }, [connectedUser, navigate]);
 

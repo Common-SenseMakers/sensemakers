@@ -1,17 +1,21 @@
 import { RequestHandler } from 'express';
 
 import {
+  GetIndexedEntries,
   GetPostPayload,
   PostUpdatePayload,
   PostsQuery,
 } from '../../@shared/types/types.posts';
+import { CollectionNames } from '../../@shared/utils/collectionNames';
 import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
 import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { IndexedPostsRepo } from '../indexed.posts.repository';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
+  getKeywordsSchema,
   getPostSchema,
   postIdValidation,
   updatePostSchema,
@@ -156,6 +160,35 @@ export const updatePostController: RequestHandler = async (
     if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
 
     response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
+  }
+};
+
+export const getKeywordsController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const services = getServices(request);
+
+    const payload = (await getKeywordsSchema.validate(
+      request.body
+    )) as GetIndexedEntries;
+
+    const cluster = services.clusters.getInstance(payload.clusterId);
+    const indexedRepo = new IndexedPostsRepo(
+      cluster.collection(CollectionNames.Keywords)
+    );
+    const keywords = await indexedRepo.getManyEntries({
+      expectedAmount: 10,
+      untilId: payload.afterId,
+    });
+
+    if (DEBUG) logger.debug(`${request.path}: updatePost`, payload);
+
+    response.status(200).send({ success: true, data: keywords });
   } catch (error) {
     logger.error('error', error);
     response.status(500).send({ success: false, error });

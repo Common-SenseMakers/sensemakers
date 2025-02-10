@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from 'react';
 
@@ -13,7 +14,7 @@ import { useBack } from '../ui-components/hooks/useBack';
 import { Overlay, OverlayValue } from './Overlay';
 import { eventToOverlay } from './overlay.utils';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export enum OverlayQueryParams {
   Post = 'p',
@@ -29,6 +30,7 @@ export interface OverlayContextType {
   onChildOverlayNav: (value: OverlayValue) => void;
   setIsLast: (isLast: boolean) => void;
   overlay: OverlayValue;
+  triggeredShowOverlay?: OverlayValue;
 }
 
 const OverlayContextValue = createContext<OverlayContextType | undefined>(
@@ -40,6 +42,8 @@ export const OverlayContext = (
     init?: OverlayValue | null;
     onOverlayNav?: (value: OverlayValue) => void;
     level?: number;
+    triggerShowOverlay?: OverlayValue; // if changed it is stacked on top
+    triggerReset?: boolean; // if toggled, it resets the overlay
   }
 ) => {
   const [overlay, _setOverlay] = useState<OverlayValue>(props.init || {});
@@ -49,8 +53,123 @@ export const OverlayContext = (
 
   const level = parentOverlay ? parentOverlay.level + 1 : 0;
 
+  /** this level state var of whether we a new overlay should be added */
+  const [triggeredShowOverlay, setTriggeredShowOverlay] =
+    useState<OverlayValue>();
+
+  const showOverlay = Object.keys(overlay).length > 0;
+
+  /** if external prop changes, replicate that in this context */
+  useEffect(() => {
+    if (DEBUG) {
+      console.log(`OverlayContext useEffect props.triggerShowOverlay`, {
+        propsDotTriggerShowOverlay: props.triggerShowOverlay,
+        parentOverlay,
+        overlay,
+        level,
+      });
+    }
+
+    if (props.triggerShowOverlay) {
+      if (DEBUG) {
+        console.log(
+          `OverlayContext useEffect props.triggerShowOverlay setTriggeredShowOverlay`,
+          {
+            propsDotTriggerShowOverlay: props.triggerShowOverlay,
+            parentOverlay,
+            overlay,
+            level,
+          }
+        );
+      }
+
+      setTriggeredShowOverlay(props.triggerShowOverlay);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.triggerShowOverlay]);
+
+  useEffect(() => {
+    if (overlay) {
+      if (DEBUG) {
+        console.log(`OverlayContext useEffect triggerReset - close()`, {
+          triggeredShowOverlay,
+          parentOverlay,
+          overlay,
+          level,
+        });
+      }
+      close();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.triggerReset]);
+
+  /** if parent triggerShowOverlay changes, replicate that in this, the child context */
+  useEffect(() => {
+    if (DEBUG) {
+      console.log(
+        `OverlayContext useEffect parentOverlay.triggeredShowOverlay`,
+        {
+          triggeredShowOverlay,
+          parentOverlay,
+          overlay,
+          level,
+        }
+      );
+    }
+
+    if (parentOverlay?.triggeredShowOverlay) {
+      if (DEBUG) {
+        console.log(
+          `OverlayContext useEffect parentOverlay.triggeredShowOverlay setTriggeredShowOverlay`,
+          {
+            triggeredShowOverlay,
+            parentOverlay,
+            overlay,
+            level,
+          }
+        );
+      }
+
+      setTriggeredShowOverlay(parentOverlay.triggeredShowOverlay);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parentOverlay?.triggeredShowOverlay]);
+
+  /** if triggeredShowOverlay state changes then set that overlay */
+  useEffect(() => {
+    if (DEBUG) {
+      console.log(`OverlayContext useEffect triggeredShowOverlay`, {
+        triggeredShowOverlay,
+        overlay,
+        level,
+      });
+    }
+
+    if (triggeredShowOverlay && !showOverlay) {
+      if (DEBUG) {
+        console.log(
+          `OverlayContext useEffect triggeredShowOverlay setOverlay`,
+          {
+            triggeredShowOverlay,
+          }
+        );
+      }
+      setOverlay(triggeredShowOverlay);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggeredShowOverlay, isLast]);
+
   const setOverlay = (value: OverlayValue) => {
+    if (DEBUG) {
+      console.log(`OverlayContext setOverlay level: ${level}`, {
+        value,
+        triggeredShowOverlay,
+        level,
+      });
+    }
+
     _setOverlay(value);
+    setTriggeredShowOverlay(undefined);
 
     if (Object.keys(value).length > 0) {
       /** mark as the last overlay whose content is shown */
@@ -62,10 +181,6 @@ export const OverlayContext = (
       _setIsLast(false);
       /** if closing, mark parent as last true */
       parentOverlay && parentOverlay.setIsLast(true);
-    }
-
-    if (DEBUG) {
-      console.log(`OverlayContext setOverlay level: ${level}`, value);
     }
 
     /** propagate upwards through onChildOverlayNav */
@@ -96,6 +211,7 @@ export const OverlayContext = (
   };
 
   const close = () => {
+    setTriggeredShowOverlay(undefined);
     setOverlay({});
   };
 
@@ -134,8 +250,6 @@ export const OverlayContext = (
     [level, overlay, parentOverlay, props]
   );
 
-  const showOverlay = Object.keys(overlay).length > 0;
-
   return (
     <OverlayContextValue.Provider
       value={{
@@ -144,6 +258,7 @@ export const OverlayContext = (
         onPostClick,
         onChildOverlayNav,
         setIsLast,
+        triggeredShowOverlay,
       }}>
       <Box
         style={{

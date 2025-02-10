@@ -171,9 +171,3 @@ export type RenderEmailFunction = (
   notificationFrequency: NotificationFreq,
   appUrl: string
 ) => { html: string; plainText: string; subject: string };
-
-export interface GetProfilePayload {
-  platformId: PLATFORM;
-  user_id?: string;
-  username?: string;
-}
