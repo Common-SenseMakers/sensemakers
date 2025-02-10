@@ -1,8 +1,6 @@
 import { Box, Layer, LayerExtendedProps } from 'grommet';
 import React from 'react';
 
-import { MAX_WIDTH_APP } from '../app/layout/Viewport';
-
 export interface IAppModal extends LayerExtendedProps {
   type: 'small' | 'normal';
   layerProps?: LayerExtendedProps;
@@ -45,7 +43,6 @@ export const AppModal = (props: IAppModal) => {
               '0px 6px 15px -2px rgba(16, 24, 40, 0.08), 0px 6px 15px -2px rgba(16, 24, 40, 0.08)',
             minHeight: '60vh',
             width: '100%',
-            maxWidth: `${MAX_WIDTH_APP * 0.8}px`,
             flexShrink: '0',
           }}>
           {content}

@@ -12,6 +12,7 @@ import {
 } from '../../@shared/types/types.mastodon';
 import {
   FetchedResult,
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostDraftApproval,
@@ -19,7 +20,10 @@ import {
   PlatformPostPublish,
   PlatformPostSignerType,
 } from '../../@shared/types/types.platform.posts';
-import { PLATFORM } from '../../@shared/types/types.platforms';
+import {
+  PLATFORM,
+  PlatformSessionRefreshError,
+} from '../../@shared/types/types.platforms';
 import {
   GenericAuthor,
   GenericPost,
@@ -32,11 +36,13 @@ import {
 } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
 import {
+  buildMastodonPostUri,
   getGlobalMastodonUsername,
   parseMastodonAccountURI,
   parseMastodonGlobalUsername,
   parseMastodonPostURI,
 } from '../../@shared/utils/mastodon.utils';
+import { APP_NAME } from '../../config/config.runtime';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
@@ -79,7 +85,7 @@ export class MastodonService
     const scopes = params.type === 'write' ? 'read write' : 'read';
 
     const app = await client.v1.apps.create({
-      clientName: 'SenseNets',
+      clientName: APP_NAME,
       redirectUris: params.callback_url,
       scopes,
       website: `https://${params.mastodonServer}`,
@@ -90,24 +96,30 @@ export class MastodonService
     return app;
   }
 
-  public getClient(server: string, credentials?: MastodonAccountCredentials) {
-    const accessTokenServer = this.config.accessTokens[server]
-      ? server
-      : 'mastodon.social';
-    return createRestAPIClient({
-      url: `https://${server}`,
-      accessToken: credentials
-        ? credentials.accessToken
-        : this.config.accessTokens[accessTokenServer],
-    });
+  public async getClient(
+    server: string,
+    credentials?: MastodonAccountCredentials
+  ) {
+    try {
+      const accessTokenServer = this.config.accessTokens[server]
+        ? server
+        : 'mastodon.social';
+      const client = createRestAPIClient({
+        url: `https://${server}`,
+        accessToken: credentials
+          ? credentials.accessToken
+          : this.config.accessTokens[accessTokenServer],
+      });
+      return client;
+    } catch (e: any) {
+      throw new PlatformSessionRefreshError(e);
+    }
   }
 
   public async getSignupContext(
-    userId?: string,
     params?: MastodonGetContextParams
   ): Promise<MastodonSignupContext> {
-    if (DEBUG)
-      logger.debug('getSignupContext', { userId, params }, DEBUG_PREFIX);
+    if (DEBUG) logger.debug('getSignupContext', { params }, DEBUG_PREFIX);
 
     if (!params || !params.mastodonServer || !params.callback_url) {
       throw new Error('Mastodon server and callback URL are required');
@@ -157,7 +169,7 @@ export class MastodonService
 
     if (DEBUG) logger.debug('handleSignupData token', { token }, DEBUG_PREFIX);
 
-    const mastoClient = this.getClient(signupData.mastodonServer, {
+    const mastoClient = await this.getClient(signupData.mastodonServer, {
       server: signupData.mastodonServer,
       accessToken: token.accessToken,
     });
@@ -211,7 +223,7 @@ export class MastodonService
   ): Promise<FetchedResult<MastodonThread>> {
     if (DEBUG) logger.debug('fetch', { params, credentials }, DEBUG_PREFIX);
     const { server, localUsername } = parseMastodonGlobalUsername(user_id);
-    const client = this.getClient(server, credentials?.read);
+    const client = await this.getClient(server, credentials?.read);
 
     const account = await client.v1.accounts.lookup({
       acct: localUsername,
@@ -309,12 +321,23 @@ export class MastodonService
       allStatuses[0].account
     );
 
-    const platformPosts = threads.map((thread) => ({
-      post_id: thread.thread_id,
-      user_id,
-      timestampMs: new Date(thread.posts[0].createdAt).getTime(),
-      post: thread,
-    }));
+    const platformPosts = await Promise.all(
+      threads.map(async (thread) => {
+        const rootPostId = await this.getRootPostId(
+          thread.posts[0],
+          credentials
+        );
+        return {
+          post_id: rootPostId,
+          user_id,
+          timestampMs: new Date(thread.posts[0].createdAt).getTime(),
+          post: {
+            ...thread,
+            thread_id: rootPostId,
+          },
+        };
+      })
+    );
 
     const result = {
       fetched: {
@@ -455,7 +478,7 @@ export class MastodonService
     }
 
     const { server, postId } = parseMastodonPostURI(post_id);
-    const client = this.getClient(server, credentials?.read);
+    const client = await this.getClient(server, credentials?.read);
 
     const context = await client.v1.statuses.$select(postId).context.fetch();
     const rootStatus = await (async () => {
@@ -518,7 +541,7 @@ export class MastodonService
   ): Promise<PlatformAccountProfile> {
     try {
       const { server } = parseMastodonGlobalUsername(username);
-      const client = this.getClient(server, credentials);
+      const client = await this.getClient(server, credentials);
 
       const mdProfile = await client.v1.accounts.lookup({
         acct: username,
@@ -545,7 +568,7 @@ export class MastodonService
     credentials?: MastodonAccountCredentials
   ): Promise<PlatformAccountProfile> {
     const { server, localUsername } = parseMastodonGlobalUsername(user_id);
-    const client = this.getClient(server, credentials);
+    const client = await this.getClient(server, credentials);
 
     const mdProfile = await client.v1.accounts.lookup({
       acct: localUsername,
@@ -563,5 +586,69 @@ export class MastodonService
     };
 
     return profile;
+  }
+  isPartOfMainThread(
+    rootPost: PlatformPost<MastodonThread>,
+    post: PlatformPostCreate<MastodonThread>
+  ): boolean {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (rootPost.posted.post_id !== post.posted.post_id) return false;
+    const rootThreadPosts = rootPost.posted.post.posts;
+    const lastRootThreadPost = rootThreadPosts[rootThreadPosts.length - 1];
+    const newThreadPosts = post.posted.post.posts;
+    const firstNewThreadPost = newThreadPosts[0];
+
+    if (firstNewThreadPost.inReplyToId === lastRootThreadPost.id) return true;
+
+    return false;
+  }
+  mergeBrokenThreads(
+    rootPost: PlatformPost<MastodonThread>,
+    post: PlatformPostCreate<MastodonThread>
+  ): PlatformPostPosted | undefined {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (!this.isPartOfMainThread(rootPost, post)) {
+      return undefined;
+    }
+
+    const mergedThread = [
+      ...rootPost.posted?.post.posts,
+      ...post.posted?.post.posts,
+    ];
+    rootPost.posted.post.posts = mergedThread;
+    return rootPost.posted;
+  }
+  isRootThread(post: PlatformPostCreate<MastodonThread>): boolean {
+    return post.posted?.post.posts[0].uri === post.posted?.post_id;
+  }
+
+  public async getRootPostId(
+    post: MastodonPost,
+    credentials?: AccountCredentials<
+      MastodonAccountCredentials,
+      MastodonAccountCredentials
+    >
+  ): Promise<string> {
+    if (!post.inReplyToId) {
+      return post.uri;
+    }
+
+    const { server, postId, username } = parseMastodonPostURI(post.uri);
+    const client = await this.getClient(server, credentials?.read);
+
+    const context = await client.v1.statuses.$select(postId).context.fetch();
+    const rootPostId = context.ancestors.find(
+      (status) => !status.inReplyToId
+    )?.id;
+
+    return buildMastodonPostUri(
+      username,
+      server,
+      rootPostId || post.inReplyToId
+    ); // if can't find the root id from the context, assume the root is the post's inReplyToId
   }
 }

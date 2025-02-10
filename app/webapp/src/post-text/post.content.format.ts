@@ -39,20 +39,18 @@ function cleanUrlParams(url: string): string {
 }
 
 /** gets the plain text and creates HTML compatible with Prosemirror schema */
-export const textToHtml = (text: string) => {
-  const paragraphs = text.split('---');
-
-  let html = paragraphs?.map((p, i) => `<p>${p}</p>`).join('');
+export const styleUrls = (text: string, color?: string) => {
+  text = text.replace(new RegExp('\n', 'g'), '<br>');
 
   const urlRegex =
     /\bhttps?:\/\/[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/gi;
 
-  html = html.replace(urlRegex, replaceUrlCallback);
+  text = text.replace(urlRegex, (url) => replaceUrlCallback(url, color));
 
-  return html;
+  return text;
 };
 
-const replaceUrlCallback = (url: string) => {
+const replaceUrlCallback = (url: string, color?: string) => {
   let endsWithPeriod = false;
   let urlClean = url;
   try {
@@ -80,5 +78,5 @@ const replaceUrlCallback = (url: string) => {
       ? noParametersUrl.slice(0, 50) + '...'
       : noParametersUrl;
 
-  return `<a href="${url}" target="_blank">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
+  return `<a href="${url}" target="_blank" style="${color ? `color: ${color}` : ''}" onclick="window.dispatchEvent(new CustomEvent('url-click', {detail: {url: '${url}'}})); return true;">${truncatedUrl}</a>${endsWithPeriod ? '.' : ''}`;
 };

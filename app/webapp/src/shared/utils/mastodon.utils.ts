@@ -69,3 +69,11 @@ export function parseMastodonPostURI(uri: string) {
     );
   }
 }
+
+export const buildMastodonPostUri = (
+  username: string,
+  server: string,
+  postId: string
+) => {
+  return `https://${server}/users/${username}/statuses/${postId}`;
+};

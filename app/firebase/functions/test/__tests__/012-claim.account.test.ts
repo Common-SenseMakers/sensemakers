@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { AppUser } from '../../src/@shared/types/types.user';
 import { getProfileId } from '../../src/@shared/utils/profiles.utils';
 import { logger } from '../../src/instances/logger';
 import { UsersHelper } from '../../src/users/users.helper';
@@ -41,7 +42,7 @@ describe('012-claim-account', () => {
       );
 
       const profile = await services.db.run((manager) =>
-        services.users.profiles.getByProfileId(
+        services.profiles.repo.getByProfileId(
           getProfileId(PLATFORM.Twitter, account.user_id),
           manager,
           true
@@ -54,7 +55,9 @@ describe('012-claim-account', () => {
     it('signup user', async () => {
       const credentials = testCredentials[0];
       const twitterUser = await services.db.run((manager) =>
-        authenticateTwitterForUser(credentials, services, manager, undefined)
+        authenticateTwitterForUser(credentials, services, manager, {
+          userId: credentials.userId,
+        } as unknown as AppUser)
       );
 
       /** update userId of posts and profiles */

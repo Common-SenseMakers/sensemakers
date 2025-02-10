@@ -1,10 +1,12 @@
 import { PropsWithChildren, createContext, useContext } from 'react';
 
+import { ClusterContext } from '../../posts.fetcher/cluster.context';
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
 import { DisconnectUserContext } from './DisconnectUserContext';
 import { NavHistoryContext } from './NavHistoryContext';
 import { BlueskyContext } from './platforms/BlueskyContext';
+import { ClerkContext } from './platforms/ClerkContext';
 import { MastodonContext } from './platforms/MastodonContext';
 import { OrcidContext } from './platforms/OrcidContext';
 import { TwitterContext } from './platforms/TwitterContext';
@@ -25,21 +27,25 @@ const ConnectedUserWrapperValue = createContext<
 export const ConnectedUserWrapper = (props: PropsWithChildren) => {
   return (
     <ConnectedUserWrapperValue.Provider value={{}}>
-      <AccountContext>
-        <OrcidContext>
-          <DisconnectUserContext>
-            <BlueskyContext>
-              <MastodonContext>
-                <TwitterContext>
-                  <UserPostsContext>
-                    <NavHistoryContext>{props.children}</NavHistoryContext>
-                  </UserPostsContext>
-                </TwitterContext>
-              </MastodonContext>
-            </BlueskyContext>
-          </DisconnectUserContext>
-        </OrcidContext>
-      </AccountContext>
+      <ClerkContext>
+        <AccountContext>
+          <OrcidContext>
+            <DisconnectUserContext>
+              <BlueskyContext>
+                <MastodonContext>
+                  <TwitterContext>
+                    <ClusterContext>
+                      <UserPostsContext>
+                        <NavHistoryContext>{props.children}</NavHistoryContext>
+                      </UserPostsContext>
+                    </ClusterContext>
+                  </TwitterContext>
+                </MastodonContext>
+              </BlueskyContext>
+            </DisconnectUserContext>
+          </OrcidContext>
+        </AccountContext>
+      </ClerkContext>
     </ConnectedUserWrapperValue.Provider>
   );
 };

@@ -1,8 +1,11 @@
-// import axios from 'axios';
 import { Anchor, Box, Paragraph, Text } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { POSTHOG_EVENTS } from '../../../analytics/posthog.events';
 import { OpenLinkIcon } from '../../../app/icons/OpenLinkIcon';
+import { PostEditKeys } from '../../../i18n/i18n.edit.post';
 import { CARD_BORDER } from '../../../post/PostCard';
 import { AppHeading } from '../../../ui-components';
 import { useThemeContext } from '../../../ui-components/ThemedApp';
@@ -32,7 +35,11 @@ export const RefCard = (props: {
   refType?: string;
   sourceRef?: number;
   showDescription?: boolean;
+  showAllMentionsText?: boolean;
 }) => {
+  const { t } = useTranslation();
+  const posthog = usePostHog();
+
   const titleTruncated = useMemo(
     () => props.title && truncate(props.title, 50),
     [props.title]
@@ -43,24 +50,41 @@ export const RefCard = (props: {
   const domain = useMemo(() => extractDomain(props.url), [props.url]);
 
   return (
-    <Box align="start" pad={{}}>
-      <Box
-        margin={{ bottom: '20px' }}
-        width="100%"
-        direction="row"
-        justify="start">
-        {props.refType && (
-          <Text
-            style={{
-              fontSize: '14px',
-              fontWeight: '500',
-              lineHeight: '16px',
-              color: constants.colors.textLight2,
-            }}>
-            {props.sourceRef
-              ? `${zoteroItemTypeDisplay(props.refType)} from Reference ${props.sourceRef}`
-              : zoteroItemTypeDisplay(props.refType)}
-          </Text>
+    <Box width="100%" align="start" pad={{}}>
+      <Box width="100%" justify="between" direction="row">
+        <Box margin={{ bottom: '20px' }} direction="row" justify="start">
+          {props.refType && (
+            <Text
+              style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                lineHeight: '16px',
+                color: constants.colors.textLight2,
+              }}>
+              {props.sourceRef
+                ? `${zoteroItemTypeDisplay(props.refType)} from Reference ${props.sourceRef}`
+                : zoteroItemTypeDisplay(props.refType)}
+            </Text>
+          )}
+        </Box>
+
+        {props.showAllMentionsText && (
+          <Box>
+            <Text
+              style={{
+                color: constants.colors.textLight2,
+                fontSize: '14px',
+                fontWeight: 500,
+                lineHeight: '16px',
+                textDecorationLine: 'underline',
+                textDecorationStyle: 'solid',
+                textDecorationSkipInk: 'none',
+                textUnderlinePosition: 'from-font',
+                whiteSpace: 'nowrap',
+              }}>
+              {t(PostEditKeys.showAllMentionsText)}
+            </Text>
+          </Box>
         )}
       </Box>
       <Box
@@ -91,6 +115,7 @@ export const RefCard = (props: {
             alignItems: 'flex-start',
             gap: '4px',
             flex: '1 0 0',
+            overflow: 'hidden',
           }}>
           <AppHeading
             level={4}
@@ -114,9 +139,12 @@ export const RefCard = (props: {
             </Paragraph>
           )}
           <Box
-            onClick={() =>
-              window.open(props.url, '_blank', 'noopener,noreferrer')
-            }
+            onClick={() => {
+              posthog?.capture(POSTHOG_EVENTS.CLICKED_REF_URL, {
+                url: props.url,
+              });
+              window.open(props.url, '_blank', 'noopener,noreferrer');
+            }}
             direction="row"
             gap="4px"
             style={{

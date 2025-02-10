@@ -57,3 +57,9 @@ export const updatePostSchema = object({
 })
   .required()
   .noUnknown(true);
+
+export const getKeywordsSchema = object({
+  clusterId: string().optional(),
+})
+  .required()
+  .noUnknown(true);

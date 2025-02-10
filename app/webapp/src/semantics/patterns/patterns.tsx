@@ -30,7 +30,8 @@ export interface PostClickEvent {
   payload: unknown;
 }
 
-export interface PatternProps {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface PatternProps<C = any> {
   size?: 'compact' | 'normal';
   isLoading?: boolean;
   editable?: boolean;
@@ -40,6 +41,7 @@ export interface PatternProps {
   post?: AppPostFull;
   structuredSemantics?: StructuredSemantics;
   onNonSemanticsClick?: () => void; // handle clicks that should be interpreted as outside of the patter component
+  custom?: C;
 }
 
 export const patternsLib: Record<

@@ -14,7 +14,7 @@ import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useIsAtBottom } from '../ui-components/hooks/IsAtBottom';
 import { PostFetcherInterface } from './posts.fetcher.hook';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface FilterOption {
   value: string;
@@ -37,6 +37,7 @@ export const PostsFetcherComponent = (props: {
   pageTitle?: string;
   isPublicFeed?: boolean;
   showHeader?: boolean;
+  showAggregatedLabels?: boolean;
   overlayConfig?: OverlayConfig;
   boxProps?: BoxExtendedProps;
 }) => {
@@ -133,7 +134,9 @@ export const PostsFetcherComponent = (props: {
       {posts.map((post, ix) => (
         <Box key={ix} id={`post-${post.id}`} style={{ flexShrink: 0 }}>
           <PostContext postInit={post}>
-            <PostCard isPublicFeed={isPublicFeed}></PostCard>
+            <PostCard
+              isPublicFeed={isPublicFeed}
+              showAggregatedLabels={props.showAggregatedLabels}></PostCard>
           </PostContext>
         </Box>
       ))}
@@ -205,7 +208,6 @@ export const PostsFetcherComponent = (props: {
         style={{
           height: '100%',
           overflowY: 'auto',
-          maxWidth: 600,
         }}>
         {!posts || isLoading
           ? showLoading

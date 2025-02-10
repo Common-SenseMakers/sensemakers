@@ -11,11 +11,11 @@ import {
 } from '../posts.fetcher/posts.fetcher.hook';
 import { AccountProfileHeader } from '../profiles/AccountProfileHeader';
 import { UserProfileHeader } from '../profiles/UserProfileHeader';
-import { AccountProfileRead } from '../shared/types/types.profiles';
 import {
-  AppUserPublicRead,
+  AccountProfileRead,
   GetProfilePayload,
-} from '../shared/types/types.user';
+} from '../shared/types/types.profiles';
+import { AppUserPublicRead } from '../shared/types/types.user';
 import { splitProfileId } from '../shared/utils/profiles.utils';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
 import { usePublicFeed } from './PublicFeedContext';
@@ -125,7 +125,8 @@ export const UserProfileOverlay = (props: {
           showHeader={false}
           isPublicFeed={isPublicFeed}
           feed={feed}
-          pageTitle={'Ref'}></PostsFetcherComponent>
+          pageTitle={'Ref'}
+          showAggregatedLabels={true}></PostsFetcherComponent>
       </Box>
     </OverlayContext>
   );

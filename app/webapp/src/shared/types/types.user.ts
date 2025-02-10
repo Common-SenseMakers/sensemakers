@@ -49,10 +49,12 @@ export interface AccountDetailsBase<
 > extends WithPlatformUserId {
   signupDate: number;
   credentials: C;
+  isDisconnected?: boolean;
 }
 
 /** The AppUser object combines the details of each platform */
 export interface UserWithId {
+  clerkId: string;
   userId: string;
 }
 
@@ -116,6 +118,7 @@ export interface AccountDetailsRead<
   profile: P;
   read: boolean;
   write: boolean;
+  isDisconnected?: boolean;
 }
 
 /** accounts include the readable details (not sensitive details) */
@@ -134,7 +137,7 @@ export interface AppUserRead
 }
 
 /** details publicly available about a user */
-export interface AppUserPublicRead extends UserWithId {
+export interface AppUserPublicRead extends Omit<UserWithId, 'clerkId'> {
   profiles: {
     [PLATFORM.Orcid]?: AccountProfileRead[];
     [PLATFORM.Twitter]?: AccountProfileRead[];
@@ -146,6 +149,8 @@ export interface AppUserPublicRead extends UserWithId {
 /** Test users support for mocks and tests */
 export interface TestUserCredentials {
   userId: string;
+  clerkId: string;
+  clustersIds: string[];
   twitter: TwitterSigninCredentials;
   mastodon: MastodonSigninCredentials;
   bluesky: BlueskySigninCredentials;
@@ -166,9 +171,3 @@ export type RenderEmailFunction = (
   notificationFrequency: NotificationFreq,
   appUrl: string
 ) => { html: string; plainText: string; subject: string };
-
-export interface GetProfilePayload {
-  platformId: PLATFORM;
-  user_id?: string;
-  username?: string;
-}

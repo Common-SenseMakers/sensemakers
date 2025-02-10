@@ -21,6 +21,7 @@ import {
   parseMastodonPostURI,
 } from '../../src/@shared/utils/mastodon.utils';
 import { getProfileId } from '../../src/@shared/utils/profiles.utils';
+import { ClustersService } from '../../src/clusters/clusters.service';
 import { logger } from '../../src/instances/logger';
 import { BlueskyService } from '../../src/platforms/bluesky/bluesky.service';
 import { MastodonService } from '../../src/platforms/mastodon/mastodon.service';
@@ -305,10 +306,11 @@ describe('02-platforms', () => {
         expect(result.avatar).to.be.a('string');
       }
     });
+
     it('handles newlines in the content html', async () => {
       const post_id =
         'https://w3c.social/users/w3c/statuses/113561528162272973';
-      const result = await mastodonService.get(
+      const result = await mastodonService.getThread(
         post_id,
         userDetails.credentials
       );
@@ -362,8 +364,14 @@ describe('02-platforms', () => {
         password: blueskyAppPassword,
       });
 
+      if (!agent.session) {
+        throw new Error('Failed to login to Bluesky with admin credentials');
+      }
+
       const result = (
-        await blueskyService.getProfileByUsername(username, agent.session)
+        await blueskyService.getProfileByUsername(username, {
+          session: agent.session,
+        })
       )?.profile;
 
       expect(result).to.not.be.null;
@@ -384,7 +392,7 @@ describe('02-platforms', () => {
 
         const result = (
           await services.db.run((manager) =>
-            blueskyService.get(postId, userDetails.credentials)
+            blueskyService.getThread(postId, userDetails.credentials)
           )
         ).platformPost;
         const expectedThreadIds = [
@@ -423,7 +431,7 @@ describe('02-platforms', () => {
       }
     );
 
-    it.only('can fetch since and until with dates instead of post_ids', async () => {
+    it('can fetch since and until with dates instead of post_ids', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -490,23 +498,27 @@ describe('02-platforms', () => {
       }
 
       const allProfilePosts =
-        await services.postsManager.processing.posts.getAllOfQuery({
-          profileId: getProfileId(PLATFORM.Bluesky, userDetails.user_id),
-          fetchParams: { expectedAmount: 100 },
-        });
+        await services.postsManager.processing.posts.getAllOfQuery(
+          {
+            profileId: getProfileId(PLATFORM.Bluesky, userDetails.user_id),
+            fetchParams: { expectedAmount: 100 },
+          },
+          (
+            services.postsManager as unknown as { clusters: ClustersService }
+          ).clusters.getInstance()
+        );
       await services.db.run(async (manager) => {
-        allProfilePosts.forEach(async (post) => {
+        for (const post of allProfilePosts) {
           if (
             post.id !== sinceAndUntilPosts.sincePost.id &&
             post.id !== sinceAndUntilPosts.untilPost.id
           ) {
-            // NOTE: something in this method calls seems to leave an unresolved async call
             await services.postsManager.processing.deletePostFull(
               post.id,
               manager
             );
           }
-        });
+        }
       });
 
       const fetchParamsSince: FetchParams = {
@@ -519,7 +531,7 @@ describe('02-platforms', () => {
         untilId: sinceAndUntilPosts.untilPost.id,
       };
       await services.db.run(async (manager) => {
-        await services.users.profiles.setAccountProfileFetched(
+        await services.users.profiles.repo.setAccountProfileFetched(
           PLATFORM.Bluesky,
           userDetails.user_id,
           { newest_id: sincePost_id, oldest_id: untilPost_id },
@@ -534,7 +546,7 @@ describe('02-platforms', () => {
       });
 
       await services.db.run(async (manager) => {
-        await services.users.profiles.setAccountProfileFetched(
+        await services.users.profiles.repo.setAccountProfileFetched(
           PLATFORM.Bluesky,
           userDetails.user_id,
           { newest_id: sincePost_id, oldest_id: untilPost_id },
@@ -581,13 +593,40 @@ describe('02-platforms', () => {
     it('includes quoted posts in the thread when the embed is of type app.bsky.embed.recordWithMedia#view', async () => {
       const post_id =
         'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcmhumbudk2m';
-      const result = await blueskyService.get(post_id, userDetails.credentials);
+      const result = await blueskyService.getThread(
+        post_id,
+        userDetails.credentials
+      );
 
       const genericPost = await blueskyService.convertToGeneric({
         posted: result.platformPost,
       } as PlatformPostCreate<BlueskyThread>);
 
       expect(genericPost.thread[0].quotedThread).to.not.be.undefined;
+    });
+
+    it('it can fetch a single post', async () => {
+      const post_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcmhumbudk2m';
+      const result = await blueskyService.getSinglePost(
+        post_id,
+        userDetails.credentials
+      );
+
+      expect(result.platformPost.post.posts).to.have.length(1);
+    });
+    it('it cannot fetch a single post if it is a repost', async () => {
+      const post_id =
+        'at://did:plc:6z5botgrc5vekq7j26xnvawq/app.bsky.feed.post/3lcmhumbudk2m?reposted_by=did:plc:xq36vykdkrzknmcxo3jnn5wq';
+      try {
+        await blueskyService.getSinglePost(post_id, userDetails.credentials);
+        throw new Error('Should not have reached here');
+      } catch (error: any) {
+        expect(error).to.not.be.undefined;
+        expect(error.message).to.equal(
+          `reposts cannot be fetched with getSinglePost. Tried to fetch ${post_id}`
+        );
+      }
     });
   });
 });

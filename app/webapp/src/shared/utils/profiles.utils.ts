@@ -19,14 +19,14 @@ export const splitProfileId = (profileId: string) => {
   throw new Error(`Cant split unexpected profileId ${profileId}`);
 };
 
+export interface ParsedProfile {
+  platformId: IDENTITY_PLATFORM;
+  username: string;
+}
+
 export const parseProfileUrl = (
   profileUrl: string
-):
-  | {
-      username: string;
-      platformId: IDENTITY_PLATFORM;
-    }
-  | undefined => {
+): ParsedProfile | undefined => {
   const url = new URL(profileUrl);
   const platformId = PLATFORM_URLS_MAP[url.hostname] || PLATFORM.Mastodon;
 

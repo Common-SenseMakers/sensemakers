@@ -45,20 +45,20 @@ import {
   triggerAutofetchPostsForNonUsers,
 } from './posts/tasks/posts.autofetch.task';
 import { PARSE_POST_TASK, parsePostTask } from './posts/tasks/posts.parse.task';
+import {
+  REPLACE_USER_TASK,
+  replaceUserTask,
+} from './posts/tasks/replace.user.task';
 import { router } from './router';
 import { getConfig } from './services.config';
 
 // all secrets are available to all functions
 const secrets: SecretParam[] = [
-  envRuntime.ORCID_SECRET,
-  envRuntime.OUR_TOKEN_SECRET,
+  envRuntime.CLERK_SECRET_KEY,
   envRuntime.TWITTER_CLIENT_SECRET,
   envRuntime.TWITTER_BEARER_TOKEN,
   envRuntime.MASTODON_ACCESS_TOKENS,
   envRuntime.BLUESKY_APP_PASSWORD,
-  envRuntime.NP_PUBLISH_RSA_PRIVATE_KEY,
-  envRuntime.EMAIL_CLIENT_SECRET,
-  envRuntime.MAGIC_ADMIN_SECRET,
   envRuntime.IFRAMELY_API_KEY,
 ];
 
@@ -93,7 +93,7 @@ export const firestore = app.firestore();
 exports['api'] = functions
   .region(region)
   .runWith(deployConfig)
-  .https.onRequest(buildApp(router));
+  .https.onRequest(buildApp(() => getConfig().clerk, router));
 
 exports['admin'] = functions
   .region(envDeploy.REGION)
@@ -101,7 +101,7 @@ exports['admin'] = functions
     ...deployConfig,
     secrets: [...secrets, envRuntime.ADMIN_API_KEY],
   })
-  .https.onRequest(buildAdminApp(adminRouter));
+  .https.onRequest(buildAdminApp(() => getConfig().clerk, adminRouter));
 
 /** jobs */
 exports.accountFetch = onSchedule(
@@ -224,6 +224,11 @@ exports[FETCH_ACCOUNT_TASKS[PLATFORM.Bluesky]] = onTaskDispatched(
   (req) => fetchPlatformAccountTask(req, createServices(firestore, getConfig()))
 );
 
+exports[REPLACE_USER_TASK] = onTaskDispatched(
+  { ...deployConfigTasks, secrets },
+  (req) => replaceUserTask(req, createServices(firestore, getConfig()))
+);
+
 const getBeforeAndAfterOnUpdate = <T>(
   event: FirestoreEvent<functions.Change<QueryDocumentSnapshot> | undefined>,
   idProperty: string
@@ -340,13 +345,4 @@ exports['trigger'] = functions
     ...deployConfig,
     secrets,
   })
-  .https.onRequest(buildApp(emulatorTriggerRouter));
-
-/** admin */
-exports['admin'] = functions
-  .region(region)
-  .runWith({
-    ...deployConfig,
-    secrets: [...secrets, envRuntime.ADMIN_API_KEY],
-  })
-  .https.onRequest(buildAdminApp(adminRouter));
+  .https.onRequest(buildApp(() => getConfig().clerk, emulatorTriggerRouter));

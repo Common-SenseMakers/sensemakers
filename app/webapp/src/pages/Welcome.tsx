@@ -1,14 +1,18 @@
+import { useClerk } from '@clerk/clerk-react';
 import { Box, Image } from 'grommet';
 import { t } from 'i18next';
+import { usePostHog } from 'posthog-js/react';
+import { useEffect } from 'react';
 import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { WelcomeKeys } from '../i18n/i18n.welcome';
 import { AbsoluteRoutes } from '../route.names';
 import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import { LoginCase } from './ConnectSocialsPage';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 
 interface WelcomeBulletProps {
   emoji: string;
@@ -48,9 +52,23 @@ export const WelcomeBullet = ({
 
 export const Welcome = () => {
   const navigate = useNavigate();
+  const posthog = usePostHog();
 
-  const setLoginCase = (loginCase: LoginCase) => {
-    navigate(AbsoluteRoutes.Start);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { openSignIn } = useClerk();
+  const { connectedUser } = useAccountContext();
+
+  /** after the signin flow, the connectedUser should be defined */
+  useEffect(() => {
+    if (connectedUser) {
+      navigate(AbsoluteRoutes.Start);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectedUser]);
+
+  const startLogin = () => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_GET_STARTED);
+    openSignIn();
   };
 
   return (
@@ -96,7 +114,7 @@ export const Welcome = () => {
           primary
           margin={{ top: 'large' }}
           label="Get started"
-          onClick={() => setLoginCase(LoginCase.signup)}></AppButton>
+          onClick={() => startLogin()}></AppButton>
       </BoxCentered>
     </Box>
   );

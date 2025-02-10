@@ -1,31 +1,37 @@
+import { BLUESKY_REPOST_URI_QUERY } from '../types/types.bluesky';
 import { AccountProfileRead } from '../types/types.profiles';
 
 export interface BlueskyURI {
   did: string;
   collection: string;
   rkey: string;
+  repostedByDid?: string;
 }
 
 export function parseBlueskyURI(uri: string): BlueskyURI {
   try {
-    // Validate the URI starts with the correct protocol
     if (!uri.startsWith('at://')) {
       throw new Error('Invalid URI: must start with "at://".');
     }
 
-    // Split the URI into its components
     const parts = uri.split('/');
 
-    // Ensure the URI has the expected number of parts
     if (parts.length !== 5) {
       throw new Error('Invalid URI: expected exactly 5 parts.');
     }
 
-    // Extract the components
-    const [, , did, collection, rkey] = parts;
+    const [, , did, collection, rkeyAndRepost] = parts;
 
-    // Return the parsed URI
-    return { did, collection, rkey };
+    const rkeyAndRepostParts = rkeyAndRepost.split(BLUESKY_REPOST_URI_QUERY);
+    if (rkeyAndRepostParts.length > 2) {
+      throw new Error('Invalid URI: too many repost query parameters.');
+    }
+    if (rkeyAndRepostParts.length === 2) {
+      const [rkey, repostedByDid] = rkeyAndRepostParts;
+      return { did, collection, rkey, repostedByDid };
+    }
+
+    return { did, collection, rkey: rkeyAndRepostParts[0] };
   } catch (error) {
     throw new Error((error as Error).message);
   }

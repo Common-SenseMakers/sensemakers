@@ -80,15 +80,8 @@ export enum OPTIONAL_TWEET_FIELDS {
   ReferencedTweets = 'referenced_tweets',
 }
 
-// I was gettig an error Type 'OPTIONAL_TWEET_FIELDS' does not satisfy the constraint 'keyof TweetV2'
-// export type AppTweetBase = Required<Pick<TweetV2, REQUIRED_TWEET_FIELDS>> &
-//   Pick<TweetV2, OPTIONAL_TWEET_FIELDS>;
-
-export type AppTweetBase = Required<Pick<TweetV2, REQUIRED_TWEET_FIELDS>> & {
-  entities?: TweetV2['entities'];
-  note_tweet?: TweetV2;
-  referenced_tweets?: TweetV2['referenced_tweets'];
-};
+export type AppTweetBase = TweetV2 &
+  Required<Pick<TweetV2, REQUIRED_TWEET_FIELDS>>;
 
 export type AppQuotedTweet = AppTweetBase & {
   author: TwitterUser;

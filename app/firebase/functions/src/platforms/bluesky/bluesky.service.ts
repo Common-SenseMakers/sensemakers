@@ -1,12 +1,6 @@
-import AtpAgent, {
-  AppBskyFeedDefs,
-  AppBskyFeedPost,
-  RichText,
-} from '@atproto/api';
-import * as jwt from 'jsonwebtoken';
+import { AppBskyFeedDefs, AppBskyFeedPost, RichText } from '@atproto/api';
 
 import {
-  AccessJwtPayload,
   BlueskyAccountCredentials,
   BlueskyAccountDetails,
   BlueskyCredentials,
@@ -19,6 +13,7 @@ import {
 import { PlatformFetchParams } from '../../@shared/types/types.fetch';
 import {
   FetchedResult,
+  PlatformPost,
   PlatformPostCreate,
   PlatformPostDraft,
   PlatformPostDraftApproval,
@@ -39,16 +34,16 @@ import {
 } from '../../@shared/types/types.profiles';
 import { AccountCredentials } from '../../@shared/types/types.user';
 import { parseBlueskyURI } from '../../@shared/utils/bluesky.utils';
+import { DBInstance } from '../../db/instance';
 import { logger } from '../../instances/logger';
 import { TimeService } from '../../time/time.service';
 import { UsersHelper } from '../../users/users.helper';
-import { UsersRepository } from '../../users/users.repository';
 import { PlatformService, WithCredentials } from '../platforms.interface';
+import { BlueskyServiceClient } from './bluesky.service.client';
 import {
   cleanBlueskyContent,
   convertBlueskyPostsToThreads,
   extractPrimaryThread,
-  removeUndefinedFields,
 } from './bluesky.utils';
 
 const DEBUG = false;
@@ -61,6 +56,7 @@ export interface BlueskyServiceConfig {
 }
 
 export class BlueskyService
+  extends BlueskyServiceClient
   implements
     PlatformService<
       BlueskySignupContext,
@@ -69,107 +65,16 @@ export class BlueskyService
     >
 {
   constructor(
+    protected db: DBInstance,
     protected time: TimeService,
-    protected usersRepo: UsersRepository,
-    protected config: BlueskyServiceConfig,
-    protected agent?: AtpAgent
-  ) {}
-
-  private async getClient(
-    credentials?: BlueskyCredentials
-  ): Promise<{ client: AtpAgent; credentials?: BlueskyCredentials }> {
-    const session = await (async () => {
-      if (!this.agent) {
-        this.agent = new AtpAgent({
-          service: this.config.BLUESKY_SERVICE_URL,
-        });
-      }
-      if (!credentials) {
-        if (this.agent?.session) {
-          return this.agent.session;
-        }
-        await this.agent.login({
-          identifier: this.config.BLUESKY_USERNAME,
-          password: this.config.BLUESKY_APP_PASSWORD,
-        });
-        if (!this.agent.session) {
-          throw new Error('Failed to login to Bluesky');
-        }
-        return this.agent.session;
-      }
-      return credentials;
-    })();
-    if (!this.agent) {
-      throw new Error('Failed to initialize bluesky client');
-    }
-    await this.agent.resumeSession(session);
-    if (!this.agent.session) {
-      throw new Error('Failed to initiate bluesky session');
-    }
-    const decodedAccessJwt = jwt.decode(
-      this.agent.session.accessJwt
-    ) as AccessJwtPayload;
-
-    let newCredentials: BlueskyCredentials | undefined = undefined;
-
-    /** if the access token is under 1 hour from expiring, refresh it */
-    if (decodedAccessJwt.exp * 1000 - this.time.now() < 1000 * 60 * 60) {
-      await this.agent.sessionManager.refreshSession();
-      newCredentials = this.agent.session;
-    }
-
-    return { client: this.agent, credentials: newCredentials };
+    protected config: BlueskyServiceConfig
+  ) {
+    super(db, time, config);
   }
 
   public async getSignupContext(userId?: string, params?: any): Promise<any> {
     // Bluesky doesn't require a signup context when using app password
     return {};
-  }
-
-  public async handleSignupData(signupData: BlueskySignupData) {
-    if (DEBUG) logger.debug('handleSignupData', { signupData }, DEBUG_PREFIX);
-    const agent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
-    await agent.login({
-      identifier: signupData.username,
-      password: signupData.appPassword,
-    });
-    if (!agent.session) {
-      throw new Error('Failed to login to Bluesky');
-    }
-    const bskFullUser = await agent.getProfile({
-      actor: agent.session.did,
-    });
-
-    const sessionData = removeUndefinedFields(agent.session);
-    const bluesky: BlueskyAccountDetails = {
-      user_id: bskFullUser.data.did,
-      signupDate: this.time.now(),
-      credentials: {
-        read: sessionData,
-      },
-    };
-
-    const bskSimpleUser: PlatformProfile = {
-      id: bskFullUser.data.did,
-      username: bskFullUser.data.handle,
-      displayName: bskFullUser.data.displayName || bskFullUser.data.handle,
-      avatar: bskFullUser.data.avatar || '',
-      description: bskFullUser.data.description || '',
-    };
-
-    const profile: PlatformAccountProfile = {
-      user_id: bskSimpleUser.id,
-      profile: bskSimpleUser,
-    };
-
-    if (signupData.type === 'write') {
-      bluesky.credentials['write'] = sessionData;
-    }
-
-    if (DEBUG)
-      logger.debug('handleSignupData result', { bluesky }, DEBUG_PREFIX);
-
-    return { accountDetails: bluesky, profile };
   }
 
   public async getProfileByUsername(
@@ -494,12 +399,9 @@ export class BlueskyService
 
   public async getProfile(
     user_id: string,
-    credentials: any
+    credentials?: BlueskyCredentials
   ): Promise<PlatformAccountProfile | undefined> {
     try {
-      if (!credentials) {
-        throw new Error('Missing Bluesky user details');
-      }
       const { client: agent } = await this.getClient(credentials);
       const profile = await agent.getProfile({ actor: user_id });
 
@@ -533,28 +435,30 @@ export class BlueskyService
     if (newSession) {
       newCredentials = { read: newSession };
     }
-
-    const result = await agent.getPostThread({
-      uri: post_id,
-      depth: 0,
-      parentHeight: 0,
-    });
-
-    const thread = result.data.thread as AppBskyFeedDefs.ThreadViewPost;
-    const bskAuthor = thread.post.author;
-    const post = {
-      ...thread.post,
-      record: thread.post.record as AppBskyFeedPost.Record,
-    } as BlueskyPost;
+    const { did, rkey, repostedByDid } = parseBlueskyURI(post_id);
+    if (repostedByDid) {
+      throw new Error(
+        `reposts cannot be fetched with getSinglePost. Tried to fetch ${post_id}`
+      );
+    }
+    const result = await agent.getPost({ repo: did, rkey });
+    const author = await agent.getProfile({ actor: did });
+    const bskyPost: BlueskyPost = {
+      cid: result.cid,
+      uri: result.uri,
+      record: result.value,
+      author: author.data,
+      indexedAt: result.value.createdAt,
+    };
 
     const blueskyThread: BlueskyThread = {
-      thread_id: thread.post.uri,
-      posts: [post],
+      thread_id: bskyPost.uri,
+      posts: [bskyPost],
       author: {
-        id: bskAuthor.did,
-        username: bskAuthor.handle,
-        avatar: bskAuthor.avatar || '',
-        displayName: bskAuthor.displayName || bskAuthor.handle,
+        id: author.data.did,
+        username: author.data.handle,
+        avatar: author.data.avatar || '',
+        displayName: author.data.displayName || author.data.handle,
       },
     };
 
@@ -570,17 +474,14 @@ export class BlueskyService
 
   public async getThread(
     post_id: string,
-    credentials: BlueskyAccountCredentials
+    credentials?: BlueskyAccountCredentials
   ): Promise<
     { platformPost: PlatformPostPosted<BlueskyThread> } & WithCredentials
   > {
     if (DEBUG) logger.debug('get', { post_id, credentials }, DEBUG_PREFIX);
 
-    if (!credentials.read) {
-      throw new Error('Missing Bluesky user details');
-    }
     const { client: agent, credentials: newCredentials } = await this.getClient(
-      credentials.read
+      credentials?.read
     );
     const newAccountCredentials: BlueskyAccountCredentials | undefined =
       newCredentials ? { read: newCredentials } : undefined;
@@ -682,5 +583,45 @@ export class BlueskyService
       }
     }
     return posts;
+  }
+  isPartOfMainThread(
+    rootPost: PlatformPost<BlueskyThread>,
+    post: PlatformPostCreate<BlueskyThread>
+  ): boolean {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (rootPost.posted.post_id !== post.posted.post_id) return false;
+    const rootThreadPosts = rootPost.posted.post.posts;
+    const lastRootThreadPost = rootThreadPosts[rootThreadPosts.length - 1];
+    const newThreadPosts = post.posted.post.posts;
+    const firstNewThreadPost = newThreadPosts[0];
+
+    if (firstNewThreadPost.record.reply?.parent.uri === lastRootThreadPost.uri)
+      return true;
+
+    return false;
+  }
+  mergeBrokenThreads(
+    rootPost: PlatformPost<BlueskyThread>,
+    post: PlatformPostCreate<BlueskyThread>
+  ): PlatformPostPosted | undefined {
+    if (!rootPost.posted || !post.posted) {
+      throw new Error('Unexpected undefined posted');
+    }
+    if (!this.isPartOfMainThread(rootPost, post)) {
+      return undefined;
+    }
+
+    const mergedThread = [
+      ...rootPost.posted?.post.posts,
+      ...post.posted?.post.posts,
+    ];
+    rootPost.posted.post.posts = mergedThread;
+    return rootPost.posted;
+  }
+  isRootThread(post: PlatformPostCreate<BlueskyThread>): boolean {
+    if (post.posted?.post.posts[0].repostedBy) return true; // a repost is always a root "thread" and should not be ignored
+    return post.posted?.post.posts[0].uri === post.posted?.post_id;
   }
 }

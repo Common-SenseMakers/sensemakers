@@ -1,14 +1,17 @@
 import { Firestore } from 'firebase-admin/firestore';
 
-import { OurTokenConfig } from '../@shared/types/types.fetch';
 import { PLATFORM } from '../@shared/types/types.platforms';
 import { ActivityRepository } from '../activity/activity.repository';
 import { ActivityService } from '../activity/activity.service';
+import { ClustersRepository } from '../clusters/clusters.repository';
+import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
 import { FeedService } from '../feed/feed.service';
 import { LinksRepository } from '../links/links.repository';
 import { LinksConfig, LinksService } from '../links/links.service';
 import { getLinksMock } from '../links/links.service.mock';
+import { OntologiesRepository } from '../ontologies/ontologies.repository';
+import { OntologiesService } from '../ontologies/ontologies.service';
 import { getParserMock } from '../parser/mock/parser.service.mock';
 import { ParserService } from '../parser/parser.service';
 import {
@@ -22,7 +25,6 @@ import {
 } from '../platforms/mastodon/mastodon.service';
 import { getMastodonMock } from '../platforms/mastodon/mock/mastodon.service.mock';
 import { getTestCredentials } from '../platforms/mock/test.users';
-import { OrcidService } from '../platforms/orcid/orcid.service';
 import {
   IdentityServicesMap,
   PlatformsMap,
@@ -38,6 +40,7 @@ import { PostsManager } from '../posts/posts.manager';
 import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
 import { ProfilesRepository } from '../profiles/profiles.repository';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -45,8 +48,14 @@ import { logger } from './logger';
 
 const DEBUG = false;
 
+export interface ClerkConfig {
+  publishableKey: string;
+  secretKey: string;
+}
+
 export interface Services {
   users: UsersService;
+  profiles: ProfilesService;
   postsManager: PostsManager;
   feed: FeedService;
   platforms: PlatformsService;
@@ -54,6 +63,8 @@ export interface Services {
   db: DBInstance;
   activity: ActivityService;
   links: LinksService;
+  ontology: OntologiesService;
+  clusters: ClustersService;
 }
 
 export interface ServicesConfig {
@@ -62,9 +73,9 @@ export interface ServicesConfig {
   mastodon: MastodonServiceConfig;
   bluesky: BlueskyServiceConfig;
   parser: string;
-  our: OurTokenConfig;
   isEmulator: boolean;
   links: LinksConfig;
+  clerk: ClerkConfig;
   mock: {
     USE_REAL_PARSER: boolean;
     USE_REAL_TWITTER: boolean;
@@ -89,12 +100,15 @@ export const createServices = (
   const platformPostsRepo = new PlatformPostsRepository(db);
   const activityRepo = new ActivityRepository(db);
   const linksRepo = new LinksRepository(db);
+  const ontologiesRepo = new OntologiesRepository(db);
+  const clustersRepo = new ClustersRepository(db);
 
   const identityPlatforms: IdentityServicesMap = new Map();
   const platformsMap: PlatformsMap = new Map();
   const time = new TimeService();
+  const ontologiesService = new OntologiesService(ontologiesRepo);
+  const clusters = new ClustersService(clustersRepo);
 
-  const orcid = new OrcidService();
   const _twitter = new TwitterService(time, userRepo, config.twitter);
 
   const testCredentials = getTestCredentials(config.testCredentials);
@@ -116,7 +130,7 @@ export const createServices = (
       : { signup: true, fetch: true, publish: true, get: true },
     testUser
   );
-  const _bluesky = new BlueskyService(time, userRepo, config.bluesky);
+  const _bluesky = new BlueskyService(db, time, config.bluesky);
   const bluesky = getBlueskyMock(
     _bluesky,
     config.mock.USE_REAL_BLUESKY
@@ -126,7 +140,6 @@ export const createServices = (
   );
 
   /** all identity services */
-  identityPlatforms.set(PLATFORM.Orcid, orcid);
   identityPlatforms.set(PLATFORM.Twitter, twitter);
   identityPlatforms.set(PLATFORM.Mastodon, mastodon);
   identityPlatforms.set(PLATFORM.Bluesky, bluesky);
@@ -136,15 +149,21 @@ export const createServices = (
   platformsMap.set(PLATFORM.Mastodon, mastodon);
   platformsMap.set(PLATFORM.Bluesky, bluesky);
 
+  /** profiles service */
+  const profilesService = new ProfilesService(
+    profilesRepo,
+    identityPlatforms,
+    db
+  );
+
   /** users service */
   const usersService = new UsersService(
     db,
     userRepo,
-    profilesRepo,
+    profilesService,
     identityPlatforms,
     platformsMap,
-    time,
-    config.our
+    time
   );
 
   // trigger magic init
@@ -163,7 +182,13 @@ export const createServices = (
     config.mock.USE_REAL_PARSER ? 'real' : 'mock'
   );
 
-  const _linksService = new LinksService(linksRepo, time, config.links);
+  const _linksService = new LinksService(
+    clusters,
+    linksRepo,
+    time,
+    ontologiesService,
+    config.links
+  );
   const linksService = getLinksMock(
     _linksService,
     config.mock.USE_REAL_LINKS ? undefined : { get: true, enable: true }
@@ -176,23 +201,27 @@ export const createServices = (
     postsRepo,
     platformPostsRepo,
     platformsService,
-    linksService
+    linksService,
+    clusters
   );
   // const postsParser = new PostsParser(platformsService, parserService);
   const postsManager = new PostsManager(
     db,
     usersService,
+    profilesService,
     postsProcessing,
     platformsService,
     parser,
-    time
+    time,
+    ontologiesService,
+    clusters
   );
 
   /** activity service */
   const activity = new ActivityService(activityRepo);
 
   /** feed */
-  const feed = new FeedService(db, postsManager);
+  const feed = new FeedService(db, postsManager, clusters);
 
   /** all services */
   const services: Services = {
@@ -204,6 +233,9 @@ export const createServices = (
     db,
     activity,
     links: linksService,
+    ontology: ontologiesService,
+    profiles: profilesService,
+    clusters,
   };
 
   if (DEBUG) {

@@ -1,5 +1,6 @@
 import { DataFactory } from 'n3';
 
+import { ClusterInstance } from '../@shared/types/types.clusters';
 import { FetchParams, PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
   PARSER_MODE,
@@ -20,6 +21,7 @@ import {
   ALL_PUBLISH_PLATFORMS,
   IDENTITY_PLATFORM,
   PLATFORM,
+  PLATFORM_SESSION_REFRESH_ERROR,
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
 import {
@@ -53,18 +55,22 @@ import {
   isReferenceLabel,
   isZoteroType,
 } from '../@shared/utils/semantics.helper';
+import { ClustersService } from '../clusters/clusters.service';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
+import { processInBatches } from '../db/db.utils';
 import { DBInstance } from '../db/instance';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
+import { OntologiesService } from '../ontologies/ontologies.service';
 import { ParserService } from '../parser/parser.service';
 import { PlatformsService } from '../platforms/platforms.service';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TimeService } from '../time/time.service';
 import { UsersHelper } from '../users/users.helper';
 import { UsersService } from '../users/users.service';
 import { PostsProcessing } from './posts.processing';
 
-const DEBUG = true;
+const DEBUG = false;
 
 /**
  * Top level methods. They instantiate a TransactionManger and execute
@@ -74,10 +80,13 @@ export class PostsManager {
   constructor(
     protected db: DBInstance,
     protected users: UsersService,
+    protected profiles: ProfilesService,
     public processing: PostsProcessing,
     protected platforms: PlatformsService,
     protected parserService: ParserService,
-    protected time: TimeService
+    protected time: TimeService,
+    public ontologies: OntologiesService,
+    protected clusters: ClustersService
   ) {}
 
   /**
@@ -184,10 +193,6 @@ export class PostsManager {
         >(platformPostId, manager, true);
         return post.posted;
       } else {
-        throw new Error(
-          `Platform post not found on ${platformId} post_id: ${post_id}. 
-           We should not have unavailable posts yet as we are not merging threads`
-        );
         const result = await this.platforms
           .get(platformId)
           .getSinglePost(post_id);
@@ -240,8 +245,8 @@ export class PostsManager {
     credentials?: AccountCredentials,
     userId?: string
   ) {
-    const profile = await this.users.getOrCreateProfile(
-      getProfileId(platformId, user_id),
+    const profile = await this.profiles.getOrCreateProfile(
+      { profileId: getProfileId(platformId, user_id) },
       manager
     );
 
@@ -289,7 +294,7 @@ export class PostsManager {
         fetchedPosts.fetched
       );
 
-      await this.users.profiles.setAccountProfileFetched(
+      await this.profiles.repo.setAccountProfileFetched(
         platformId,
         user_id,
         newFetchedDetails,
@@ -301,10 +306,24 @@ export class PostsManager {
         this.initPlatformPost(platformId, fetchedPost)
       );
     } catch (err: any) {
-      logger.error(
-        `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}`,
-        { err }
-      );
+      if (userId && err.name === PLATFORM_SESSION_REFRESH_ERROR) {
+        logger.warn(
+          `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}. Marking as disconnected.`,
+          { err }
+        );
+        await this.users.updateAccountDisconnectedStatus(
+          userId,
+          platformId,
+          user_id,
+          true,
+          manager
+        );
+      } else {
+        logger.error(
+          `Error at fetchAccountFromPlatform for user_id ${user_id} on platform ${platformId}`,
+          { err }
+        );
+      }
 
       return undefined;
     }
@@ -427,23 +446,24 @@ export class PostsManager {
       }
 
       const authorUserId =
-        await this.users.profiles.getUserIdWithPlatformAccount(
+        await this.profiles.repo.getUserIdWithPlatformAccount(
           platformId,
           user_id,
           manager
         );
 
       /** Create the PlatformPosts and AppPosts */
-      const platformPostsCreated = await this.processing.createPlatformPosts(
-        platformPostsCreate,
-        manager,
-        authorUserId
-      );
+      const platformPostsCreated =
+        await this.processing.createOrMergePlatformPosts(
+          platformPostsCreate,
+          manager,
+          authorUserId
+        );
 
       /** make sure the profiles of each post exist */
       const profileIds = new Set<string>();
 
-      /** get all unique profiles */
+      /** fetch all unique profiles presets in the platform posts */
       platformPostsCreated.forEach((posts) => {
         if (!profileIds.has(posts.post.authorProfileId)) {
           profileIds.add(posts.post.authorProfileId);
@@ -452,7 +472,7 @@ export class PostsManager {
 
       await Promise.all(
         Array.from(profileIds).map((profileId) => {
-          this.users.getOrCreateProfile(profileId, manager);
+          this.profiles.getOrCreateProfile({ profileId }, manager);
         })
       );
 
@@ -546,7 +566,10 @@ export class PostsManager {
    * single place where new posts are fetched for a signedup user
    * from any platform
    * */
-  private async fetchIfNecessary(queryParams: PostsQueryDefined): Promise<{
+  private async fetchIfNecessary(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ): Promise<{
     posts: AppPost[];
     enough: boolean;
   }> {
@@ -571,7 +594,7 @@ export class PostsManager {
     let enough: boolean = true;
 
     /** if untilId is provided fetch backwards, but only if not enough posts are already stored */
-    const posts = await this.processing.posts.getMany(queryParams);
+    const posts = await this.processing.posts.getMany(queryParams, cluster);
 
     /** fetch if older posts are less thant he expected amount */
     if (posts.length < queryParams.fetchParams.expectedAmount) {
@@ -588,7 +611,7 @@ export class PostsManager {
       if (queryParams.userId === undefined) {
         throw new Error('userId is a required query parameter here');
       }
-      return this.users.profiles.getOfUser(queryParams.userId, manager);
+      return this.profiles.repo.getOfUser(queryParams.userId, manager);
     });
 
     const platformsWithoutFetch = profiles
@@ -614,13 +637,16 @@ export class PostsManager {
   }
 
   /** get AppPost and fetch for new posts if necessary */
-  private async getAndFetchIfNecessary(queryParams: PostsQueryDefined) {
+  private async getAndFetchIfNecessary(
+    queryParams: PostsQueryDefined,
+    cluster: ClusterInstance
+  ) {
     if (!queryParams.userId) {
       throw new Error('userId is required');
     }
 
     /** only fetch if searching for all "my posts" and not filtering by status or  */
-    const { posts, enough } = await this.fetchIfNecessary(queryParams);
+    const { posts, enough } = await this.fetchIfNecessary(queryParams, cluster);
 
     /**
      * after fetching (if it was necessary), get the posts from
@@ -632,10 +658,13 @@ export class PostsManager {
         return posts;
       }
 
-      return this.processing.posts.getMany({
-        ...queryParams,
-        userId: queryParams.userId,
-      });
+      return this.processing.posts.getMany(
+        {
+          ...queryParams,
+          userId: queryParams.userId,
+        },
+        cluster
+      );
     })();
 
     return _posts;
@@ -671,20 +700,23 @@ export class PostsManager {
       ..._queryParams,
     };
 
-    const appPosts = await this.getAndFetchIfNecessary(queryParams);
+    const cluster = this.clusters.getInstance(queryParams.clusterId);
+    const appPosts = await this.getAndFetchIfNecessary(queryParams, cluster);
 
     const postsFull = await Promise.all(
       appPosts.map((post) =>
         this.db.run((manager) =>
-          this.processing.hydratePostFull(post, hydrateConfig, manager)
+          this.processing.hydratePostFull(post, hydrateConfig, manager, cluster)
         )
       )
     );
 
-    logger.debug(
-      `getOfUser query for user ${queryParams.userId} has ${appPosts.length} results for query params: `,
-      { queryParams }
-    );
+    if (DEBUG)
+      logger.debug(
+        `getOfUser query for user ${queryParams.userId} has ${appPosts.length} results for query params: `,
+        { queryParams }
+      );
+
     return postsFull;
   }
 
@@ -692,13 +724,17 @@ export class PostsManager {
     postId: string,
     config: HydrateConfig,
     shouldThrow?: T,
-    manager?: TransactionManager
+    manager?: TransactionManager,
+    clusterId?: string
   ) {
     const func = async (manager: TransactionManager) => {
+      const cluster = this.clusters.getInstance(clusterId);
+
       const post = await this.processing.getPostFull(
         postId,
         config,
         manager,
+        cluster,
         shouldThrow
       );
       // use this occassion to check if post processing expired
@@ -720,6 +756,7 @@ export class PostsManager {
             postId,
             config,
             manager,
+            cluster,
             shouldThrow
           );
         }
@@ -894,9 +931,12 @@ export class PostsManager {
   }
 
   protected async _parsePost(postId: string) {
+    /** split the read post and write semantics in two transactions because the parsePost
+     * can take longer than the transaction expiration time */
     const post = await this.db.run(async (manager) => {
       return this.processing.posts.get(postId, manager, true);
     });
+
     if (DEBUG) logger.debug(`parsePost - start ${postId}`, { postId, post });
 
     const params: ParsePostRequest<TopicsParams> = {
@@ -916,17 +956,41 @@ export class PostsManager {
     /** single place where we enforce rules over semantics */
     const parserResult = await this.sanitizeParserResult(post, _parserResult);
 
-    const update: PostUpdate = {
-      semantics: parserResult.semantics,
-      originalParsed: parserResult,
-      parsedStatus: AppPostParsedStatus.PROCESSED,
-      parsingStatus: AppPostParsingStatus.IDLE,
-    };
-
-    if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId, update });
+    if (DEBUG) logger.debug(`parsePost - done ${postId}`, { postId });
 
     /** store the semantics and mark as processed */
     await this.db.run(async (manager) => {
+      const parserOntology = parserResult.support?.ontology;
+      /** store the ontology */
+      if (parserOntology) {
+        if (parserOntology.semantic_predicates) {
+          await this.ontologies.setMany(
+            parserOntology.semantic_predicates,
+            manager
+          );
+        }
+        if (parserOntology.keyword_predicate) {
+          await this.ontologies.setMany(
+            [parserOntology.keyword_predicate],
+            manager
+          );
+        }
+        if (parserOntology.topics_predicate) {
+          await this.ontologies.setMany(
+            [parserOntology.topics_predicate],
+            manager
+          );
+        }
+      }
+
+      /** store the semantics in the post */
+      const update: PostUpdate = {
+        semantics: parserResult.semantics,
+        originalParsed: parserResult,
+        parsedStatus: AppPostParsedStatus.PROCESSED,
+        parsingStatus: AppPostParsingStatus.IDLE,
+      };
+
       return this.updatePost(post.id, update, manager);
     });
   }
@@ -982,7 +1046,7 @@ export class PostsManager {
                 );
               }
 
-              const profile = await this.users.profiles.getByProfileId(
+              const profile = await this.profiles.repo.getByProfileId(
                 profileId,
                 manager,
                 true
@@ -991,7 +1055,7 @@ export class PostsManager {
                 throw new Error('unexpected missing profile');
               }
 
-              await this.users.profiles.setUserId(profileId, userId, manager);
+              await this.profiles.repo.update(profileId, { userId }, manager);
             })
           );
         })
@@ -1010,10 +1074,14 @@ export class PostsManager {
               /** udpate the profile */
               const profileId = getProfileId(platform, account.user_id);
               /** get this account platform posts */
-              const posts = await this.processing.posts.getAllOfQuery({
-                profileId,
-                fetchParams: { expectedAmount: 1000 },
-              });
+              const posts = await this.processing.posts.getAllOfQuery(
+                {
+                  profileId,
+                  fetchParams: { expectedAmount: 1000 },
+                },
+                this.clusters.getInstance()
+              );
+
               if (DEBUG) {
                 logger.debug(`got ${posts.length} posts of ${profileId}`);
               }
@@ -1045,10 +1113,13 @@ export class PostsManager {
   async deleteAccountFull(platformId: PLATFORM, user_id: string) {
     const profileId = getProfileId(platformId, user_id);
 
-    const posts = await this.processing.posts.getAllOfQuery({
-      profileId,
-      fetchParams: { expectedAmount: 100000 },
-    });
+    const posts = await this.processing.posts.getAllOfQuery(
+      {
+        profileId,
+        fetchParams: { expectedAmount: 100000 },
+      },
+      this.clusters.getInstance()
+    );
 
     if (DEBUG) {
       logger.debug(`fully deleting ${posts.length} posts of ${profileId}`);
@@ -1080,7 +1151,40 @@ export class PostsManager {
           manager
         );
       }
-      this.users.profiles.delete(profileId, manager);
+      this.profiles.repo.delete(profileId, manager);
     });
+  }
+
+  async replacePostsAuthor(existingUserId: string, newUserId: string) {
+    const cluster = this.clusters.getInstance();
+    const posts = await this.processing.posts.getAllOfQuery(
+      {
+        userId: existingUserId,
+        fetchParams: { expectedAmount: 100 },
+      },
+      cluster
+    );
+
+    await processInBatches(
+      posts.map(
+        (element) => () =>
+          (async (post: AppPost) => {
+            try {
+              if (DEBUG) console.log(`Processing ${post.id}`);
+
+              await this.db.run(async (manager) => {
+                await this.processing.posts.update(
+                  post.id,
+                  { authorUserId: newUserId },
+                  manager
+                );
+              });
+            } catch (error) {
+              console.error(`Error processing ${post.id}`, error);
+            }
+          })(element)
+      ),
+      10
+    );
   }
 }

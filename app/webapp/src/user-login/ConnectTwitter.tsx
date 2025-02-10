@@ -14,13 +14,17 @@ import { useAccountContext } from './contexts/AccountContext';
 export const ConnectTwitterPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { connectedPlatforms } = useAccountContext();
+  const { connectedUser, connectedPlatforms } = useAccountContext();
+  const twitterProfile = connectedUser?.profiles?.twitter;
 
   useEffect(() => {
-    if (connectedPlatforms.includes(PLATFORM.Twitter)) {
+    if (
+      connectedPlatforms.includes(PLATFORM.Twitter) &&
+      !twitterProfile?.isDisconnected
+    ) {
       navigate(AbsoluteRoutes.App);
     }
-  }, [connectedPlatforms, navigate]);
+  }, [connectedPlatforms, navigate, twitterProfile]);
 
   return (
     <Box

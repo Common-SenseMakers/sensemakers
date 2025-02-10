@@ -6,7 +6,10 @@ import {
   PlatformPostPosted,
   PlatformPostPublish,
 } from '../../../@shared/types/types.platform.posts';
-import { PlatformAccountProfile } from '../../../@shared/types/types.profiles';
+import {
+  PlatformAccountProfile,
+  PlatformProfile,
+} from '../../../@shared/types/types.profiles';
 import {
   TwitterAccountCredentials,
   TwitterAccountDetails,
@@ -48,14 +51,19 @@ export interface TwitterMockConfig {
   get?: boolean;
 }
 
+export interface InitThreadsProfiles {
+  id: string;
+  username: string;
+}
+
 export const initThreads = (
   testThreads: string[][],
-  testUsers: TestUserCredentials[]
+  testProfiles: InitThreadsProfiles[]
 ) => {
   const now = 1720805241;
 
   const threads = testThreads.map((thread, ixThread): TwitterThread => {
-    const testUser = testUsers[ixThread % testUsers.length];
+    const testProfile = testProfiles[ixThread % testProfiles.length];
 
     const tweets = thread.map((content, ixTweet) => {
       const idTweet = ixThread * 100 + ixTweet;
@@ -63,7 +71,7 @@ export const initThreads = (
       state.latestTweetId = idTweet;
       return getSampleTweet(
         idTweet.toString().padStart(5, '0'),
-        testUser.twitter.id,
+        testProfile.id,
         createdAt,
         ixThread.toString().padStart(5, '0'),
         content
@@ -74,9 +82,9 @@ export const initThreads = (
       conversation_id: `${ixThread}`,
       tweets,
       author: {
-        id: testUser.twitter.id,
-        name: testUser.twitter.username,
-        username: testUser.twitter.username,
+        id: testProfile.id,
+        name: testProfile.username,
+        username: testProfile.username,
         profile_image_url:
           'https://pbs.twimg.com/profile_images/1783977034038882304/RGn66lGT_normal.jpg',
       },
@@ -156,6 +164,8 @@ export const getTwitterMock = (
   }
 
   if (type.fetch) {
+    when(mocked.isRootThread(anything())).thenReturn(true);
+
     when(mocked.fetchInternal(anything(), anything(), anything())).thenCall(
       async (
         user_id: string,
@@ -221,6 +231,40 @@ export const getTwitterMock = (
           : { threads };
       }
     );
+
+    when(mocked.getProfile(anything(), anything())).thenCall(
+      async (user_id: string, credentials: TwitterCredentials) => {
+        const platformProfile: PlatformProfile = {
+          id: user_id,
+          displayName: `Name of ${user_id}`,
+          username: `username-${user_id}`,
+          avatar: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTePqvjrMR2bJt1B2e6bNQ6RS2n0q9ZN4e1UA&s`,
+          description: `a description`,
+        };
+
+        return {
+          user_id,
+          profile: platformProfile,
+        };
+      }
+    );
+
+    when(mocked.getProfileByUsername(anything(), anything())).thenCall(
+      async (username: string, credentials: TwitterCredentials) => {
+        const platformProfile: PlatformProfile = {
+          id: `${username}-id`,
+          displayName: `Name of ${username}`,
+          username: `${username}`,
+          avatar: `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTePqvjrMR2bJt1B2e6bNQ6RS2n0q9ZN4e1UA&s`,
+          description: `a description`,
+        };
+
+        return {
+          user_id: `${username}-id`,
+          profile: platformProfile,
+        };
+      }
+    );
   }
 
   if (type.get) {
@@ -253,7 +297,7 @@ export const getTwitterMock = (
   }
 
   if (type.signup) {
-    when(mocked.getSignupContext(anything(), anything())).thenCall(
+    when(mocked.getSignupContext(anything())).thenCall(
       (
         user_id?: string,
         params?: TwitterGetContextParams
@@ -294,11 +338,13 @@ export const getTwitterMock = (
           credentials: {
             read: {
               accessToken:
+                process.env.TWITTER_BEARER_TOKEN ||
                 'ZWJzaEJCU1BSaFZvLUIwRFNCNHNXVlQtTV9mY2VSaDlOSk5ETjJPci0zbmJtOjE3MTk0MzM5ODkyNTM6MTowOmF0OjE',
               refreshToken:
+                process.env.TWITTER_BEARER_TOKEN ||
                 'U2xBMGpRSkFucE9yQzAxSnJlM0pRci1tQzJlR2dfWEY2MEpNc2daYkF6VjZSOjE3MTk0MzM5ODkyNTM6MTowOnJ0OjE',
               expiresIn: 7200,
-              expiresAtMs: 1719441189590,
+              expiresAtMs: 2054341070000,
             },
           },
         };

@@ -1,0 +1,93 @@
+{
+  "platformPost": {
+    "post_id": "at://did:plc:5vcc6x4pw2nualmcmpifr4pk/app.bsky.feed.post/3lgi3w56awc2l",
+    "user_id": "did:plc:5vcc6x4pw2nualmcmpifr4pk",
+    "timestampMs": 1737711424773,
+    "post": {
+      "thread_id": "at://did:plc:5vcc6x4pw2nualmcmpifr4pk/app.bsky.feed.post/3lgi3w56awc2l",
+      "posts": [
+        {
+          "cid": "bafyreieppciowb46obwmwo63o56lamgyhxejhnqlliazrzt4pdsvh6v3ey",
+          "uri": "at://did:plc:5vcc6x4pw2nualmcmpifr4pk/app.bsky.feed.post/3lgi3w56awc2l",
+          "record": {
+            "$type": "app.bsky.feed.post",
+            "createdAt": "2025-01-24T09:37:04.773Z",
+            "embed": {
+              "$type": "app.bsky.embed.external",
+              "external": {
+                "description": "In an unprecedented move, research-grant reviews have been suspended indefinitely at the world’s largest public funder of biomedical research.",
+                "thumb": {
+                  "$type": "blob",
+                  "ref": {
+                    "$link": "bafkreicatoibhwnml44oczbon5acw4y7d25lztblioi5thcbwnu56kvgzq"
+                  },
+                  "mimeType": "image/jpeg",
+                  "size": 456713
+                },
+                "title": "‘Never seen anything like this’: Trump’s team halts NIH meetings and travel",
+                "uri": "https://www.nature.com/articles/d41586-025-00231-y"
+              }
+            },
+            "facets": [
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://www.nature.com/articles/d41586-025-00231-y"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 77,
+                  "byteStart": 47
+                }
+              },
+              {
+                "features": [
+                  {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://www.nature.com/articles/d41586-025-00229-6"
+                  }
+                ],
+                "index": {
+                  "byteEnd": 156,
+                  "byteStart": 126
+                }
+              }
+            ],
+            "langs": ["en"],
+            "text": "this is really unfortunate for public science: www.nature.com/articles/d41...\n\nat least this is something to look forward to: www.nature.com/articles/d41..."
+          },
+          "author": {
+            "did": "did:plc:5vcc6x4pw2nualmcmpifr4pk",
+            "handle": "sensebottest.bsky.social",
+            "displayName": "",
+            "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:5vcc6x4pw2nualmcmpifr4pk/bafkreieocqwf3shlt5uzpm6rf26z36utigo5ktwlqqppkvhkotu3yqmkxe@jpeg",
+            "associated": {
+              "lists": 0,
+              "feedgens": 0,
+              "starterPacks": 0,
+              "labeler": false
+            },
+            "viewer": {
+              "muted": false,
+              "blockedBy": false
+            },
+            "labels": [],
+            "createdAt": "2025-01-22T10:21:13.243Z",
+            "indexedAt": "2025-01-22T10:21:26.344Z",
+            "followersCount": 0,
+            "followsCount": 1,
+            "postsCount": 19
+          },
+          "indexedAt": "2025-01-24T09:37:04.773Z"
+        }
+      ],
+      "author": {
+        "id": "did:plc:5vcc6x4pw2nualmcmpifr4pk",
+        "username": "sensebottest.bsky.social",
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:5vcc6x4pw2nualmcmpifr4pk/bafkreieocqwf3shlt5uzpm6rf26z36utigo5ktwlqqppkvhkotu3yqmkxe@jpeg",
+        "displayName": "sensebottest.bsky.social"
+      }
+    }
+  }
+}

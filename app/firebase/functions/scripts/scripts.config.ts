@@ -25,9 +25,9 @@ export const config: ServicesConfig = {
     BLUESKY_SERVICE_URL: process.env.BLUESKY_SERVICE_URL as string,
   },
   parser: process.env.FUNCTIONS_PY_URL as string,
-  our: {
-    expiresIn: '30d',
-    tokenSecret: process.env.OUR_TOKEN_SECRET as string,
+  clerk: {
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY as string,
+    secretKey: process.env.CLERK_SECRET_KEY as string,
   },
   isEmulator: process.env.FIRESTORE_EMULATOR_HOST !== undefined,
   mock: {

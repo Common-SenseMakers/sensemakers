@@ -1,11 +1,11 @@
 import { Box } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
-import { Location, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
+import { KeywordsSuggestions } from '../clusters/keywords.suggestions';
 import { MultiTabFeeds } from '../feed/MultiTabFeeds';
-import { FeedTabConfig, feedTabs } from '../feed/feed.config';
 import { OverlayValue } from '../overlays/Overlay';
 import { OverlayContext, OverlayQueryParams } from '../overlays/OverlayContext';
 import { PublicFeedContext } from '../overlays/PublicFeedContext';
@@ -14,52 +14,39 @@ import {
   hasSearchParam,
   searchParamsKeyValueToEvent,
 } from '../overlays/overlay.utils';
+import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
 import {
   FetcherConfig,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
+import { ClusterProfiles } from '../profiles/ClusterProfiles';
+import { AbsoluteRoutes } from '../route.names';
 import { PostClickEvent } from '../semantics/patterns/patterns';
+import { TabQuery, feedTabs } from '../shared/utils/feed.config';
 
 const DEBUG = false;
 
-export const locationToFeedIx = (location: Location) => {
-  if (DEBUG) console.log(location);
-
-  const pageIx = feedTabs.findIndex((tab) =>
-    location.pathname.startsWith(`/feed/${tab.id}`)
-  );
-
-  if (pageIx === -1) {
-    return 0;
-  } else {
-    return pageIx;
-  }
-};
-
-export const feedIndexToPathname = (ix: number) => {
-  return `/feed/${feedTabs[ix].id}`;
-};
-
 const getFeedConfig = (
-  tab: FeedTabConfig,
+  tabQuery: TabQuery,
   DEBUG_PREFIX: string
 ): FetcherConfig => {
   return {
     endpoint: '/api/feed/get',
     queryParams: {
-      semantics: { labels: tab.labels, topic: tab.topic },
+      semantics: { tab: tabQuery.tab, topic: tabQuery.topic },
       hydrateConfig: { addAggregatedLabels: true },
+      clusterId:
+        tabQuery.clusterId !== ALL_CLUSTER_NAME
+          ? tabQuery.clusterId
+          : undefined,
     },
     DEBUG_PREFIX,
   };
 };
 
 export const PublicFeedPage = () => {
-  const location = useLocation();
-
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const ixInit = useMemo(() => locationToFeedIx(location), [location]);
+  const { clusterId: clusterSelected, tabId } = useParams();
 
   const [overlayInit, setOverlayInit] = useState<
     OverlayValue | undefined | null
@@ -123,6 +110,7 @@ export const PublicFeedPage = () => {
     syncQueryParams(overlay);
   };
 
+  /** keeps the url query params aligend with the current visible overlay */
   const syncQueryParams = (overlay: OverlayValue) => {
     if (Object.keys(overlay).length === 0) {
       searchParams.forEach((value, key) => {
@@ -176,24 +164,59 @@ export const PublicFeedPage = () => {
   };
 
   const feed0Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[0], '[FEED 0] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[0].index,
+        topic: feedTabs[0].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 0] '
+    );
+  }, [clusterSelected]);
 
   const feed1Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[1], '[FEED 1] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[1].index,
+        topic: feedTabs[1].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 1] '
+    );
+  }, [clusterSelected]);
 
   const feed2Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[2], '[FEED 2] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[2].index,
+        topic: feedTabs[2].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 2] '
+    );
+  }, [clusterSelected]);
 
   const feed3Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[3], '[FEED 3] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[3].index,
+        topic: feedTabs[3].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 3] '
+    );
+  }, [clusterSelected]);
 
   const feed4Config = useMemo((): FetcherConfig => {
-    return getFeedConfig(feedTabs[4], '[FEED 4] ');
-  }, []);
+    return getFeedConfig(
+      {
+        tab: feedTabs[4].index,
+        topic: feedTabs[4].topic,
+        clusterId: clusterSelected,
+      },
+      '[FEED 4] '
+    );
+  }, [clusterSelected]);
 
   const feed0 = usePostsFetcher(feed0Config);
   const feed1 = usePostsFetcher(feed1Config);
@@ -202,6 +225,32 @@ export const PublicFeedPage = () => {
   const feed4 = usePostsFetcher(feed4Config);
 
   const feeds = [feed0, feed1, feed2, feed3, feed4];
+
+  const navigate = useNavigate();
+
+  const onFeedIxChanged = (ix: number) => {
+    const tabId = feedTabs[ix].id;
+    navigate(AbsoluteRoutes.ClusterFeed(tabId, clusterSelected));
+  };
+
+  const feedIx = feedTabs.findIndex((tab) => tab.id === tabId);
+
+  const [showOverlay, setShowOverlay] = useState<OverlayValue>();
+  const onKeywordClick = (kw: string) => {
+    setShowOverlay({ keyword: kw });
+  };
+
+  const [resetOverlays, setResetOverlays] = useState(false);
+
+  /** if the url params change, reset all overlays */
+  useEffect(() => {
+    setResetOverlays(!resetOverlays);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabId, clusterSelected]);
+
+  const onProfileClick = (profileId: string) => {
+    setShowOverlay({ profileId });
+  };
 
   return (
     <ViewportPage
@@ -212,17 +261,28 @@ export const PublicFeedPage = () => {
             {overlayInit !== undefined && (
               <OverlayContext
                 init={overlayInit}
+                triggerShowOverlay={showOverlay}
+                triggerReset={resetOverlays}
                 onOverlayNav={(overlay) => onOverlayNav(overlay)}>
                 <MultiTabFeeds
                   feeds={feeds}
                   tabs={feedTabs}
-                  feedIxInit={ixInit}></MultiTabFeeds>
+                  feedIx={feedIx !== -1 ? feedIx : 0}
+                  onFeedIxChanged={(ix) => onFeedIxChanged(ix)}></MultiTabFeeds>
               </OverlayContext>
             )}
           </PublicFeedContext>
         </Box>
       }
       nav={<GlobalNav></GlobalNav>}
+      suggestions={
+        <KeywordsSuggestions
+          onKeywordClick={(kw) => onKeywordClick(kw)}></KeywordsSuggestions>
+      }
+      profiles={
+        <ClusterProfiles
+          onProfileClick={(p) => onProfileClick(p)}></ClusterProfiles>
+      }
       justify="start"></ViewportPage>
   );
 };

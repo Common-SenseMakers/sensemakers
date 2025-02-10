@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 
-import { ParserOntology } from '../../../shared/types/types.parser';
+import { OntologyItem } from '../../../shared/types/types.parser';
 import { RefLabel } from '../../../shared/types/types.references';
+import { transformDisplayName } from '../../../shared/utils/semantics.helper';
 import { LabelColors } from '../../../ui-components';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 
@@ -11,10 +12,11 @@ interface LabelDetails {
 
 export const AggregatedRefLabels = (props: {
   refLabels: RefLabel[];
-  ontology?: ParserOntology;
+  onLabelClick?: (label: string) => void;
+  ontology?: OntologyItem[];
 }) => {
   const labelsSummary = useMemo(() => {
-    const labelsOntology = props.ontology?.semantic_predicates;
+    const ontology = props.ontology;
 
     const summaryMap = new Map<string, LabelDetails>();
 
@@ -29,8 +31,8 @@ export const AggregatedRefLabels = (props: {
 
     const labelsSummary = Array.from(summaryMap.entries())
       .map(([labelUri, details]) => {
-        const label_ontology = labelsOntology
-          ? labelsOntology.find((item) => item.uri === labelUri)
+        const label_ontology = ontology
+          ? ontology.find((item) => item.uri === labelUri)
           : undefined;
 
         if (!label_ontology) {
@@ -38,7 +40,7 @@ export const AggregatedRefLabels = (props: {
         }
 
         return {
-          label: label_ontology.display_name,
+          label: transformDisplayName(label_ontology.display_name),
           details,
         };
       })
@@ -47,7 +49,12 @@ export const AggregatedRefLabels = (props: {
       details: LabelDetails;
     }[];
 
-    return labelsSummary;
+    return labelsSummary.sort((a, b) => {
+      if (a.label === '💬 mentions') {
+        return -1;
+      }
+      return b.details.count - a.details.count;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.refLabels]);
 
@@ -61,6 +68,7 @@ export const AggregatedRefLabels = (props: {
     <AppLabelsEditor
       placeholder=""
       colors={colors}
+      onLabelClick={props.onLabelClick}
       labels={labelsSummary.map((labelDetails) => (
         <span>
           {`${labelDetails.label}`}

@@ -1,5 +1,6 @@
 import { Quad, Store } from 'n3';
 
+import { RefDisplayMeta } from '../types/types.references';
 import { forEachStore } from './n3.utils';
 
 export const THIS_POST_NAME_URI = 'https://sense-nets.xyz/mySemanticPost';
@@ -15,6 +16,56 @@ export const HAS_ZOTERO_REFERENCE_TYPE_URI =
 export const HAS_RDF_SYNTAX_TYPE_URI =
   'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 export const LINKS_TO_URI = 'http://purl.org/spar/cito/linksTo';
+export const QUOTES_POST_URI = 'https://sense-nets.xyz/quotesPost';
+
+export const isIgnoredLabelUri = (label: string) => {
+  return label === QUOTES_POST_URI || label === LINKS_TO_URI;
+};
+
+export const removeUndisplayedLabelUris = (labels: string[]) => {
+  return labels.filter((label) => !isIgnoredLabelUri(label));
+};
+
+export const transformDisplayName = (label: string) => {
+  if (label === '🔗 links-to') {
+    return '💬 mentions';
+  }
+
+  return label;
+};
+
+export const parseRefDisplayMeta = (
+  refDisplayMeta?: RefDisplayMeta,
+  authorProfileId?: string
+) => {
+  const aggregatedLabels = refDisplayMeta?.aggregatedLabels;
+
+  const authorLabels = authorProfileId
+    ? aggregatedLabels
+        ?.filter((label) => label.authorProfileId === authorProfileId)
+        .map((label) => label.label)
+    : undefined;
+
+  const nonAuthorLabels = authorProfileId
+    ? aggregatedLabels?.filter(
+        (label) => label.authorProfileId !== authorProfileId
+      )
+    : undefined;
+
+  const postsIds = new Set<string>();
+  aggregatedLabels?.forEach((label) => {
+    if (label.postId) {
+      postsIds.add(label.postId);
+    }
+  });
+
+  return {
+    postsIds: Array.from(postsIds),
+    aggregatedLabels,
+    authorLabels,
+    nonAuthorLabels,
+  };
+};
 
 export const getKeywords = (store: Store) => {
   const keywords: Set<string> = new Set();

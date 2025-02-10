@@ -10,6 +10,7 @@ export enum AppGeneralKeys {
   noPostsFoundDesc = 'appnav-010',
   autoIndexed = 'appnav-011',
   autoIndexedInfo = 'appnav-012',
+  accountDisconnectedInfo = 'appnav-013',
 }
 
 export const appGeneralValues: Record<AppGeneralKeys, string> = {
@@ -25,4 +26,6 @@ export const appGeneralValues: Record<AppGeneralKeys, string> = {
   [AppGeneralKeys.autoIndexed]: 'Auto-indexed',
   [AppGeneralKeys.autoIndexedInfo]:
     'This account is automatically indexed and has not yet been claimed by its owner. Keywords and tags are AI generated.',
+  [AppGeneralKeys.accountDisconnectedInfo]:
+    'The following account(s) have been disconnected. Please reconnect them in your settings: {{platforms}}',
 };

@@ -1,11 +1,13 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import { useEffect, useRef, useState } from 'react';
 import { CSSProperties } from 'styled-components';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
+import { FeedTabConfig } from '../shared/utils/feed.config';
 import { AppButton } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { FeedTabConfig } from './feed.config';
 
 const Chevron = (props: { direction: 'left' | 'right' }) => {
   const { direction } = props;
@@ -47,6 +49,7 @@ export const FeedTabs = (props: {
   feedIx: number;
 }) => {
   const { constants } = useThemeContext();
+  const posthog = usePostHog();
   const { feedTabs, onTabClicked, feedIx } = props;
 
   const [showRightCaret, setShowRightCaret] = useState(false);
@@ -137,6 +140,9 @@ export const FeedTabs = (props: {
           plain
           style={{ height: '100%' }}
           onClick={() => {
+            posthog?.capture(POSTHOG_EVENTS.CLICKED_FEED_TAB, {
+              feed: feedTabs[ix].title,
+            });
             onTabClicked(ix);
           }}>
           <Box {...internalBoxProps}>
@@ -157,70 +163,70 @@ export const FeedTabs = (props: {
   };
 
   return (
-    <div
-      ref={containerRef}
-      onScroll={handleScroll}
-      style={{
-        height: '48px',
-        display: 'flex',
-        overflowX: 'auto',
-        whiteSpace: 'nowrap',
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-      }}>
-      {feedTabs.map((tab, ix) => (
-        <Box
-          direction="row"
-          key={ix}
-          style={{
-            flex: '0 0 auto',
-            height: '100%',
-          }}>
-          <div style={spaceStyle}></div>
-          {tabElement(tab.title, ix, feedIx === ix)}
-          {ix === feedTabs.length - 1 && <div style={spaceStyle}></div>}
-        </Box>
-      ))}
-      {showLeftCaret && (
-        <Box
-          onClick={() => scrollToLeft()}
-          justify="end"
-          style={{
-            cursor: 'pointer',
-            position: 'absolute',
-            left: '0',
-            top: '0',
-            height: '63px',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '10px',
-            width: '48px',
-            background:
-              'linear-gradient(to left, rgba(255,255,255,0), rgba(255,255,255,1))',
-          }}>
-          <LeftIcon></LeftIcon>
-        </Box>
-      )}
-      {showRightCaret && (
-        <Box
-          onClick={() => scrollToRight()}
-          justify="end"
-          style={{
-            cursor: 'pointer',
-            position: 'absolute',
-            right: '0',
-            top: '0',
-            height: '63px',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '10px',
-            width: '48px',
-            background:
-              'linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0))',
-          }}>
-          <RightIcon></RightIcon>
-        </Box>
-      )}
+    <div id="feed-tabs" style={{ position: 'relative' }}>
+      <div
+        ref={containerRef}
+        onScroll={handleScroll}
+        style={{
+          height: '48px',
+          display: 'flex',
+          overflowX: 'auto',
+          whiteSpace: 'nowrap',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}>
+        {feedTabs.map((tab, ix) => (
+          <Box
+            direction="row"
+            key={ix}
+            style={{
+              flex: '0 0 auto',
+              height: '100%',
+            }}>
+            <div style={spaceStyle}></div>
+            {tabElement(tab.title, ix, feedIx === ix)}
+            {ix === feedTabs.length - 1 && <div style={spaceStyle}></div>}
+          </Box>
+        ))}
+        {showLeftCaret && (
+          <Box
+            onClick={() => scrollToLeft()}
+            justify="end"
+            style={{
+              cursor: 'pointer',
+              position: 'absolute',
+              left: '0',
+              top: '0',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '10px',
+              width: '48px',
+              background:
+                'linear-gradient(to left, rgba(255,255,255,0), rgba(255,255,255,1))',
+            }}>
+            <LeftIcon></LeftIcon>
+          </Box>
+        )}
+        {showRightCaret && (
+          <Box
+            onClick={() => scrollToRight()}
+            justify="end"
+            style={{
+              cursor: 'pointer',
+              position: 'absolute',
+              right: '0',
+              top: '0',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '10px',
+              width: '48px',
+              background:
+                'linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0))',
+            }}>
+            <RightIcon></RightIcon>
+          </Box>
+        )}
+      </div>
     </div>
   );
 };

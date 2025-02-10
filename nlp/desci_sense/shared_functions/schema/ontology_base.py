@@ -186,3 +186,9 @@ class OntologyBase:
             return self.default_no_ref_label()
         else:
             return self.default_mention_label()
+        
+    def get_re_post_allowed_tags(self) -> List[str]:
+        df = self.ont_df
+        repost_df = df[df["re_post"] == True]       
+        repost_tags = repost_df['label']
+        return list(repost_tags)

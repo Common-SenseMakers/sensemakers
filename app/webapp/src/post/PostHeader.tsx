@@ -1,5 +1,7 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { useOverlay } from '../overlays/OverlayContext';
@@ -18,6 +20,7 @@ export const PostHeader = (props: {
   const { constants } = useThemeContext();
   const { updated } = usePost();
   const overlay = useOverlay();
+  const posthog = usePostHog();
 
   const post = updated.postMerged;
   const isAutoIndexed = post?.authorUserId === null;
@@ -28,6 +31,10 @@ export const PostHeader = (props: {
 
   const onUserClicked = () => {
     if (!post) return;
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_PROFILE_PAGE, {
+      userId: post.authorUserId,
+      profileId: post.authorProfileId,
+    });
 
     if (post.authorUserId) {
       overlay &&

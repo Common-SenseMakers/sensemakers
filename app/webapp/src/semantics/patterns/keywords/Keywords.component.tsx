@@ -1,8 +1,10 @@
 import { Box } from 'grommet';
 import { DataFactory } from 'n3';
+import { usePostHog } from 'posthog-js/react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { POSTHOG_EVENTS } from '../../../analytics/posthog.events';
 import { PostEditKeys } from '../../../i18n/i18n.edit.post';
 import { useOverlay } from '../../../overlays/OverlayContext';
 import {
@@ -16,14 +18,25 @@ import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps, PostClickTarget } from '../patterns';
 
+export const KEYWORDS_COLORS = {
+  font: '#498283',
+  background: '#F5FCFC',
+  border: '#DAEDED',
+};
+
 export const KeywordsComponent = (props: PatternProps) => {
   const { t } = useTranslation();
   /** actual semantics */
   const { store } = useSemanticsStore(props.semantics, props.originalParsed);
+  const posthog = usePostHog();
 
   const overlay = useOverlay();
 
   const handleKeywordClick = (keyword: string) => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_KEYWORD, {
+      keyword,
+      postId: props.post?.id,
+    });
     overlay &&
       overlay.onPostClick({
         target: PostClickTarget.KEYWORD,
@@ -104,12 +117,13 @@ export const KeywordsComponent = (props: PatternProps) => {
         }}
         direction="row">
         <AppLabelsEditor
+          underline={true}
           maxLabels={props.size === 'compact' ? 2 : undefined}
           placeholder={
             props.editable ? t(PostEditKeys.keywordsPlaceholder) : ''
           }
           editable={props.editable}
-          colors={{ font: '#FFFFFF', background: '#498283', border: '#6C9C9D' }}
+          colors={KEYWORDS_COLORS}
           labels={keywords}
           onLabelClick={handleKeywordClick}
           addLabel={(newLabel) => {

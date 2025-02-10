@@ -1,8 +1,10 @@
 import { Box } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { useAppFetch } from '../api/app.fetch';
 import {
   BlueskyIcon,
@@ -13,15 +15,13 @@ import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { MAX_BUTTON_WIDTH, ViewportPage } from '../app/layout/Viewport';
 import { IntroKeys } from '../i18n/i18n.intro';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
+import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
 import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import {
-  PlatformConnectedStatus,
-  useAccountContext,
-} from '../user-login/contexts/AccountContext';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import { getAppUrl } from '../utils/general';
@@ -34,6 +34,7 @@ export enum LoginCase {
 export const ConnectSocialsPage = () => {
   const loginCase = LoginCase.login;
   const appFetch = useAppFetch();
+  const posthog = usePostHog();
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -42,16 +43,17 @@ export const ConnectSocialsPage = () => {
 
   const { connect: connectTwitter } = useTwitterContext();
 
-  const twitterProfile = connectedUser?.profiles?.twitter;
-  const mastodonProfile = connectedUser?.profiles?.mastodon;
-  const blueskyProfile = connectedUser?.profiles?.bluesky;
+  const twitterProfile = connectedUser?.profiles?.twitter?.profile;
+  const mastodonProfile = connectedUser?.profiles?.mastodon?.profile;
+  const blueskyProfile = connectedUser?.profiles?.bluesky?.profile;
 
   const buttonText =
     loginCase === LoginCase.login ? t(IntroKeys.login) : t(IntroKeys.connect);
 
   const handleContinue = () => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_CONTINUE);
     appFetch('/api/auth/setOnboarded', {}, true).catch(console.error);
-    navigate(AbsoluteRoutes.Feed);
+    navigate(AbsoluteRoutes.ClusterFeed(ALL_CLUSTER_NAME));
   };
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export const ConnectSocialsPage = () => {
       connectedUser && connectedUser.details && connectedUser.details.onboarded;
 
     if (alreadyConnected) {
-      navigate(AbsoluteRoutes.Feed);
+      navigate(AbsoluteRoutes.ClusterFeed(ALL_CLUSTER_NAME));
     }
   }, [connectedUser, navigate]);
 
@@ -100,11 +102,7 @@ export const ConnectSocialsPage = () => {
           }}
           buttonText={twitterProfile ? '' : buttonText}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connected={!!twitterProfile}
-          connecting={
-            getPlatformConnectedStatus(PLATFORM.Twitter) ===
-            PlatformConnectedStatus.Connecting
-          }
+          platformStatus={getPlatformConnectedStatus(PLATFORM.Twitter)}
         />
 
         <PlatformSection
@@ -120,7 +118,7 @@ export const ConnectSocialsPage = () => {
           onButtonClicked={() => navigate(AbsoluteRoutes.ConnectMastodon)}
           buttonText={mastodonProfile ? '' : buttonText}
           username={mastodonProfile?.username || ''}
-          connected={!!mastodonProfile}
+          platformStatus={getPlatformConnectedStatus(PLATFORM.Mastodon)}
         />
 
         <PlatformSection
@@ -137,7 +135,7 @@ export const ConnectSocialsPage = () => {
           }}
           buttonText={blueskyProfile ? '' : buttonText}
           username={blueskyProfile ? `@${blueskyProfile.username}` : ''}
-          connected={!!blueskyProfile}
+          platformStatus={getPlatformConnectedStatus(PLATFORM.Bluesky)}
         />
       </Box>
 

@@ -17,3 +17,4 @@ export * from './AppLabel';
 export * from './AppModal';
 export * from './AppTip';
 export * from './FixedHeightPar';
+export * from './Banner';

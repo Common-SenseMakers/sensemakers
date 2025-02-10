@@ -1,7 +1,7 @@
 import { Box, Keyboard } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { IntroKeys } from '../i18n/i18n.intro';
 import { AbsoluteRoutes } from '../route.names';
@@ -10,6 +10,7 @@ import { AppButton, AppHeading, AppInput } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
+import { getAppUrl } from '../utils/general';
 import {
   PlatformConnectedStatus,
   useAccountContext,
@@ -21,7 +22,6 @@ const DEFAULT_SERVER = 'mastodon.social';
 
 export const ConnectMastodonPage = () => {
   const { t } = useTranslation();
-  const location = useLocation();
   const navigate = useNavigate();
 
   const { connect, error } = useMastodonContext();
@@ -32,7 +32,7 @@ export const ConnectMastodonPage = () => {
 
   useEffect(() => {
     const mastodonProfile = connectedUser?.profiles?.mastodon;
-    if (mastodonProfile) {
+    if (mastodonProfile && !mastodonProfile.isDisconnected) {
       navigate(AbsoluteRoutes.App);
     }
   }, [connectedUser, navigate]);
@@ -51,10 +51,7 @@ export const ConnectMastodonPage = () => {
 
   const handleConnect = () => {
     if (connect) {
-      const callbackUrl =
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        (location.state?.callbackUrl as string | undefined) ||
-        `${window.location.origin}${AbsoluteRoutes.ConnectMastodon}`;
+      const callbackUrl = `${getAppUrl()}${AbsoluteRoutes.ConnectMastodon}`;
 
       setIsConnecting(true);
       connect(server, 'read', callbackUrl).catch(console.error);
@@ -90,7 +87,11 @@ export const ConnectMastodonPage = () => {
       };
     }
 
-    if (!status || status === PlatformConnectedStatus.Disconnected) {
+    if (
+      !status ||
+      status === PlatformConnectedStatus.Disconnected ||
+      status === PlatformConnectedStatus.ReconnectRequired
+    ) {
       return {
         title: t(IntroKeys.connectMastodonTitle),
         content: (

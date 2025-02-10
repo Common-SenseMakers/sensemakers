@@ -1,24 +1,29 @@
 import { Box, Text } from 'grommet';
-import { MouseEventHandler, useState } from 'react';
+import { t } from 'i18next';
+import { usePostHog } from 'posthog-js/react';
+import { MouseEventHandler } from 'react';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
+import { PostEditKeys } from '../i18n/i18n.edit.post';
 import { useOverlay } from '../overlays/OverlayContext';
 import { SemanticsEditor } from '../semantics/SemanticsEditor';
 import { PATTERN_ID, PostClickTarget } from '../semantics/patterns/patterns';
-import { AppPostFull } from '../shared/types/types.posts';
-import { ChevronButton } from '../ui-components/ChevronButton';
+import { RefLabelsCustomProps } from '../semantics/patterns/refs-labels/RefsLabels.component';
+import { AppPostFull, GenericPost } from '../shared/types/types.posts';
 import { useThemeContext } from '../ui-components/ThemedApp';
+import { truncateGenericThread } from '../utils/post.utils';
+import { GenericThreadText } from './GenericThreadText';
 import { PlatformPostAnchor } from './PlatformPostAnchor';
 import { PublishButtons } from './PostPublishButtons';
-import { PostTextStatic } from './PostTextStatic';
 import { getPostDetails } from './platform-specific.details';
 import { usePost } from './post.context/PostContext';
-import { concatenateThread } from './posts.helper';
 
 const KEYWORDS_SEMANTICS_ID = 'keywords-semantics';
 const REFS_SEMANTICS_ID = 'refs-semantics';
 const POST_AUTHOR_ID = 'post-author';
+export const POST_CARD_SEE_MORE_CLASS = 'post-card-see-more-button';
 
 export const CARD_BORDER = '1px solid var(--Neutral-300, #D1D5DB)';
 
@@ -27,6 +32,7 @@ const PostCardHeader = (props: {
   onBlankClick?: () => void;
 }) => {
   const { constants } = useThemeContext();
+  const posthog = usePostHog();
   const details = getPostDetails(props.post);
   const onBlankClick = props.onBlankClick;
   const isAutoIndexed = props.post.authorUserId === null;
@@ -34,6 +40,11 @@ const PostCardHeader = (props: {
   const overlay = useOverlay();
 
   const onUserClicked = () => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_PROFILE_PAGE, {
+      userId: props.post.authorUserId,
+      profileId: props.post.authorProfileId,
+    });
+
     if (props.post.authorUserId) {
       overlay &&
         overlay.onPostClick({
@@ -97,6 +108,7 @@ export const PostCard = (props: {
   isPublicFeed?: boolean;
   shade?: boolean;
   isEmail?: boolean;
+  showAggregatedLabels?: boolean;
 }) => {
   const { shade: _shade } = props;
   const shade = _shade || false;
@@ -105,7 +117,7 @@ export const PostCard = (props: {
   const post = updated.postMerged;
 
   const { constants } = useThemeContext();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const posthog = usePostHog();
 
   const overlay = useOverlay();
 
@@ -115,6 +127,7 @@ export const PostCard = (props: {
   }
 
   const onPostClick = () => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_POST_VIEW, { postId: post.id });
     overlay &&
       overlay.onPostClick({ target: PostClickTarget.POST, payload: post });
   };
@@ -138,12 +151,13 @@ export const PostCard = (props: {
     onPostClick();
   };
 
-  const postText = concatenateThread(post.generic);
-  const useTruncated = postText.length > 700;
-  const postTextTruncated = useTruncated
-    ? postText.slice(0, 700) + '...'
-    : postText;
-
+  const truncatedGenericThread: GenericPost[] = truncateGenericThread(
+    post.generic.thread,
+    {
+      color: constants.colors.links,
+      text: t(PostEditKeys.showMoreTruncatedText),
+    }
+  );
   const handleInternalClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).tagName === 'A') {
       e.stopPropagation();
@@ -151,6 +165,7 @@ export const PostCard = (props: {
   };
 
   const hideSemantics = false;
+  const hasRefs = post?.structuredSemantics?.refs?.length || 0 > 0;
 
   const handlePostDelete = () => {
     if (window.confirm('Are you sure you want to delete this post?')) {
@@ -184,7 +199,7 @@ export const PostCard = (props: {
           </Box>
           {!hideSemantics && (
             <Box id={KEYWORDS_SEMANTICS_ID}>
-              <SemanticsEditor
+              <SemanticsEditor<RefLabelsCustomProps>
                 include={[PATTERN_ID.KEYWORDS]}
                 patternProps={{
                   isLoading:
@@ -200,29 +215,10 @@ export const PostCard = (props: {
                 }}></SemanticsEditor>
             </Box>
           )}
-          <div
-            style={{
-              overflow: 'hidden',
-              transition: 'height 0.3s ease-in-out',
-              height: 'auto',
-            }}>
-            <PostTextStatic
-              onClick={handleInternalClick}
-              truncate
-              shade={shade}
-              text={isExpanded ? postText : postTextTruncated}></PostTextStatic>
-          </div>
-          {useTruncated && (
-            <Box align="end" margin={{ top: 'xxxsmall', right: 'xsmall' }}>
-              <ChevronButton
-                isExpanded={isExpanded}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsExpanded(!isExpanded);
-                }}></ChevronButton>
-            </Box>
-          )}
-          {!hideSemantics && (
+          <GenericThreadText
+            onClick={handleInternalClick}
+            thread={truncatedGenericThread}></GenericThreadText>
+          {!hideSemantics && hasRefs && (
             <Box margin={{ top: '24px' }} id={REFS_SEMANTICS_ID}>
               <SemanticsEditor
                 include={[PATTERN_ID.REF_LABELS]}
@@ -237,6 +233,9 @@ export const PostCard = (props: {
                   originalParsed: post?.originalParsed,
                   structuredSemantics: post?.structuredSemantics,
                   post,
+                  custom: {
+                    showAggregatedLabels: props.showAggregatedLabels,
+                  },
                 }}></SemanticsEditor>
             </Box>
           )}

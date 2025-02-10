@@ -9,9 +9,9 @@ import {
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
 import {
+  AppPost,
   AppPostFull,
-  GenericPost,
-  PostsQueryDefined,
+  StructuredSemantics,
 } from '../@shared/types/types.posts';
 import { AccountDetailsBase, DefinedIfTrue } from '../@shared/types/types.user';
 import { APP_URL } from '../config/config.runtime';
@@ -22,13 +22,6 @@ export interface PlatformDetails {
 }
 
 export class PostsHelper {
-  static concatenateThread(generic: { thread: GenericPost[] }): string {
-    return generic.thread.reduce(
-      (_acc, post) => `${_acc} ${post.content}\n\n`,
-      ''
-    );
-  }
-
   static getPostUrl(postId: string): string {
     return `${APP_URL}/post/${postId}`;
   }
@@ -100,26 +93,16 @@ export class PostsHelper {
   }
 }
 
-const QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION = [
-  'userId',
-  'profileId',
-  'origins',
-];
+/** type protection against properties renaming */
+export const CREATED_AT_KEY: keyof AppPost = 'createdAtMs';
+export const AUTHOR_USER_KEY: keyof AppPost = 'authorUserId';
+export const AUTHOR_PROFILE_KEY: keyof AppPost = 'authorProfileId';
+export const ORIGIN_KEY: keyof AppPost = 'origin';
 
-export const doesQueryUseSubcollection = (queryParams: PostsQueryDefined) => {
-  let defaultResult = {
-    useLinksSubcollection: false,
-  };
+export const STRUCTURED_SEMANTICS_KEY: keyof AppPost = 'structuredSemantics';
 
-  const canUseSubcollection = !QUERY_PARAMS_NOT_USING_LINKS_SUBCOLLECTION.some(
-    (param) => param in queryParams
-  );
-
-  if (canUseSubcollection && queryParams.semantics?.refs?.length === 1) {
-    return {
-      useLinksSubcollection: true,
-    };
-  }
-
-  return defaultResult;
-};
+export const KEYWORDS_KEY: keyof StructuredSemantics = 'keywords';
+export const LABELS_KEY: keyof StructuredSemantics = 'labels';
+export const TOPIC_KEY: keyof StructuredSemantics = 'topic';
+export const REFS_KEY: keyof StructuredSemantics = 'refs';
+export const TABS_KEY: keyof StructuredSemantics = 'tabs';

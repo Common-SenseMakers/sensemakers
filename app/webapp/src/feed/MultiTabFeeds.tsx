@@ -1,23 +1,21 @@
 import { Box } from 'grommet';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import { PostFetcherInterface } from '../posts.fetcher/posts.fetcher.hook';
+import { FeedTabConfig } from '../shared/utils/feed.config';
 import { FeedTabs } from './FeedTabs';
-import { FeedTabConfig } from './feed.config';
 
 export const MultiTabFeeds = (props: {
   feeds: PostFetcherInterface[];
   tabs: FeedTabConfig[];
-  feedIxInit?: number;
+  feedIx: number;
+  onFeedIxChanged: (ix: number) => void;
 }) => {
   const { t } = useTranslation();
 
-  const { feeds, tabs, feedIxInit } = props;
-
-  const [feedIx, setFeedIx] = useState<number>(feedIxInit || 0);
+  const { feeds, tabs, feedIx, onFeedIxChanged } = props;
 
   const n = feeds.length;
   const percWidth = 100 / n;
@@ -26,7 +24,7 @@ export const MultiTabFeeds = (props: {
     <>
       <FeedTabs
         feedIx={feedIx}
-        onTabClicked={(ix) => setFeedIx(ix)}
+        onTabClicked={(ix) => onFeedIxChanged(ix)}
         feedTabs={tabs}></FeedTabs>
       <div
         style={{
@@ -54,9 +52,8 @@ export const MultiTabFeeds = (props: {
                   showHeader={false}
                   isPublicFeed={true}
                   feed={feed}
-                  pageTitle={t(
-                    AppGeneralKeys.feedTitle
-                  )}></PostsFetcherComponent>
+                  pageTitle={t(AppGeneralKeys.feedTitle)}
+                  showAggregatedLabels={true}></PostsFetcherComponent>
               </Box>
             );
           })}

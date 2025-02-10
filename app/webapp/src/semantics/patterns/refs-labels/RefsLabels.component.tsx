@@ -1,11 +1,16 @@
 import { Box } from 'grommet';
 import { DataFactory } from 'n3';
+import { usePostHog } from 'posthog-js/react';
 import { useMemo } from 'react';
 
+import { POSTHOG_EVENTS } from '../../../analytics/posthog.events';
 import { useOverlay } from '../../../overlays/OverlayContext';
 import { isPlatformPost } from '../../../shared/utils/links.utils';
 import { filterStore, writeRDF } from '../../../shared/utils/n3.utils';
-import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
+import {
+  THIS_POST_NAME_URI,
+  parseRefDisplayMeta,
+} from '../../../shared/utils/semantics.helper';
 import { AppLabel } from '../../../ui-components';
 import { REF_LABELS_EDITOR_ID } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
@@ -18,7 +23,14 @@ import { QuotedPostLabel } from './QuotedPostLabel';
 import { RefWithLabels } from './RefWithLabels';
 import { RefsMap, processSemantics } from './process.semantics';
 
-export const RefLabelsComponent = (props: PatternProps) => {
+export interface RefLabelsCustomProps {
+  showAggregatedLabels?: boolean;
+}
+
+export const RefLabelsComponent = (
+  props: PatternProps<RefLabelsCustomProps>
+) => {
+  const posthog = usePostHog();
   const { store, originalStore } = useSemanticsStore(
     props.semantics,
     props.originalParsed
@@ -32,6 +44,10 @@ export const RefLabelsComponent = (props: PatternProps) => {
     event: React.MouseEvent<HTMLDivElement>,
     ref: string
   ) => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_REFERENCE_PAGE, {
+      ref,
+      postId: props.post?.id,
+    });
     let target = event.target as HTMLElement;
 
     // filter clicks on the ref semantics
@@ -42,7 +58,6 @@ export const RefLabelsComponent = (props: PatternProps) => {
 
       target = target.parentNode as HTMLElement;
     }
-
     overlay &&
       overlay.onPostClick({ target: PostClickTarget.REF, payload: ref });
   };
@@ -135,24 +150,24 @@ export const RefLabelsComponent = (props: PatternProps) => {
                 throw new Error('Unexpected undefined');
 
               const refDisplayMeta = props.post?.meta?.references[ref];
+              const { postsIds } = parseRefDisplayMeta(refDisplayMeta);
 
-              const aggregatedLabelsWithoutAuthorLabels =
-                refDisplayMeta?.aggregatedLabels?.filter(
-                  (refLabel) =>
-                    refLabel.authorProfileId !== props.post?.authorProfileId
-                );
+              // here we get the author labels directly from the semantics of the post.
+              const authorLabels = refs.get(ref)?.labelsUris || [];
+              const hasOtherLabels = postsIds.length > 1;
+
+              const isQuotedPost = isPlatformPost(ref);
 
               return (
                 refDisplayMeta?.oembed && (
-                  <>
-                    {isPlatformPost(ref) && (
+                  <div key={index}>
+                    {isQuotedPost && (
                       <QuotedPostLabel
                         color={constants.colors.textLight2}
                         postType={getPostType(props.post)}
                       />
                     )}
                     <Box
-                      key={index}
                       style={{
                         borderRadius: '12px',
                         border: '1.6px solid #D1D5DB',
@@ -165,11 +180,18 @@ export const RefLabelsComponent = (props: PatternProps) => {
                       <RefWithLabels
                         ix={index}
                         oembed={refDisplayMeta.oembed}
-                        authorLabels={refs.get(ref)?.labelsUris || []}
-                        aggregatedLabels={aggregatedLabelsWithoutAuthorLabels}
-                        showDescription={isPlatformPost(ref)}
+                        authorLabels={authorLabels}
+                        aggregatedLabels={refDisplayMeta.aggregatedLabels}
+                        showAggregatedLabels={
+                          props.custom?.showAggregatedLabels && hasOtherLabels
+                        }
+                        showDescription={isQuotedPost}
+                        showAllMentionsText={true}
                         editable={props.editable}
-                        ontology={props.originalParsed?.support?.ontology}
+                        ontology={
+                          props.originalParsed?.support?.ontology
+                            ?.semantic_predicates
+                        }
                         removeLabel={(labelUri: string) => {
                           removeLabel(ref, labelUri).catch(console.error);
                         }}
@@ -177,7 +199,7 @@ export const RefLabelsComponent = (props: PatternProps) => {
                           addLabel(ref, labelUri).catch(console.error);
                         }}></RefWithLabels>
                     </Box>
-                  </>
+                  </div>
                 )
               );
             })}

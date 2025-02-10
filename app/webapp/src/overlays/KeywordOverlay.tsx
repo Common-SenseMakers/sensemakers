@@ -21,13 +21,13 @@ export const KeywordOverlay = (props: { keyword: string }) => {
     return {
       endpoint: '/api/feed/get',
       queryParams: {
-        semantics: { keywords: [keyword], topic: SCIENCE_TOPIC_URI },
+        semantics: { keyword: keyword, topic: SCIENCE_TOPIC_URI },
         hydrateConfig: { addAggregatedLabels: false },
       },
       DEBUG_PREFIX: 'REF FEED',
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.keyword]);
 
   const feed = usePostsFetcher(feedConfig);
 
@@ -45,7 +45,8 @@ export const KeywordOverlay = (props: { keyword: string }) => {
         <PostsFetcherComponent
           showHeader={false}
           isPublicFeed={isPublicFeed}
-          feed={feed}></PostsFetcherComponent>
+          feed={feed}
+          showAggregatedLabels={true}></PostsFetcherComponent>
       </Box>
     </OverlayContext>
   );

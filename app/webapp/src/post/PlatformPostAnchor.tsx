@@ -1,5 +1,7 @@
 import { Anchor, Box } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { OpenLinkIcon } from '../app/icons/OpenLinkIcon';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
@@ -10,6 +12,7 @@ export const PlatformPostAnchor = (props: {
   details?: GenericPlatformPostDetails;
 }) => {
   const { constants } = useThemeContext();
+  const posthog = usePostHog();
 
   const { loading, details } = props;
   const { label, timestampMs, url } = details
@@ -29,6 +32,11 @@ export const PlatformPostAnchor = (props: {
 
   return (
     <Anchor
+      onClick={() => {
+        posthog?.capture(POSTHOG_EVENTS.CLICKED_ORIGINAL_POST_URL, {
+          url: details?.url,
+        });
+      }}
       style={{
         fontSize: '14px',
         fontStyle: 'normal',
