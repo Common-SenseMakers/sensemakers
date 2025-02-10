@@ -127,7 +127,10 @@ export const deletePostController: RequestHandler = async (
   response
 ) => {
   try {
-    const userId = getAuthenticatedUser(request, true);
+    const services = getServices(request);
+    const userId = await services.db.run(async (manager) => {
+      return getAuthenticatedUser(request, services.users, manager, true);
+    });
     const { db, postsManager } = getServices(request);
 
     const payload = await deletePostSchema.validate(request.body);
