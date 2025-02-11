@@ -12,6 +12,7 @@ import {
 import { POSTHOG_EVENTS } from '../../analytics/posthog.events';
 import { AppGeneralKeys } from '../../i18n/i18n.app.general';
 import { ClustersMenu } from '../../posts.fetcher/ClustersMenu';
+import { ALL_CLUSTER_NAME } from '../../posts.fetcher/cluster.context';
 import { AbsoluteRoutes, RouteNames } from '../../route.names';
 import { AppButton, AppCircleButton } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
@@ -98,6 +99,8 @@ export const GlobalNav = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const notFeed = !location.pathname.includes(RouteNames.Feed);
+
   const posthog = usePostHog();
   const { mobile } = useResponsive();
 
@@ -121,6 +124,10 @@ export const GlobalNav = () => {
       searchParams.set('details', 'true');
     }
     setSearchParams(searchParams);
+  };
+
+  const backToHyperfeed = () => {
+    navigate(AbsoluteRoutes.ClusterFeed(ALL_CLUSTER_NAME));
   };
 
   if (!mobile) {
@@ -161,18 +168,24 @@ export const GlobalNav = () => {
           onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
           icon={<SettignsIcon color="white"></SettignsIcon>}></AppCircleButton>
       </Box>
-      <Box direction="row" align="center" gap="8px">
-        <AppCircleButton
-          onClick={() => showProfiles()}
-          icon={
-            searchParams.get('details') === 'true' ? (
-              <FeedIcon color="white"></FeedIcon>
-            ) : (
-              <ClusterIcon color="white"></ClusterIcon>
-            )
-          }></AppCircleButton>
-        <ClustersMenu></ClustersMenu>
-      </Box>
+      {notFeed ? (
+        <AppButton
+          label="hyperfeed"
+          onClick={() => backToHyperfeed()}></AppButton>
+      ) : (
+        <Box direction="row" align="center" gap="8px">
+          <AppCircleButton
+            onClick={() => showProfiles()}
+            icon={
+              searchParams.get('details') === 'true' ? (
+                <FeedIcon color="white"></FeedIcon>
+              ) : (
+                <ClusterIcon color="white"></ClusterIcon>
+              )
+            }></AppCircleButton>
+          <ClustersMenu></ClustersMenu>
+        </Box>
+      )}
     </Box>
   );
 };

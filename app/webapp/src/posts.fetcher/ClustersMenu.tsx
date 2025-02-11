@@ -20,7 +20,6 @@ export const ClustersMenu = () => {
     navigate(AbsoluteRoutes.ClusterFeed(tabId || feedTabs[0].id, clusterId));
   };
 
-  console.log({ clusterId });
   const allClusters = [ALL_CLUSTER_NAME].concat(clustersIds || []);
 
   if (mobile) {
