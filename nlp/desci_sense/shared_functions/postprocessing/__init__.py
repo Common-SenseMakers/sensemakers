@@ -604,12 +604,11 @@ def combine_from_raw_results(
         is_re_post = False
         if len(post.thread_posts()) == 1:
             first_content = post.content.strip()
+            print("first content is: ",first_content)
             if not first_content:  # empty
                 is_re_post = True
 
         if is_re_post:
-            # TODO hotfix - we should have this be a property in the ontology
-            # that we can read from, as oppose to hardcoding
             repost_allowed_tags = set(ontology.get_re_post_allowed_tags())  # your intersection set
             for tag_list in combined.multi_reference_tagger:
                 # Convert to set, intersect, then back to list

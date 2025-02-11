@@ -64,7 +64,7 @@ export const app = getApps().length
 export let globalTestServices = getTestServices({
   time: 'mock',
   twitter: USE_REAL_TWITTER
-    ? undefined
+    ? { signup: true }
     : { publish: true, signup: true, fetch: true, get: true },
   bluesky: USE_REAL_BLUESKY
     ? undefined
@@ -107,8 +107,12 @@ export const mochaHooks = (): Mocha.RootHookObject => {
       const users = await globalTestServices.db.run(async (manager) => {
         return Promise.all(
           testCredentials.map(async (accountCredentials) => {
+            const userId = await globalTestServices.users.createUser(
+              accountCredentials.clerkId,
+              manager
+            );
             return authenticateTestUser(
-              accountCredentials,
+              { ...accountCredentials, userId },
               globalTestServices,
               includePlatforms,
               manager

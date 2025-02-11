@@ -5,6 +5,7 @@ import {
   UsersV2Params,
 } from 'twitter-api-v2';
 
+import { PlatformSessionRefreshError } from '../../@shared/types/types.platforms';
 import { PlatformAccountProfile } from '../../@shared/types/types.profiles';
 import {
   TwitterAccountDetails,
@@ -140,7 +141,7 @@ export class TwitterServiceClient {
         };
       } catch (e: any) {
         logger.error('getClientWithCredentials - refreshOAuth2Token()', e);
-        throw new Error(handleTwitterError(e));
+        throw new PlatformSessionRefreshError(handleTwitterError(e));
       }
     } else {
       return { client: type === 'read' ? client.readOnly : client };
@@ -170,10 +171,7 @@ export class TwitterServiceClient {
     return { client, credentials: newCredentials } as GetClientResult<T>;
   }
 
-  public async getSignupContext(
-    userId?: string,
-    params?: TwitterGetContextParams
-  ) {
+  public async getSignupContext(params?: TwitterGetContextParams) {
     const client = this.getAppClient();
 
     if (!params) {

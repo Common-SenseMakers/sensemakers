@@ -45,7 +45,6 @@ export const BlueskyContext = (props: PropsWithChildren) => {
   const {
     connectedUser,
     refresh: refreshConnected,
-    setToken: setOurToken,
     setLoginFlowState,
     setPlatformConnectedStatus,
   } = useAccountContext();
@@ -86,11 +85,7 @@ export const BlueskyContext = (props: PropsWithChildren) => {
           signupData
         );
 
-        if (result && result.ourAccessToken) {
-          setOurToken(result.ourAccessToken);
-        } else {
-          refreshConnected().catch(console.error);
-        }
+        refreshConnected().catch(console.error);
 
         log('Bluesky signup result', result);
       } catch (err) {
@@ -104,7 +99,7 @@ export const BlueskyContext = (props: PropsWithChildren) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setLoginFlowState, appFetch, refreshConnected, setOurToken]
+    [setLoginFlowState, appFetch, refreshConnected]
   );
 
   return (

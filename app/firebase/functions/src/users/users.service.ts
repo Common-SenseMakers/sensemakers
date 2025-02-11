@@ -1,9 +1,4 @@
-import * as jwt from 'jsonwebtoken';
-
-import {
-  HandleSignupResult,
-  OurTokenConfig,
-} from '../@shared/types/types.fetch';
+import { HandleSignupResult } from '../@shared/types/types.fetch';
 import {
   ALL_IDENTITY_PLATFORMS,
   IDENTITY_PLATFORM,
@@ -15,6 +10,7 @@ import {
 } from '../@shared/types/types.profiles';
 import {
   AccountCredentials,
+  AccountDetailsBase,
   AccountDetailsRead,
   AppUserPublicRead,
   AppUserRead,
@@ -22,7 +18,6 @@ import {
   UserSettings,
   UserSettingsUpdate,
 } from '../@shared/types/types.user';
-import { getProfileId } from '../@shared/utils/profiles.utils';
 import { USER_INIT_SETTINGS } from '../config/config.runtime';
 import { DBInstance } from '../db/instance';
 import { removeUndefined } from '../db/repo.base';
@@ -41,10 +36,6 @@ import { getPrefixedUserId } from './users.utils';
 const DEBUG = false;
 const DEBUG_PREFIX = 'UsersService';
 
-interface TokenData {
-  userId: string;
-}
-
 /**
  * A user profile is made up of a dictionary of PLATFORM => Arrray<AuthenticationDetails>
  * One user can have multiple profiles on each platform.
@@ -59,8 +50,7 @@ export class UsersService {
     public profiles: ProfilesService,
     public identityPlatforms: IdentityServicesMap,
     public platformServices: PlatformsMap,
-    public time: TimeService,
-    protected ourToken: OurTokenConfig
+    public time: TimeService
   ) {}
 
   private getIdentityService(platform: PLATFORM) {
@@ -71,6 +61,22 @@ export class UsersService {
     return service;
   }
 
+  public async createUser(clerkId: string, manager: TransactionManager) {
+    const initSettings: UserSettings = USER_INIT_SETTINGS;
+
+    const userId = await this.repo.createUser(
+      {
+        clerkId,
+        settings: initSettings,
+        signupDate: this.time.now(),
+        accounts: {},
+      },
+      manager
+    );
+
+    return userId;
+  }
+
   /**
    * This method request the user signup context and stores it in the user profile.
    * If the user is not defined (first time), the details are stored on a temporary
@@ -78,17 +84,13 @@ export class UsersService {
    */
   public async getSignupContext<R = any>(
     platform: PLATFORM,
-    userId?: string,
     params?: any
   ): Promise<R> {
-    const context = await this.getIdentityService(platform).getSignupContext(
-      userId,
-      params
-    );
+    const context =
+      await this.getIdentityService(platform).getSignupContext(params);
 
     if (DEBUG)
       logger.debug('UsersService: getSignupContext', {
-        userId,
         platform,
         params,
         context,
@@ -98,15 +100,14 @@ export class UsersService {
   }
 
   /**
-   * This method validates the signup data and stores it in the user profile. If
-   * a userId is provided the user must exist and a new platform is added to it,
-   * otherewise a new user is created.
+   * This method validates the signup (connect platform) data and stores it in the user profile.
+   * A userId must be provided the user must exist and a new platform is added to it,
    */
   public async handleSignup<T = any>(
     platform: IDENTITY_PLATFORM,
     signupData: T,
     manager: TransactionManager,
-    _userId?: string // MUST be the authenticated userId if provided
+    userId: string // MUST be the authenticated userId if provided
   ): Promise<HandleSignupResult | undefined> {
     /**
      * validate the signup data for this platform and convert it into
@@ -116,7 +117,7 @@ export class UsersService {
       logger.debug('UsersService: handleSignup', {
         platform,
         signupData,
-        userId: _userId,
+        userId,
       });
 
     const { accountDetails: authenticatedDetails, profile } =
@@ -134,179 +135,109 @@ export class UsersService {
         manager
       );
 
-    const existingUserWithAccount = existingUserWithAccountId
-      ? await this.repo.getUser(existingUserWithAccountId, manager)
-      : undefined;
-
     if (DEBUG)
       logger.debug('UsersService: handleSignup', {
         authenticatedDetails,
         prefixed_user_id,
-        existingUserWithAccount,
+        existingUserWithAccountId,
       });
 
-    if (_userId) {
-      /**
-       * authenticated userId is provided: then the users exists and may or may not have
-       * already registered this platform user_id
-       * */
+    /** If existing user and the new userId is different, we consider this a replace legacy user operation */
+    if (existingUserWithAccountId && existingUserWithAccountId !== userId) {
+      await this.replaceLegacyUser(
+        existingUserWithAccountId,
+        userId,
+        platform,
+        authenticatedDetails,
+        manager
+      );
 
-      if (existingUserWithAccount) {
-        /**
-         * a user has already registered this platform user_id, then check which user registered it.
-         * */
-
-        if (existingUserWithAccount.userId !== _userId) {
-          /**
-           * the user with this platform user_id is another userId then we have a problem. This person has two
-           *  user profiles on our app and the should be merged.
-           * */
-
-          throw new Error(
-            `Unexpected, existing user ${existingUserWithAccount.userId} with this platform user_id ${prefixed_user_id} does not match the userId provided ${_userId}`
-          );
-        }
-
-        /**
-         * the user with this platform user_id is the same authenticated userId, then simply return. The current
-         * ourAccessToken is valid and this is an unexpected call since there was no need to signup with this platform
-         * and user_id
-         * */
-        if (DEBUG)
-          logger.debug(
-            'the user with this platform user_id is the same authenticated userId'
-          );
-
-        return {
-          userId: _userId,
-          linkProfile: false,
-        };
-      } else {
-        /**
-         * the user has not registered this platform user_id, then store it as a new entry on the [platform] array
-         * of the AppUser object
-         * */
-        if (DEBUG)
-          logger.debug(
-            'the user has not registered this platform user_id, then store it',
-            { _userId, platform, authenticatedDetails }
-          );
-
-        await this.repo.setAccountDetails(
-          _userId,
-          platform,
-          authenticatedDetails,
-          manager
-        );
-
-        /** create the profile when adding that account */
-        const profileCreate: AccountProfileCreate = {
-          ...profile,
-          userId: _userId,
-          platformId: platform,
-        };
-
-        await this.profiles.upsertProfile(profileCreate, manager);
-
-        return {
-          userId: _userId,
-          linkProfile: true,
-        };
-      }
-    } else {
-      /**
-       * authenticated userId not provided: the user may or may not exist
-       * */
-
-      if (existingUserWithAccount) {
-        /**
-         * a user exist with this platform user_id, then store the new credentials and
-         * return an accessToken and consider this a login for that userId
-         * */
-
-        const userId = existingUserWithAccount.userId;
-
-        if (DEBUG)
-          logger.debug(
-            ' user exist with this platform user_id, then return an accessToken'
-          );
-
-        await this.repo.setAccountDetails(
-          userId,
-          platform,
-          authenticatedDetails,
-          manager
-        );
-
-        // patch to recover uncreated profiles
-        const existing = await this.profiles.repo.getByProfileId(
-          getProfileId(platform, authenticatedDetails.user_id),
-          manager
-        );
-
-        if (!existing) {
-          const profileCreate: AccountProfileCreate = {
-            ...profile,
-            userId,
-            platformId: platform,
-          };
-
-          await this.profiles.upsertProfile(profileCreate, manager);
-        }
-
-        return {
-          ourAccessToken: this.generateOurAccessToken({
-            userId,
-          }),
-          userId,
-          linkProfile: true,
-        };
-      } else {
-        /**
-         * a user does not exist with this platform user_id then this is the first time that platform is used to signin
-         * and we need to create a new user.
-         * */
-
-        const initSettings: UserSettings = USER_INIT_SETTINGS;
-
-        const userId = await this.repo.createUser(
-          prefixed_user_id,
-          {
-            settings: initSettings,
-            signupDate: this.time.now(),
-            accounts: {
-              [platform]: [authenticatedDetails],
-            },
-          },
-          manager
-        );
-
-        /** create profile and link it to the user */
-        /** create the profile when addint that account */
-        const profileCreate: AccountProfileCreate = {
-          ...profile,
-          userId,
-          platformId: platform,
-        };
-
-        await this.profiles.upsertProfile(profileCreate, manager);
-
-        if (DEBUG)
-          logger.debug(
-            'a user does not exist with this platform user_id then this is the first time that platform is used to signin and we need to create a new user.'
-          );
-
-        return {
-          ourAccessToken: this.generateOurAccessToken({
-            userId: prefixed_user_id,
-          }),
-          userId: prefixed_user_id,
-          linkProfile: true,
-        };
-      }
+      return {
+        userId,
+        linkProfile: false,
+        replaceLegacy: {
+          existingUserId: existingUserWithAccountId,
+          newUserId: userId,
+        },
+      };
     }
 
-    return;
+    /** If existing user and the new userId is the same, we consider this a reconnect account operation */
+    if (existingUserWithAccountId && existingUserWithAccountId === userId) {
+      await this.repo.setAccountDetails(
+        userId,
+        platform,
+        { ...authenticatedDetails, isDisconnected: false },
+        manager
+      );
+      return {
+        userId,
+        linkProfile: false,
+      };
+    }
+
+    /**
+     * the user has not registered this platform user_id, then store it as a new entry on the [platform] array
+     * of the AppUser object
+     * */
+    if (DEBUG)
+      logger.debug(
+        'the user has not registered this platform user_id, then store it',
+        { userId, platform, authenticatedDetails }
+      );
+
+    await this.repo.setAccountDetails(
+      userId,
+      platform,
+      authenticatedDetails,
+      manager
+    );
+
+    /** create the profile when adding that account */
+    const profileCreate: AccountProfileCreate = {
+      ...profile,
+      userId,
+      platformId: platform,
+    };
+
+    await this.profiles.upsertProfile(profileCreate, manager);
+
+    return {
+      userId,
+      linkProfile: true,
+    };
+  }
+
+  protected async replaceLegacyUser(
+    existingUserId: string,
+    newUserId: string,
+    platform: PLATFORM,
+    details: AccountDetailsBase,
+    manager: TransactionManager
+  ) {
+    const existingUser = await this.repo.getUser(existingUserId, manager, true);
+
+    /** copy accounts from legacy user */
+    await this.repo.setAccounts(newUserId, existingUser.accounts, manager);
+
+    /** set the just-used account details */
+    await this.repo.setAccountDetails(newUserId, platform, details, manager);
+
+    /** update all profiles to be of the new userId */
+    const profiles = await this.profiles.repo.getOfUser(
+      existingUserId,
+      manager
+    );
+
+    await Promise.all(
+      profiles.map(async (profile) => {
+        await this.profiles.repo.update(
+          profile.id,
+          { userId: newUserId },
+          manager
+        );
+      })
+    );
   }
 
   public async updateAccountCredentials(
@@ -351,18 +282,47 @@ export class UsersService {
 
     await this.repo.setAccountDetails(userId, platformId, account, manager);
   }
+  public async updateAccountDisconnectedStatus(
+    userId: string,
+    platformId: PLATFORM,
+    user_id: string,
+    isDisconnected: boolean,
+    manager: TransactionManager
+  ) {
+    if (DEBUG)
+      logger.debug(
+        'updateAccountDisconnectedStatus - isDisconnected status',
+        isDisconnected,
+        DEBUG_PREFIX
+      );
 
-  protected generateOurAccessToken(data: TokenData) {
-    return jwt.sign(data, this.ourToken.tokenSecret, {
-      expiresIn: this.ourToken.expiresIn,
-    });
-  }
+    const user = await this.repo.getUser(userId, manager, true);
 
-  public verifyAccessToken(token: string) {
-    const verified = jwt.verify(token, this.ourToken.tokenSecret, {
-      complete: true,
-    }) as unknown as jwt.JwtPayload & TokenData;
-    return verified.payload.userId;
+    if (platformId === PLATFORM.Local) {
+      throw new Error('Cannot update local account status');
+    }
+
+    const accounts = user.accounts[platformId];
+    if (!accounts) {
+      throw new Error('Unexpected accounts not found');
+    }
+
+    const account = accounts.find((c) => c.user_id === user_id);
+    if (!account) {
+      throw new Error(`Unexpected account for user_id ${user_id} not found`);
+    }
+
+    /** update the credentials */
+    account.isDisconnected = isDisconnected;
+
+    if (DEBUG)
+      logger.debug(
+        'getUserClientAndUpdateDetails - newDetails',
+        account,
+        DEBUG_PREFIX
+      );
+
+    await this.repo.setAccountDetails(userId, platformId, account, manager);
   }
 
   public async getUserReadProfiles(
@@ -394,6 +354,7 @@ export class UsersService {
                 profile: profile.profile,
                 read: account.credentials.read !== undefined,
                 write: account.credentials.write !== undefined,
+                isDisconnected: account.isDisconnected,
               });
 
               profiles[platform] = current as AccountDetailsRead<any>[];
@@ -454,6 +415,7 @@ export class UsersService {
 
     const userRead: AppUserRead = {
       userId,
+      clerkId: user.clerkId,
       email,
       signupDate: user.signupDate,
       settings: user.settings,
@@ -464,11 +426,13 @@ export class UsersService {
     return userRead;
   }
 
-  updateSettings(userId: string, settings: UserSettingsUpdate) {
-    return this.db.run(async (manager) => {
-      // set timestamp
-      await this.repo.updateSettings(userId, settings, manager);
-    });
+  updateSettings(
+    userId: string,
+    settings: UserSettingsUpdate,
+    manager: TransactionManager
+  ) {
+    // set timestamp
+    return this.repo.updateSettings(userId, settings, manager);
   }
 
   setEmail(userId: string, emailDetails: EmailDetails) {
@@ -482,9 +446,7 @@ export class UsersService {
     });
   }
 
-  async setOnboarded(userId: string) {
-    return this.db.run(async (manager) => {
-      await this.repo.setOnboarded(userId, manager);
-    });
+  async setOnboarded(userId: string, manager: TransactionManager) {
+    await this.repo.setOnboarded(userId, manager);
   }
 }

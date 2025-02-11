@@ -1,11 +1,15 @@
+import { clerkMiddleware } from '@clerk/express';
 import cors from 'cors';
 import express from 'express';
 
 import { attachServices } from '../middleware/attach.services';
-import { authenticate, authenticateAdmin } from '../middleware/authenticate';
 import { errorHandling } from '../middleware/errorHandlingMiddleware';
+import { ClerkConfig } from './services';
 
-export const buildApp = (router?: express.Router): express.Application => {
+export const buildApp = (
+  clerk: () => ClerkConfig,
+  router?: express.Router
+): express.Application => {
   const app = express();
 
   app.use(express.json());
@@ -16,7 +20,10 @@ export const buildApp = (router?: express.Router): express.Application => {
   );
 
   app.use(attachServices);
-  app.use(authenticate);
+  app.use((req, res, next) => {
+    const clerkConfig = clerk();
+    clerkMiddleware(clerkConfig)(req, res, next);
+  });
 
   if (router) {
     app.use(router);
@@ -27,7 +34,10 @@ export const buildApp = (router?: express.Router): express.Application => {
   return app;
 };
 
-export const buildAdminApp = (router?: express.Router): express.Application => {
+export const buildAdminApp = (
+  clerk: () => ClerkConfig,
+  router?: express.Router
+): express.Application => {
   const app = express();
 
   app.use(express.json());
@@ -38,8 +48,10 @@ export const buildAdminApp = (router?: express.Router): express.Application => {
   );
 
   app.use(attachServices);
-  app.use(authenticateAdmin);
-  app.use(authenticate);
+  app.use((req, res, next) => {
+    const clerkConfig = clerk();
+    clerkMiddleware(clerkConfig)(req, res, next);
+  });
 
   if (router) {
     app.use(router);

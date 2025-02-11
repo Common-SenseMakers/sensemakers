@@ -23,7 +23,11 @@ import {
   PlatformPostSignerType,
   PlatformPostUpdate,
 } from '../../@shared/types/types.platform.posts';
-import { PLATFORM } from '../../@shared/types/types.platforms';
+import {
+  PLATFORM,
+  PLATFORM_SESSION_REFRESH_ERROR,
+  PlatformSessionRefreshError,
+} from '../../@shared/types/types.platforms';
 import '../../@shared/types/types.posts';
 import {
   AppPostFull,
@@ -386,6 +390,9 @@ export class TwitterService
 
       return { threads, credentials: newCredentials };
     } catch (e: any) {
+      if (e.name === PLATFORM_SESSION_REFRESH_ERROR) {
+        throw new PlatformSessionRefreshError(e);
+      }
       throw new Error(handleTwitterError(e));
     }
   }

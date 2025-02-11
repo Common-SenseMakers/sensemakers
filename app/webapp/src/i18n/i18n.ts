@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import { AppGeneralKeys, appGeneralValues } from './i18n.app.general';
+import { ClustersKeys, clustersKeys } from './i18n.clusters';
 import { PostEditKeys, editValues } from './i18n.edit.post';
 import { IntroKeys, introValues } from './i18n.intro';
 import { PlatformsKeys, platformsValues } from './i18n.platforms';
@@ -14,7 +15,8 @@ export type I18Keys =
   | PlatformsKeys
   | SettingsKeys
   | PostEditKeys
-  | WelcomeKeys;
+  | WelcomeKeys
+  | ClustersKeys;
 
 export const translationENG: Record<I18Keys, string> = {
   ...introValues,
@@ -23,6 +25,7 @@ export const translationENG: Record<I18Keys, string> = {
   ...settingsValues,
   ...editValues,
   ...welcomeValues,
+  ...clustersKeys,
 };
 
 i18n

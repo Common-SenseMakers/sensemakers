@@ -14,16 +14,13 @@ import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { SettingsKeys } from '../i18n/i18n.settings';
-import { AbsoluteRoutes, RouteNames } from '../route.names';
+import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';
 import { BoxCentered } from '../ui-components/BoxCentered';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import {
-  PlatformConnectedStatus,
-  useAccountContext,
-} from '../user-login/contexts/AccountContext';
+import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useBlueskyContext } from '../user-login/contexts/platforms/BlueskyContext';
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
@@ -59,9 +56,9 @@ export const UserSettingsPage = () => {
   const { connect: connectTwitter, needConnect: needConnectTwitter } =
     useTwitterContext();
 
-  const twitterProfile = connectedUser?.profiles?.twitter;
-  const mastodonProfile = connectedUser?.profiles?.mastodon;
-  const blueskyProfile = connectedUser?.profiles?.bluesky;
+  const twitterProfile = connectedUser?.profiles?.twitter?.profile;
+  const mastodonProfile = connectedUser?.profiles?.mastodon?.profile;
+  const blueskyProfile = connectedUser?.profiles?.bluesky?.profile;
 
   const content = (() => {
     if (!connectedUser) {
@@ -133,16 +130,14 @@ export const UserSettingsPage = () => {
             connectTwitter &&
               connectTwitter(
                 'read',
-                `${getAppUrl()}${AbsoluteRoutes.Settings}/${RouteNames.ConnectTwitter}`
+                `${getAppUrl()}${AbsoluteRoutes.ConnectTwitter}`
               ).catch(console.error);
           }}
           buttonText={needConnectTwitter ? 'connect' : ''}
           username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          connecting={
-            getPlatformConnectedStatus(PLATFORM.Twitter) ===
-            PlatformConnectedStatus.Connecting
-          }
-          connected={twitterProfile !== undefined}></PlatformSection>
+          platformStatus={getPlatformConnectedStatus(
+            PLATFORM.Twitter
+          )}></PlatformSection>
 
         <PlatformSection
           icon={
@@ -154,17 +149,13 @@ export const UserSettingsPage = () => {
           }
           platformName={'Mastodon'}
           onButtonClicked={() => {
-            navigate(AbsoluteRoutes.ConnectMastodon, {
-              state: { callbackUrl: window.location.href },
-            });
+            navigate(AbsoluteRoutes.ConnectMastodon);
           }}
           buttonText={needConnectMastodon ? 'connect' : ''}
           username={mastodonProfile?.username || ''}
-          connecting={
-            getPlatformConnectedStatus(PLATFORM.Mastodon) ===
-            PlatformConnectedStatus.Connecting
-          }
-          connected={mastodonProfile !== undefined}></PlatformSection>
+          platformStatus={getPlatformConnectedStatus(
+            PLATFORM.Mastodon
+          )}></PlatformSection>
 
         <PlatformSection
           icon={
@@ -176,19 +167,15 @@ export const UserSettingsPage = () => {
           }
           platformName={'Bluesky'}
           onButtonClicked={() => {
-            navigate(AbsoluteRoutes.ConnectBluesky, {
-              state: { callbackUrl: window.location.href },
-            });
+            navigate(AbsoluteRoutes.ConnectBluesky);
           }}
           buttonText={needConnectBluesky ? 'connect' : ''}
           username={
             blueskyProfile ? `@${blueskyProfile.username}` : '- not connected -'
           }
-          connecting={
-            getPlatformConnectedStatus(PLATFORM.Bluesky) ===
-            PlatformConnectedStatus.Connecting
-          }
-          connected={!!blueskyProfile}></PlatformSection>
+          platformStatus={getPlatformConnectedStatus(
+            PLATFORM.Bluesky
+          )}></PlatformSection>
 
         <Box
           direction="row"

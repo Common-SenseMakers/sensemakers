@@ -18,6 +18,12 @@ import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { useSemanticsStore } from '../common/use.semantics';
 import { PatternProps, PostClickTarget } from '../patterns';
 
+export const KEYWORDS_COLORS = {
+  font: '#498283',
+  background: '#F5FCFC',
+  border: '#DAEDED',
+};
+
 export const KeywordsComponent = (props: PatternProps) => {
   const { t } = useTranslation();
   /** actual semantics */
@@ -117,7 +123,7 @@ export const KeywordsComponent = (props: PatternProps) => {
             props.editable ? t(PostEditKeys.keywordsPlaceholder) : ''
           }
           editable={props.editable}
-          colors={{ font: '#498283', background: '#F5FCFC', border: '#DAEDED' }}
+          colors={KEYWORDS_COLORS}
           labels={keywords}
           onLabelClick={handleKeywordClick}
           addLabel={(newLabel) => {

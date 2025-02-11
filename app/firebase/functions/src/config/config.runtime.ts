@@ -4,7 +4,7 @@ import { envRuntime } from './typedenv.runtime';
 /** Verify that all needed env variables were provided */
 const mandatory: Array<keyof typeof envRuntime> = [
   'ORCID_CLIENT_ID',
-  'OUR_TOKEN_SECRET',
+  'CLERK_PUBLISHABLE_KEY',
   'TWITTER_CLIENT_ID',
   'TWITTER_CLIENT_SECRET',
   'TWITTER_BEARER_TOKEN',
@@ -28,6 +28,7 @@ mandatory.forEach((varName) => {
 export const NODE_ENV = envRuntime.NODE_ENV;
 export const PROJECT_ID = envRuntime.PROJECT_ID;
 export const APP_URL = envRuntime.APP_URL;
+export const APP_NAME = 'Cosmik';
 
 export const IS_EMULATOR = process.env.FIRESTORE_EMULATOR_HOST !== undefined;
 
@@ -44,6 +45,9 @@ export const BLUESKY_USERNAME = envRuntime.BLUESKY_USERNAME;
 export const BLUESKY_SERVICE_URL = 'https://bsky.social';
 
 export const ADMIN_API_KEY = envRuntime.ADMIN_API_KEY;
+
+export const CLERK_PUBLISHABLE_KEY = envRuntime.CLERK_PUBLISHABLE_KEY;
+export const CLERK_SECRET_KEY = envRuntime.CLERK_SECRET_KEY;
 
 export const IFRAMELY_API_URL = 'https://iframe.ly/api';
 export const IFRAMELY_API_KEY = envRuntime.IFRAMELY_API_KEY;
@@ -64,9 +68,6 @@ export const USE_REAL_LINKS = envRuntime.USE_REAL_LINKS;
 export const TEST_USER_ACCOUNTS = envRuntime.TEST_USER_ACCOUNTS;
 
 export const PARSING_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-
-export const OUR_TOKEN_SECRET = envRuntime.OUR_TOKEN_SECRET;
-export const OUR_EXPIRES_IN = '30d';
 
 export const EMAIL_SENDER_FROM = envRuntime.EMAIL_SENDER_FROM;
 export const ADMIN_EMAIL = envRuntime.ADMIN_EMAIL;

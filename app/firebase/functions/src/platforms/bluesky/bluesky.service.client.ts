@@ -7,6 +7,7 @@ import {
   BlueskyCredentials,
   BlueskySignupData,
 } from '../../@shared/types/types.bluesky';
+import { PlatformSessionRefreshError } from '../../@shared/types/types.platforms';
 import {
   PlatformAccountProfile,
   PlatformProfile,
@@ -152,21 +153,25 @@ export class BlueskyServiceClient {
     /** if credentials are provided (user-specific session) */
     const atpAgent = new AtpAgent({ service: this.config.BLUESKY_SERVICE_URL });
 
-    const newSession = await this.resumeSession(
-      atpAgent,
-      credentials.session,
-      credentials.credentials
-    );
+    try {
+      const newSession = await this.resumeSession(
+        atpAgent,
+        credentials.session,
+        credentials.credentials
+      );
 
-    if (!atpAgent.session) {
-      throw new Error('Failed to initiate bluesky session');
+      if (!atpAgent.session) {
+        throw new Error('Failed to initiate bluesky session');
+      }
+
+      const newCredentials = newSession
+        ? { session: atpAgent.session, credentials: credentials.credentials }
+        : undefined;
+
+      return { client: atpAgent, credentials: newCredentials };
+    } catch (e: any) {
+      throw new PlatformSessionRefreshError(e);
     }
-
-    const newCredentials = newSession
-      ? { session: atpAgent.session, credentials: credentials.credentials }
-      : undefined;
-
-    return { client: atpAgent, credentials: newCredentials };
   };
 
   /** gets a client using provided credentials (session) or returns and admin client */
