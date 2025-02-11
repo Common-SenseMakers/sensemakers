@@ -23,6 +23,7 @@ import {
   THIS_POST_NAME_URI,
 } from '../shared/utils/semantics.helper';
 import { HelpTip } from '../ui-components';
+import { DeleteButton } from '../ui-components/DeleteButton';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
@@ -30,7 +31,9 @@ import { usePost } from './post.context/PostContext';
 
 const DEBUG = false;
 
-export const PublishButtons = (props: BoxExtendedProps) => {
+export const PublishButtons = (
+  props: BoxExtendedProps & { handlePostDelete: () => void }
+) => {
   const { constants } = useThemeContext();
   const { t } = useTranslation();
   const { updated, fetched } = usePost();
@@ -181,6 +184,7 @@ export const PublishButtons = (props: BoxExtendedProps) => {
                   : t(PostEditKeys.reseachNotDetectedHelp)}
               </Text>
             }></HelpTip>
+          <DeleteButton onClick={props.handlePostDelete}></DeleteButton>
         </Box>
       )}
     </Box>

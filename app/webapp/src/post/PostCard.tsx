@@ -113,7 +113,7 @@ export const PostCard = (props: {
   const { shade: _shade } = props;
   const shade = _shade || false;
 
-  const { updated } = usePost();
+  const { updated, deleted } = usePost();
   const post = updated.postMerged;
 
   const { constants } = useThemeContext();
@@ -167,6 +167,12 @@ export const PostCard = (props: {
   const hideSemantics = false;
   const hasRefs = post?.structuredSemantics?.refs?.length || 0 > 0;
 
+  const handlePostDelete = () => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      deleted.deletePost().catch(console.error);
+    }
+  };
+
   return (
     <Box
       style={{
@@ -176,7 +182,7 @@ export const PostCard = (props: {
         borderLeft: CARD_BORDER,
         borderTop: 'none',
       }}>
-      <PublishButtons></PublishButtons>
+      <PublishButtons handlePostDelete={handlePostDelete}></PublishButtons>
 
       <Box pad={{ top: '16px', horizontal: '12px', bottom: '24px' }}>
         <Box

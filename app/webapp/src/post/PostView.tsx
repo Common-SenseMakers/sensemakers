@@ -35,7 +35,7 @@ export const PostView = (props: {
   const [, setIsReparsing] = useState(false);
 
   const { constants } = useThemeContext();
-  const { updated, fetched } = usePost();
+  const { updated, fetched, deleted } = usePost();
 
   const { connectedUser } = useAccountContext();
 
@@ -142,6 +142,28 @@ export const PostView = (props: {
   const hideSemantics = false;
 
   const content = (() => {
+    if (fetched.post === null) {
+      return (
+        <Box
+          pad="medium"
+          justify="center"
+          align="center"
+          style={{
+            color: '#4B5563',
+            fontFamily: 'Libre Franklin',
+            fontSize: '14px',
+            fontStyle: 'normal',
+            fontWeight: 500,
+            lineHeight: '16px',
+            textDecorationStyle: 'solid',
+            textDecorationSkipInk: 'none',
+            textDecorationThickness: 'auto',
+            textUnderlineOffset: 'auto',
+          }}>
+          <Text>Post Deleted</Text>
+        </Box>
+      );
+    }
     if (!updated.postMerged) {
       return (
         <Box gap="12px" pad="medium">
@@ -162,10 +184,22 @@ export const PostView = (props: {
       post: updated.postMerged,
       custom: { showAggregatedLabels: true },
     };
+    const handlePostDelete = () => {
+      if (window.confirm('Are you sure you want to delete this post?')) {
+        deleted
+          .deletePost()
+          .then(() => {
+            fetched.refetch();
+          })
+          .catch(console.error);
+      }
+    };
 
     return (
       <>
-        <PublishButtons margin={{ bottom: '16px' }}></PublishButtons>
+        <PublishButtons
+          handlePostDelete={handlePostDelete}
+          margin={{ bottom: '16px' }}></PublishButtons>
 
         <Box
           pad={{ top: 'medium', horizontal: 'medium', bottom: 'large' }}

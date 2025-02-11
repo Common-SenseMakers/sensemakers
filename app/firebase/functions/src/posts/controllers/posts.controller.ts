@@ -15,6 +15,7 @@ import { enqueueTask } from '../../tasksUtils/tasks.support';
 import { IndexedPostsRepo } from '../indexed.posts.repository';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
+  deletePostSchema,
   getKeywordsSchema,
   getPostSchema,
   postIdValidation,
@@ -118,6 +119,42 @@ export const parsePostController: RequestHandler = async (
   } catch (error: any) {
     logger.error('error', error);
     response.status(500).send({ success: false, error: error.message });
+  }
+};
+
+export const deletePostController: RequestHandler = async (
+  request,
+  response
+) => {
+  try {
+    const services = getServices(request);
+    const userId = await services.db.run(async (manager) => {
+      return getAuthenticatedUser(request, services.users, manager, true);
+    });
+    const { db, postsManager } = getServices(request);
+
+    const payload = await deletePostSchema.validate(request.body);
+
+    await db.run(async (manager) => {
+      const post = await postsManager.processing.posts.get(
+        payload.postId,
+        manager,
+        true
+      );
+
+      if (post.authorUserId !== userId) {
+        throw new Error(`Post can only be deleted by the author`);
+      }
+
+      return postsManager.processing.deletePostFull(payload.postId, manager);
+    });
+
+    if (DEBUG) logger.debug(`${request.path}: deletePost`, payload);
+
+    response.status(200).send({ success: true });
+  } catch (error) {
+    logger.error('error', error);
+    response.status(500).send({ success: false, error });
   }
 };
 
