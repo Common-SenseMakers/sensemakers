@@ -17,6 +17,7 @@ import { AbsoluteRoutes, RouteNames } from '../../route.names';
 import { AppButton, AppCircleButton } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
+import { useAccountContext } from '../../user-login/contexts/AccountContext';
 import { ClusterIcon } from '../icons/ClusterIcon';
 import { DraftsIcon } from '../icons/DraftsIcon';
 import { FeedIcon } from '../icons/FeedIcon';
@@ -98,6 +99,7 @@ export const GlobalNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { connectedUser, signIn } = useAccountContext();
 
   const notFeed = !location.pathname.includes(RouteNames.Feed);
 
@@ -130,26 +132,45 @@ export const GlobalNav = () => {
     navigate(AbsoluteRoutes.ClusterFeed(ALL_CLUSTER_NAME));
   };
 
+  const userButtons = connectedUser ? (
+    !mobile ? (
+      <Box align="start">
+        <NavButton
+          key="0"
+          label={t(AppGeneralKeys.myPosts)}
+          icon={<DraftsIcon></DraftsIcon>}
+          onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
+          isSelected={pageIx === 0}></NavButton>
+        <NavButton
+          key="2"
+          label={t(AppGeneralKeys.settings)}
+          icon={<SettignsIcon></SettignsIcon>}
+          onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
+          isSelected={pageIx === 2}></NavButton>
+      </Box>
+    ) : (
+      <Box direction="row" align="center" gap="8px">
+        <AppCircleButton
+          onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
+          icon={<DraftsIcon color="white"></DraftsIcon>}></AppCircleButton>
+        <AppCircleButton
+          onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
+          icon={<SettignsIcon color="white"></SettignsIcon>}></AppCircleButton>
+      </Box>
+    )
+  ) : (
+    <Box pad="small">
+      <AppButton label="Sign In" onClick={() => signIn()}></AppButton>
+    </Box>
+  );
+
   if (!mobile) {
     return (
       <Box style={{ flexGrow: 1 }}>
         <Box style={{ flexGrow: 1 }}>
           <ClustersMenu></ClustersMenu>
         </Box>
-        <Box align="start">
-          <NavButton
-            key="0"
-            label={t(AppGeneralKeys.myPosts)}
-            icon={<DraftsIcon></DraftsIcon>}
-            onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
-            isSelected={pageIx === 0}></NavButton>
-          <NavButton
-            key="2"
-            label={t(AppGeneralKeys.settings)}
-            icon={<SettignsIcon></SettignsIcon>}
-            onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
-            isSelected={pageIx === 2}></NavButton>
-        </Box>
+        {userButtons}
       </Box>
     );
   }
@@ -160,14 +181,7 @@ export const GlobalNav = () => {
       direction="row"
       justify="between"
       pad={{ left: '20px', right: '10px' }}>
-      <Box direction="row" align="center" gap="8px">
-        <AppCircleButton
-          onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
-          icon={<DraftsIcon color="white"></DraftsIcon>}></AppCircleButton>
-        <AppCircleButton
-          onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
-          icon={<SettignsIcon color="white"></SettignsIcon>}></AppCircleButton>
-      </Box>
+      {userButtons}
       {notFeed ? (
         <AppButton
           label="hyperfeed"

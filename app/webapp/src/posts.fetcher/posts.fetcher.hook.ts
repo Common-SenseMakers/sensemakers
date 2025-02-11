@@ -199,7 +199,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
           connectedUser,
           code,
         });
-      if (!connectedUser || code) {
+      if (code) {
         return;
       }
 
@@ -297,7 +297,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
   const fetchNewerCallback = useCallback(
     async (_newestPostId: string) => {
-      if (!connectedUser || !_newestPostId || code) {
+      if (!_newestPostId || code) {
         return;
       }
 
@@ -327,6 +327,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         setIsLoading(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       DEBUG_PREFIX,
       PAGE_SIZE,
@@ -395,7 +396,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
   /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
   useEffect(() => {
-    if (posts && posts.length > 0 && !fetchedNewerFirst && connectedUser) {
+    if (posts && posts.length > 0 && !fetchedNewerFirst) {
       if (DEBUG) console.log(`${DEBUG_PREFIX}first fetch newer`);
       _fetchNewer(posts[0].id);
     }

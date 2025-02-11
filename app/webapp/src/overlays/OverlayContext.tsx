@@ -14,7 +14,7 @@ import { useBack } from '../ui-components/hooks/useBack';
 import { Overlay, OverlayValue } from './Overlay';
 import { eventToOverlay } from './overlay.utils';
 
-const DEBUG = true;
+const DEBUG = false;
 
 export enum OverlayQueryParams {
   Post = 'p',

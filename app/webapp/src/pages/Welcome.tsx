@@ -1,18 +1,13 @@
-import { useClerk } from '@clerk/clerk-react';
 import { Box, Image } from 'grommet';
-import { t } from 'i18next';
-import { usePostHog } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { POSTHOG_EVENTS } from '../analytics/posthog.events';
-import { WelcomeKeys } from '../i18n/i18n.welcome';
+import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
 import { AbsoluteRoutes } from '../route.names';
-import { AppButton, AppHeading, AppSubtitle } from '../ui-components';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { BoxCentered } from '../ui-components/BoxCentered';
-import { useAccountContext } from '../user-login/contexts/AccountContext';
+import { Loading } from '../ui-components/LoadingDiv';
 
 interface WelcomeBulletProps {
   emoji: string;
@@ -52,70 +47,16 @@ export const WelcomeBullet = ({
 
 export const Welcome = () => {
   const navigate = useNavigate();
-  const posthog = usePostHog();
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { openSignIn } = useClerk();
-  const { connectedUser } = useAccountContext();
 
   /** after the signin flow, the connectedUser should be defined */
   useEffect(() => {
-    if (connectedUser) {
-      navigate(AbsoluteRoutes.Start);
-    }
+    navigate(AbsoluteRoutes.ClusterFeed(ALL_CLUSTER_NAME));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectedUser]);
-
-  const startLogin = () => {
-    posthog?.capture(POSTHOG_EVENTS.CLICKED_GET_STARTED);
-    openSignIn();
-  };
+  }, []);
 
   return (
-    <Box pad={{ bottom: '24px', horizontal: '12px' }}>
-      <Box style={{ flexGrow: 1 }}>
-        <Box style={{ flexGrow: 1 }}>
-          <AppHeading level="1">{t(WelcomeKeys.title)}</AppHeading>
-          <Box width="100%" height="4px"></Box>
-          <Box style={{ flexGrow: 1 }} gap="16px">
-            <AppSubtitle>{t(WelcomeKeys.subtitle)}</AppSubtitle>
-            <AppParagraph>{t(WelcomeKeys.par1)}</AppParagraph>
-            <WelcomeBullet
-              emoji="/icons/intro/icon01.png"
-              translationKey={WelcomeKeys.bullet1}
-            />
-            <WelcomeBullet
-              emoji="/icons/intro/icon02.png"
-              translationKey={WelcomeKeys.bullet2}
-            />
-            <WelcomeBullet
-              emoji="/icons/intro/icon03.png"
-              translationKey={WelcomeKeys.bullet3}
-            />
-            <WelcomeBullet
-              emoji="/icons/intro/icon04.png"
-              translationKey={WelcomeKeys.bullet4}
-            />
-            <WelcomeBullet
-              emoji="/icons/intro/icon05.png"
-              translationKey={WelcomeKeys.bullet5}
-            />
-            <AppParagraph>
-              <Trans
-                i18nKey={WelcomeKeys.par2}
-                components={{ b: <b></b> }}></Trans>
-            </AppParagraph>
-          </Box>
-        </Box>
-      </Box>
-      <BoxCentered gap="16px" direction="row">
-        <AppButton
-          style={{ flexGrow: 1 }}
-          primary
-          margin={{ top: 'large' }}
-          label="Get started"
-          onClick={() => startLogin()}></AppButton>
-      </BoxCentered>
-    </Box>
+    <BoxCentered>
+      <Loading />
+    </BoxCentered>
   );
 };

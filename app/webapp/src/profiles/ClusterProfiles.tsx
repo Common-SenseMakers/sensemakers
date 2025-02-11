@@ -48,7 +48,10 @@ export const ClusterProfiles = (props: {
         {profiles &&
           profiles.map((profile) => {
             return (
-              <AppButton plain onClick={() => props.onProfileClick(profile.id)}>
+              <AppButton
+                key={profile.id}
+                plain
+                onClick={() => props.onProfileClick(profile.id)}>
                 <AccountProfileHeader
                   size="small"
                   accounts={[profile]}></AccountProfileHeader>

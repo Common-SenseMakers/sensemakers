@@ -1,4 +1,4 @@
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
 import { usePostHog } from 'posthog-js/react';
 import {
   PropsWithChildren,
@@ -36,6 +36,7 @@ export const PLATFORMS_LOGIN_STATUS = 'platformsLoginStatus';
 export const ALREADY_CONNECTED_KEY = 'already-connected';
 
 export type AccountContextType = {
+  signIn: () => void;
   connectedUser?: ConnectedUser;
   connectedPlatforms: IDENTITY_PLATFORM[];
   isConnected: boolean;
@@ -124,6 +125,11 @@ export const AccountContext = (props: PropsWithChildren) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { isSignedIn } = useUser();
   const { getToken, signOut } = useAuth();
+  const { openSignIn } = useClerk();
+
+  const signIn = () => {
+    openSignIn();
+  };
 
   const [token, setToken] = useState<string>();
 
@@ -352,6 +358,7 @@ export const AccountContext = (props: PropsWithChildren) => {
   return (
     <AccountContextValue.Provider
       value={{
+        signIn,
         connectedUser: connectedUser === null ? undefined : connectedUser,
         connectedPlatforms,
         email,
