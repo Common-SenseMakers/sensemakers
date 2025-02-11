@@ -63,7 +63,10 @@ export const AppCircleButton = (props: IButton) => {
       {...props}
       plain
       label=""
-      style={{ ...props.style, ...circleButtonStyle }}></AppButton>
+      style={{
+        ...props.style,
+        ...circleButtonStyle,
+      }}></AppButton>
   );
 };
 

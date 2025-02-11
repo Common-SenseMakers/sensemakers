@@ -160,7 +160,7 @@ export const GlobalNav = () => {
     )
   ) : (
     <Box pad="small">
-      <AppButton label="Sign In" onClick={() => signIn()}></AppButton>
+      <AppButton primary label="Sign In" onClick={() => signIn()}></AppButton>
     </Box>
   );
 
