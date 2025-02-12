@@ -11,6 +11,7 @@ import {
 } from '../@shared/types/types.platform.posts';
 import {
   AppPostFull,
+  EngagementMetrics,
   GenericThread,
   PostAndAuthor,
 } from '../@shared/types/types.posts';
@@ -65,6 +66,10 @@ export interface PlatformService<
       platformPost: PlatformPostPosted;
     } & WithCredentials
   >;
+  getPostMetrics(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ engagementMetrics?: EngagementMetrics } & WithCredentials>;
 
   getThread(
     post_id: string,

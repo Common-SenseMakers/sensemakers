@@ -31,6 +31,7 @@ import {
 import '../../@shared/types/types.posts';
 import {
   AppPostFull,
+  EngagementMetrics,
   GenericAuthor,
   GenericPost,
   GenericThread,
@@ -112,7 +113,9 @@ export class TwitterService
   async getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
-  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+  ): Promise<
+    { platformPost: PlatformPostPosted<TwitterThread> } & WithCredentials
+  > {
     const { client: readOnlyClient, credentials: newCredentials } =
       await this.getClient(credentials?.read, 'read');
 
@@ -151,6 +154,22 @@ export class TwitterService
     } catch (e: any) {
       throw new Error(handleTwitterError(e));
     }
+  }
+
+  async getPostMetrics(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ engagementMetrics?: EngagementMetrics } & WithCredentials> {
+    const platformPost = await this.getSinglePost(post_id, credentials);
+    const rootPost = platformPost.platformPost.post.tweets[0];
+    const engagementMetrics: EngagementMetrics | undefined =
+      rootPost.public_metrics && {
+        likes: rootPost.public_metrics.like_count,
+        reposts: rootPost.public_metrics.retweet_count,
+        replies: rootPost.public_metrics.reply_count,
+        quotes: rootPost.public_metrics.quote_count,
+      };
+    return { engagementMetrics, credentials: platformPost.credentials };
   }
 
   async getThread(
