@@ -107,9 +107,53 @@ thread_data_2 = {
         },
     ],
 }
+
+repost_thread = {
+  #"id": "sdhLWjIZaK9hzXfzwLpS",
+  #"generic": {
+    "author": {
+      "platformId": "bluesky",
+      "id": "did:plc:xq36vykdkrzknmcxo3jnn5wq",
+      "username": "sensenetsbot.bsky.social",
+      "name": "Sense Bot",
+      "avatarUrl": "https://cdn.bsky.app/img/avatar/plain/did:plc:xq36vykdkrzknmcxo3jnn5wq/bafkreidjv7bsdwqhaq6ft44iwsrp2xplruur76lnny4v2ecixqtzkpjf34@jpeg"
+    },
+    "url": "https://bsky.app/profile/plato-philosophy.bsky.social/post/3lbsjlmobfk2c",
+    "thread": [
+      {
+        "content": "",
+        "quotedThread": {
+          "author": {
+            "platformId": "bluesky",
+            "id": "did:plc:xq36vykdkrzknmcxo3jnn5wq",
+            "username": "sensenetsbot.bsky.social",
+            "name": "Sense Bot"
+          },
+          "thread": [
+            {
+              "url": "https://bsky.app/profile/plato-philosophy.bsky.social/post/3lbsjlmobfk2c",
+              "content": "There is still time to submit your proposal for the 2025 PLATO conference event! Learn more and submit here: https://www.plato-philosophy.org/plato-conferences/ it is a very exciting oporttunity #Philsky #philosophy"
+            }
+          ]
+        }
+      }
+    ],
+  #},
+  "origin": "bluesky",
+  "authorProfileId": "bluesky-did:plc:xq36vykdkrzknmcxo3jnn5wq",
+  "authorUserId": "twitter:1753077743816777728",
+  "mirrorsIds": [
+    "4LxVik40k2biNVcURdTt"
+  ],
+  "createdAtMs": 1736504456748,
+  "editStatus": "pending",
+  "parsedStatus": "unprocessed",
+  "parsingStatus": "idle"
+}
+
 parameters = {}
 
-parser_request = {"post": thread_data, "parameters": parameters}
+parser_request = {"post": repost_thread, "parameters": parameters}
 
 config: SM_FUNCTION_post_parser_config = {
     "openrouter_api_key": openai_api_key,
@@ -121,6 +165,8 @@ config: SM_FUNCTION_post_parser_config = {
 }
 
 result = SM_FUNCTION_post_parser_imp(parser_request, config)
+
+
 
 serialized = result.model_dump_json()
 
