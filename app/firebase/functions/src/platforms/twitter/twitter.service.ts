@@ -109,7 +109,7 @@ export class TwitterService
       this.cache = {};
     }
   }
-  getSinglePost(
+  async getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
   ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
@@ -496,6 +496,15 @@ export class TwitterService
     }
 
     const twitterThread = platformPost.posted.post;
+
+    const publicMetrics = twitterThread.tweets[0].public_metrics;
+    const engagementMetrics = publicMetrics && {
+      likes: publicMetrics.like_count,
+      reposts: publicMetrics.retweet_count,
+      replies: publicMetrics.reply_count,
+      quotes: publicMetrics.quote_count,
+    };
+
     const genericAuthor: GenericAuthor = {
       id: twitterThread.author.id,
       name: twitterThread.author.name || twitterThread.author.username,
@@ -535,6 +544,7 @@ export class TwitterService
     return {
       author: genericAuthor,
       thread: genericThread,
+      engagementMetrics,
     };
   }
 

@@ -15,6 +15,7 @@ import {
 } from '../../src/@shared/types/types.mastodon';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
+import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser } from '../../src/@shared/types/types.user';
 import {
   parseMastodonGlobalUsername,
@@ -132,6 +133,27 @@ describe('02-platforms', () => {
         expect(result.displayName).to.be.a('string');
         expect(result.avatar).to.be.a('string');
       }
+    });
+    it.only('fetches the engagement metrics', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user.accounts[PLATFORM.Twitter];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const twitterService = services.platforms.get(PLATFORM.Twitter);
+      const userDetails = allUserDetails[0];
+      if (userDetails.credentials.read === undefined) {
+        throw new Error('Unexpected');
+      }
+
+      const result = await twitterService.getSinglePost('1876891181428142124');
+
+      expect(result).to.not.be.undefined;
+      expect(
+        (result.platformPost.post as TwitterThread).tweets[0].public_metrics
+      ).to.not.be.undefined;
     });
   });
 
