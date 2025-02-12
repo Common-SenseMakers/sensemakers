@@ -8,6 +8,7 @@ import {
   GridColumnsType,
   GridExtendedProps,
   GridSizeType,
+  Image,
   Layer,
   ResponsiveContext,
   Text,
@@ -196,9 +197,13 @@ export const ViewportPage = (props: {
           <>
             <Box gridArea="left">
               {props.nav && (
-                <Box style={{ flexGrow: 1 }}>
-                  <Box pad={{ vertical: '12px', horizontal: '16px' }}>
-                    <AppIcon></AppIcon>
+                <Box
+                  style={{ flexGrow: 1 }}
+                  pad={{ horizontal: '16px', vertical: '16px' }}>
+                  <Box margin={{ bottom: '28px' }}>
+                    <Box style={{ height: '24px' }} align="start">
+                      <Image fit="contain" src="/icons/appLogo.png"></Image>
+                    </Box>
                   </Box>
                   {props.nav}
                 </Box>

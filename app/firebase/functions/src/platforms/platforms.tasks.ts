@@ -4,7 +4,7 @@ import { FetchParams } from '../@shared/types/types.fetch';
 import { splitProfileId } from '../@shared/utils/profiles.utils';
 import { Services } from '../instances/services';
 
-export const DEBUG = false;
+export const DEBUG = true;
 
 export const fetchPlatformAccountTask = async (
   req: {
@@ -35,13 +35,13 @@ export const fetchPlatformAccountTask = async (
     throw new Error(error);
   }
 
-  if (DEBUG) logger.debug('Profile found', { profile });
+  if (DEBUG) logger.debug(`Profile found ${profile.id}` , { profile });
   /** the value of sinceId or untilId doesn't matter, as long as it exists, then it will be converted to appropriate fetch params */
   const fetchParams: FetchParams = req.data.latest
     ? { expectedAmount: req.data.amount, sinceId: 'dummy' }
     : { expectedAmount: req.data.amount, untilId: 'dummy' };
 
-  if (DEBUG) logger.debug('Fetching account with params', { fetchParams });
+  if (DEBUG) logger.debug(`Fetching account with params ${profile.id}`, { fetchParams, profile });
 
   await services.db.run(async (manager) => {
     return services.postsManager.fetchAccount(
@@ -52,5 +52,5 @@ export const fetchPlatformAccountTask = async (
     );
   });
 
-  if (DEBUG) logger.debug('Finished fetchPlatformAccountTask');
+  if (DEBUG) logger.debug(`Finished fetchPlatformAccountTask ${profile.id}`, { profile });
 };
