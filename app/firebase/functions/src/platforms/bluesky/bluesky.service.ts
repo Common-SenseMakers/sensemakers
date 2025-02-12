@@ -434,7 +434,9 @@ export class BlueskyService
   async getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
-  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+  ): Promise<
+    { platformPost: PlatformPostPosted<BlueskyThread> } & WithCredentials
+  > {
     const { client: agent, credentials: newSession } = await this.getClient(
       credentials?.read
     );
@@ -479,6 +481,21 @@ export class BlueskyService
     };
 
     return { credentials: newCredentials, platformPost };
+  }
+
+  async getPostMetrics(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ engagementMetrics?: EngagementMetrics } & WithCredentials> {
+    const platformPost = await this.getSinglePost(post_id, credentials);
+    const rootPost = platformPost.platformPost.post.posts[0];
+    const engagementMetrics: EngagementMetrics | undefined = {
+      likes: rootPost.likeCount || 0,
+      reposts: rootPost.repostCount || 0,
+      replies: rootPost.replyCount || 0,
+      quotes: rootPost.quoteCount,
+    };
+    return { engagementMetrics, credentials: platformPost.credentials };
   }
 
   public async getThread(
