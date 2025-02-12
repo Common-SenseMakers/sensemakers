@@ -113,7 +113,44 @@ export class TwitterService
     post_id: string,
     credentials?: AccountCredentials
   ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
-    throw new Error('Method not implemented.');
+    const { client: readOnlyClient, credentials: newCredentials } =
+      await this.getClient(credentials?.read, 'read');
+
+    try {
+      const options: Partial<Tweetv2FieldsParams> = {
+        'tweet.fields': tweetFields,
+        expansions,
+      };
+
+      const original = await readOnlyClient.v2.singleTweet(post_id, options);
+      const authorId = original.data.author_id;
+      if (!authorId) {
+        throw new Error('author_id not found');
+      }
+      const { data: originalAuthor } = await readOnlyClient.v2.user(authorId);
+      const appTweets = convertToAppTweets([original.data], original.includes);
+      const twitterThreads = convertTweetsToThreads(appTweets, originalAuthor);
+      const thread = twitterThreads[0];
+
+      const platformPost: PlatformPostPosted<TwitterThread, TwitterUser> = {
+        post_id: thread.conversation_id,
+        user_id: thread.author.id,
+        timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
+        post: thread,
+        author: originalAuthor,
+      };
+
+      const newAccountCredentials: TwitterAccountCredentials | undefined =
+        newCredentials ? { read: newCredentials } : undefined;
+
+      if (credentials?.write && newAccountCredentials) {
+        newAccountCredentials.write = newCredentials;
+      }
+
+      return { platformPost, credentials: newAccountCredentials };
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
+    }
   }
 
   async getThread(
