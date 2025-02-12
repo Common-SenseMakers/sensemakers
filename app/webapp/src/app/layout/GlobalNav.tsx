@@ -2,12 +2,7 @@ import { Box, BoxExtendedProps, Text } from 'grommet';
 import { usePostHog } from 'posthog-js/react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Location,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { POSTHOG_EVENTS } from '../../analytics/posthog.events';
 import { AppGeneralKeys } from '../../i18n/i18n.app.general';
@@ -22,27 +17,6 @@ import { ClusterIcon } from '../icons/ClusterIcon';
 import { DraftsIcon } from '../icons/DraftsIcon';
 import { FeedIcon } from '../icons/FeedIcon';
 import { SettignsIcon } from '../icons/SettingsIcon';
-
-const DEBUG = false;
-
-export const locationToPageIx = (location: Location) => {
-  if (DEBUG) console.log(location);
-
-  if (
-    location.pathname === '/' ||
-    location.pathname.startsWith(`/${RouteNames.MyPosts}`)
-  ) {
-    return 0;
-  }
-
-  if (location.pathname.startsWith(`/${RouteNames.Feed}`)) {
-    return 1;
-  }
-
-  if (location.pathname.startsWith(`/${RouteNames.Settings}`)) {
-    return 2;
-  }
-};
 
 const NavButton = (props: {
   label: string;
@@ -59,7 +33,7 @@ const NavButton = (props: {
     gap: '4px',
     align: 'center',
     justify: 'center',
-    pad: mobile ? 'none' : { vertical: '12px', horizontal: '16px' },
+    pad: mobile ? 'none' : { vertical: '12px' },
   };
 
   const externalBoxProps: BoxExtendedProps = {
@@ -68,12 +42,11 @@ const NavButton = (props: {
       height: '100%',
       justifyContent: 'center',
     },
-    border: {
-      color: isSelected ? constants.colors.primary : 'transparent',
-      side: mobile ? 'top' : 'left',
-      size: mobile ? '2px' : '4px',
-    },
   };
+
+  const color = isSelected
+    ? constants.colors.primary
+    : constants.colors.textLight;
 
   return (
     <Box {...externalBoxProps}>
@@ -84,9 +57,14 @@ const NavButton = (props: {
           props.onClick();
         }}>
         <Box {...internalBoxProps}>
-          {React.cloneElement(icon, { size: 24 })}
+          {React.cloneElement(icon, {
+            size: 24,
+            color: color,
+          })}
           <Box justify="center">
-            <Text size="small">{label}</Text>
+            <Text color={color} size="small">
+              {label}
+            </Text>
           </Box>
         </Box>
       </AppButton>
@@ -105,8 +83,6 @@ export const GlobalNav = () => {
 
   const posthog = usePostHog();
   const { mobile } = useResponsive();
-
-  const pageIx = locationToPageIx(location);
 
   const handleNavClick = (route: string) => {
     if (route === AbsoluteRoutes.MyPosts) {
@@ -132,21 +108,35 @@ export const GlobalNav = () => {
     navigate(AbsoluteRoutes.ClusterFeed(ALL_CLUSTER_NAME));
   };
 
+  const isFeed = location.pathname.startsWith(`/${RouteNames.Feed}`);
+
+  const isUserPosts =
+    location.pathname === '/' ||
+    location.pathname.startsWith(`/${RouteNames.MyPosts}`);
+
+  const isSettings = location.pathname.startsWith(`/${RouteNames.Settings}`);
+
   const userButtons = connectedUser ? (
     !mobile ? (
       <Box align="start">
         <NavButton
           key="0"
+          label={t(AppGeneralKeys.feedTitle)}
+          icon={<FeedIcon selected={isFeed}></FeedIcon>}
+          onClick={() => backToHyperfeed()}
+          isSelected={isFeed}></NavButton>
+        <NavButton
+          key="0"
           label={t(AppGeneralKeys.myPosts)}
-          icon={<DraftsIcon></DraftsIcon>}
+          icon={<DraftsIcon selected={isUserPosts}></DraftsIcon>}
           onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
-          isSelected={pageIx === 0}></NavButton>
+          isSelected={isUserPosts}></NavButton>
         <NavButton
           key="2"
           label={t(AppGeneralKeys.settings)}
           icon={<SettignsIcon></SettignsIcon>}
           onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
-          isSelected={pageIx === 2}></NavButton>
+          isSelected={isSettings}></NavButton>
       </Box>
     ) : (
       <Box direction="row" align="center" gap="8px">

@@ -3,5 +3,5 @@ export enum ClustersKeys {
 }
 
 export const clustersKeys: Record<ClustersKeys, string> = {
-  [ClustersKeys.clusters]: 'Communities',
+  [ClustersKeys.clusters]: 'Groups',
 };

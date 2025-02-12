@@ -1,7 +1,7 @@
 import { Box } from 'grommet';
 
 export const SettignsIcon = (props: { size?: number; color?: string }) => {
-  const color = props.color || 'black';
+  const color = props.color || '#4B5563';
   const size = props.size || 18;
 
   return (

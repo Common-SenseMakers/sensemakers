@@ -1,8 +1,56 @@
 import { Box } from 'grommet';
 
-export const FeedIcon = (props: { size?: number; color?: string }) => {
+export const FeedIcon = (props: {
+  size?: number;
+  color?: string;
+  selected?: boolean;
+}) => {
   const color = props.color || '#111827';
   const size = props.size || 18;
+
+  if (props.selected) {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none">
+        <path
+          d="M12 12.45L21 16.7L12 20.95L3 16.7L12 12.45Z"
+          fill="white"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M12 9.45001L21 13.7L12 17.95L3 13.7L12 9.45001Z"
+          fill="white"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M12 6.45001L21 10.7L12 14.95L3 10.7L12 6.45001Z"
+          fill="white"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M12 3.45001L21 7.70001L12 11.95L3 7.70001L12 3.45001Z"
+          fill={color}
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
 
   return (
     <Box>
@@ -10,21 +58,40 @@ export const FeedIcon = (props: { size?: number; color?: string }) => {
         xmlns="http://www.w3.org/2000/svg"
         width={size}
         height={size}
-        viewBox="0 0 25 24"
+        viewBox="0 0 24 24"
         fill="none">
         <path
-          d="M6.375 3.75C4.92525 3.75 3.75 4.92525 3.75 6.375C3.75 7.82475 4.92525 9 6.375 9H19.125C20.5747 9 21.75 7.82475 21.75 6.375C21.75 4.92525 20.5747 3.75 19.125 3.75H6.375Z"
-          fill={color}
+          d="M12 12.45L21 16.7L12 20.95L3 16.7L12 12.45Z"
+          fill="white"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
-          d="M4.5 11.25C4.08579 11.25 3.75 11.5858 3.75 12C3.75 12.4142 4.08579 12.75 4.5 12.75H21C21.4142 12.75 21.75 12.4142 21.75 12C21.75 11.5858 21.4142 11.25 21 11.25H4.5Z"
-          fill={color}
+          d="M12 9.44995L21 13.7L12 17.95L3 13.7L12 9.44995Z"
+          fill="white"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
-          d="M3.75 15.75C3.75 15.3358 4.08579 15 4.5 15H21C21.4142 15 21.75 15.3358 21.75 15.75C21.75 16.1642 21.4142 16.5 21 16.5H4.5C4.08579 16.5 3.75 16.1642 3.75 15.75Z"
-          fill={color}
+          d="M12 6.44995L21 10.7L12 14.95L3 10.7L12 6.44995Z"
+          fill="white"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
-        <path d="M4.5 18.75C4.08579 18.75 3.75 19.0858 3.75 19.5C3.75 19.9142 4.08579 20.25 4.5 20.25H21C21.4142 20.25 21.75 19.9142 21.75 19.5C21.75 19.0858 21.4142 18.75 21 18.75H4.5Z" />
+        <path
+          d="M12 3.44995L21 7.69995L12 11.95L3 7.69995L12 3.44995Z"
+          fill="white"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     </Box>
   );
