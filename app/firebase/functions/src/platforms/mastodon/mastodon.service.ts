@@ -25,6 +25,7 @@ import {
   PlatformSessionRefreshError,
 } from '../../@shared/types/types.platforms';
 import {
+  EngagementMetrics,
   GenericAuthor,
   GenericPost,
   GenericThread,
@@ -369,6 +370,12 @@ export class MastodonService
     }
 
     const thread = platformPost.posted.post;
+    const rootPost = thread.posts[0];
+    const engagementMetrics: EngagementMetrics = {
+      likes: rootPost.favouritesCount,
+      reposts: rootPost.reblogsCount,
+      replies: rootPost.repliesCount,
+    };
     const { globalUsername } = parseMastodonAccountURI(thread.author.url);
     const genericAuthor: GenericAuthor = {
       platformId: PLATFORM.Mastodon,
@@ -409,6 +416,7 @@ export class MastodonService
     return {
       author: genericAuthor,
       thread: genericPosts,
+      engagementMetrics,
     };
   }
 

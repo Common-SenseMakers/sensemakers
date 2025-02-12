@@ -23,6 +23,7 @@ import {
 } from '../../@shared/types/types.platform.posts';
 import { PLATFORM } from '../../@shared/types/types.platforms';
 import {
+  EngagementMetrics,
   GenericAuthor,
   GenericPost,
   GenericThread,
@@ -253,6 +254,13 @@ export class BlueskyService
     }
 
     const thread = platformPost.posted.post;
+    const rootPost = thread.posts[0];
+    const engagementMetrics: EngagementMetrics = {
+      likes: rootPost.likeCount || 0,
+      reposts: rootPost.repostCount || 0,
+      replies: rootPost.replyCount || 0,
+      quotes: rootPost.quoteCount || 0,
+    };
 
     const genericAuthor: GenericAuthor = {
       platformId: PLATFORM.Bluesky,
@@ -333,6 +341,7 @@ export class BlueskyService
     return {
       author: genericAuthor,
       thread: genericPosts,
+      engagementMetrics,
     };
   }
 
