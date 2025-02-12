@@ -467,11 +467,46 @@ export class MastodonService
     };
   }
 
-  getSinglePost(
+  async getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
-  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
-    throw new Error('Method not implemented.');
+  ): Promise<
+    { platformPost: PlatformPostPosted<MastodonThread> } & WithCredentials
+  > {
+    const { server, postId } = parseMastodonPostURI(post_id);
+    const client = await this.getClient(server, credentials?.read);
+
+    const status = await client.v1.statuses.$select(postId).fetch();
+    const thread = this.constructThread(
+      status,
+      {
+        ancestors: [],
+        descendants: [],
+      },
+      status.account.id
+    );
+
+    const platformPost = {
+      post_id: thread.thread_id,
+      user_id: parseMastodonAccountURI(thread.author.url).globalUsername,
+      timestampMs: new Date(thread.posts[0].createdAt).getTime(),
+      post: thread,
+    };
+
+    return { platformPost };
+  }
+  async getPostMetrics(
+    post_id: string,
+    credentials?: AccountCredentials
+  ): Promise<{ engagementMetrics?: EngagementMetrics } & WithCredentials> {
+    const platformPost = await this.getSinglePost(post_id, credentials);
+    const rootPost = platformPost.platformPost.post.posts[0];
+    const engagementMetrics: EngagementMetrics | undefined = {
+      likes: rootPost.favouritesCount,
+      reposts: rootPost.reblogsCount,
+      replies: rootPost.repliesCount,
+    };
+    return { engagementMetrics, credentials: platformPost.credentials };
   }
 
   public async getThread(
