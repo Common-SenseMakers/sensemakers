@@ -133,7 +133,7 @@ describe('02-platforms', () => {
         expect(result.avatar).to.be.a('string');
       }
     });
-    it('fetches the engagement metrics', async () => {
+    it.only('fetches the engagement metrics', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -147,7 +147,9 @@ describe('02-platforms', () => {
         throw new Error('Unexpected');
       }
 
-      const result = await twitterService.getPostMetrics('1876891181428142124');
+      const result = await twitterService.getPostMetrics([
+        '1876891181428142124',
+      ]);
 
       expect(result).to.not.be.undefined;
       expect(result.engagementMetrics).to.not.be.undefined;
@@ -345,7 +347,7 @@ describe('02-platforms', () => {
 
       expect(charAfterAccessibility).to.be.equal('\n');
     });
-    it('fetches the engagement metrics', async () => {
+    it.only('fetches the engagement metrics', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -357,7 +359,7 @@ describe('02-platforms', () => {
       const post_id =
         'https://w3c.social/users/w3c/statuses/113561528162272973';
 
-      const result = await mastodonService.getPostMetrics(post_id);
+      const result = await mastodonService.getPostMetrics([post_id]);
 
       expect(result).to.not.be.undefined;
       expect(result.engagementMetrics).to.not.be.undefined;
@@ -664,7 +666,7 @@ describe('02-platforms', () => {
         );
       }
     });
-    it('fetches the engagement metrics', async () => {
+    it.only('fetches the engagement metrics', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -675,7 +677,7 @@ describe('02-platforms', () => {
       const blueskyService = services.platforms.get(PLATFORM.Bluesky);
       const post_id =
         'at://did:plc:tgfzv5irks5acnmk75j4elky/app.bsky.feed.post/3leu4dukohy25';
-      const result = await blueskyService.getPostMetrics(post_id);
+      const result = await blueskyService.getPostMetrics([post_id]);
 
       expect(result).to.not.be.undefined;
       expect(result.engagementMetrics).to.not.be.undefined;
