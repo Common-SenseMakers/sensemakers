@@ -487,7 +487,7 @@ export class BlueskyService
     post_id: string,
     credentials?: AccountCredentials
   ): Promise<{ engagementMetrics?: EngagementMetrics } & WithCredentials> {
-    const platformPost = await this.getSinglePost(post_id, credentials);
+    const platformPost = await this.getThread(post_id, credentials);
     const rootPost = platformPost.platformPost.post.posts[0];
     const engagementMetrics: EngagementMetrics | undefined = {
       likes: rootPost.likeCount || 0,
