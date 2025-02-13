@@ -42,7 +42,6 @@ export const OverlayContext = (
     init?: OverlayValue | null;
     onOverlayNav?: (value: OverlayValue) => void;
     level?: number;
-    triggerShowOverlay?: OverlayValue; // if changed it is stacked on top
     triggerReset?: boolean; // if toggled, it resets the overlay
   }
 ) => {
@@ -63,19 +62,18 @@ export const OverlayContext = (
   useEffect(() => {
     if (DEBUG) {
       console.log(`OverlayContext useEffect props.triggerShowOverlay`, {
-        propsDotTriggerShowOverlay: props.triggerShowOverlay,
         parentOverlay,
         overlay,
         level,
       });
     }
 
-    if (props.triggerShowOverlay) {
+    if (props.init) {
       if (DEBUG) {
         console.log(
           `OverlayContext useEffect props.triggerShowOverlay setTriggeredShowOverlay`,
           {
-            propsDotTriggerShowOverlay: props.triggerShowOverlay,
+            propsDotTriggerShowOverlay: props.init,
             parentOverlay,
             overlay,
             level,
@@ -83,10 +81,10 @@ export const OverlayContext = (
         );
       }
 
-      setTriggeredShowOverlay(props.triggerShowOverlay);
+      setTriggeredShowOverlay(props.init);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.triggerShowOverlay]);
+  }, [props.init]);
 
   useEffect(() => {
     if (overlay) {

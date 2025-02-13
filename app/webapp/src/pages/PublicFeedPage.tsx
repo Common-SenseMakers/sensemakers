@@ -4,6 +4,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
+import { useDetailsParams } from '../app/layout/details.params.hook';
 import { KeywordsSuggestions } from '../clusters/keywords.suggestions';
 import { MultiTabFeeds } from '../feed/MultiTabFeeds';
 import { OverlayValue } from '../overlays/Overlay';
@@ -51,6 +52,8 @@ export const PublicFeedPage = () => {
   const [overlayInit, setOverlayInit] = useState<
     OverlayValue | undefined | null
   >();
+
+  const { hideDetails } = useDetailsParams();
 
   /** check for URL parameters and set the overlayInit.
    * it does it only once at page load
@@ -235,9 +238,8 @@ export const PublicFeedPage = () => {
 
   const feedIx = feedTabs.findIndex((tab) => tab.id === tabId);
 
-  const [showOverlay, setShowOverlay] = useState<OverlayValue>();
   const onKeywordClick = (kw: string) => {
-    setShowOverlay({ keyword: kw });
+    setOverlayInit({ keyword: kw });
   };
 
   const [resetOverlays, setResetOverlays] = useState(false);
@@ -249,7 +251,8 @@ export const PublicFeedPage = () => {
   }, [tabId, clusterSelected]);
 
   const onProfileClick = (profileId: string) => {
-    setShowOverlay({ profileId });
+    setOverlayInit({ profileId });
+    hideDetails();
   };
 
   return (
@@ -261,7 +264,6 @@ export const PublicFeedPage = () => {
             {overlayInit !== undefined && (
               <OverlayContext
                 init={overlayInit}
-                triggerShowOverlay={showOverlay}
                 triggerReset={resetOverlays}
                 onOverlayNav={(overlay) => onOverlayNav(overlay)}>
                 <MultiTabFeeds

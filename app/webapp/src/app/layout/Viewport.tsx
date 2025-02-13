@@ -14,7 +14,6 @@ import {
   Text,
 } from 'grommet';
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 
 import { ClustersMenu } from '../../posts.fetcher/ClustersMenu';
 import { AppHeading } from '../../ui-components';
@@ -22,6 +21,7 @@ import { useResponsive } from '../../ui-components/ResponsiveApp';
 import { useThemeContext } from '../../ui-components/ThemedApp';
 import { BUILD_ID } from '../config';
 import { AppIcon } from '../icons/AppIcon';
+import { useDetailsParams } from './details.params.hook';
 
 export const MAX_BUTTON_WIDTH = 1600;
 
@@ -129,7 +129,7 @@ export const ViewportPage = (props: {
 }) => {
   const [showLeftbar, setShowLeftbar] = useState(false);
   const { mobile } = useResponsive();
-  const [searchParams] = useSearchParams();
+  const { showingDetails } = useDetailsParams();
 
   const columns = mobile
     ? ['auto'] // Mobile: 1 column
@@ -150,10 +150,10 @@ export const ViewportPage = (props: {
       ];
 
   const clusterDetails = (
-    <>
+    <Box style={{ backgroundColor: 'white' }}>
       <Box style={{ flexShrink: 0 }}>{props.suggestions}</Box>
       <Box style={{ flexGrow: 1, overflow: 'auto' }}>{props.profiles}</Box>
-    </>
+    </Box>
   );
 
   return (
@@ -171,9 +171,13 @@ export const ViewportPage = (props: {
         rows={rows}
         areas={areas}>
         <Box gridArea="content" style={{ position: 'relative' }}>
-          {searchParams.get('details') === 'true'
-            ? clusterDetails
-            : props.content}
+          {props.content}
+          {showingDetails && (
+            <Box
+              style={{ position: 'absolute', width: '100%', height: '100%' }}>
+              {clusterDetails}
+            </Box>
+          )}
           {mobile && (
             <Box
               style={{
