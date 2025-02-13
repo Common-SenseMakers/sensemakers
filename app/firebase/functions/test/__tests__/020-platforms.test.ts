@@ -15,7 +15,6 @@ import {
 } from '../../src/@shared/types/types.mastodon';
 import { PlatformPostCreate } from '../../src/@shared/types/types.platform.posts';
 import { PLATFORM } from '../../src/@shared/types/types.platforms';
-import { TwitterThread } from '../../src/@shared/types/types.twitter';
 import { AppUser } from '../../src/@shared/types/types.user';
 import {
   parseMastodonGlobalUsername,
@@ -134,7 +133,7 @@ describe('02-platforms', () => {
         expect(result.avatar).to.be.a('string');
       }
     });
-    it.only('fetches the engagement metrics', async () => {
+    it('fetches the engagement metrics', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -148,12 +147,10 @@ describe('02-platforms', () => {
         throw new Error('Unexpected');
       }
 
-      const result = await twitterService.getSinglePost('1876891181428142124');
+      const result = await twitterService.getPostMetrics('1876891181428142124');
 
       expect(result).to.not.be.undefined;
-      expect(
-        (result.platformPost.post as TwitterThread).tweets[0].public_metrics
-      ).to.not.be.undefined;
+      expect(result.engagementMetrics).to.not.be.undefined;
     });
   });
 
@@ -347,6 +344,23 @@ describe('02-platforms', () => {
       const charAfterAccessibility = content[accessibilityIndex + 14];
 
       expect(charAfterAccessibility).to.be.equal('\n');
+    });
+    it('fetches the engagement metrics', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user.accounts[PLATFORM.Mastodon];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const mastodonService = services.platforms.get(PLATFORM.Mastodon);
+      const post_id =
+        'https://w3c.social/users/w3c/statuses/113561528162272973';
+
+      const result = await mastodonService.getPostMetrics(post_id);
+
+      expect(result).to.not.be.undefined;
+      expect(result.engagementMetrics).to.not.be.undefined;
     });
   });
 
@@ -649,6 +663,22 @@ describe('02-platforms', () => {
           `reposts cannot be fetched with getSinglePost. Tried to fetch ${post_id}`
         );
       }
+    });
+    it('fetches the engagement metrics', async () => {
+      if (!user) {
+        throw new Error('appUser not created');
+      }
+      const allUserDetails = user.accounts[PLATFORM.Bluesky];
+      if (!allUserDetails || allUserDetails.length < 0) {
+        throw new Error('Unexpected');
+      }
+      const blueskyService = services.platforms.get(PLATFORM.Bluesky);
+      const post_id =
+        'at://did:plc:tgfzv5irks5acnmk75j4elky/app.bsky.feed.post/3leu4dukohy25';
+      const result = await blueskyService.getPostMetrics(post_id);
+
+      expect(result).to.not.be.undefined;
+      expect(result.engagementMetrics).to.not.be.undefined;
     });
   });
 });
