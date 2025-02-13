@@ -79,11 +79,15 @@ class BskyClient:
     def get_list_uri(self, list_url: str) -> str:
         """
         Given a list URL, returns the at:// URI (e.g. at://did:plc:xxx/app.bsky.graph.list/yyy).
+        Unless it is already a at:// URI, then it is id
         """
-        handle, rkey = self._parse_list_url(list_url)
-        profile_resp = self.client.app.bsky.actor.get_profile({"actor": handle})
-        did = profile_resp.did
-        return f"at://{did}/app.bsky.graph.list/{rkey}"
+        if list_url.startswith("at://"):
+            return list_url
+        else:
+            handle, rkey = self._parse_list_url(list_url)
+            profile_resp = self.client.app.bsky.actor.get_profile({"actor": handle})
+            did = profile_resp.did
+            return f"at://{did}/app.bsky.graph.list/{rkey}"
 
     def get_profile_link_from_handle(self, handle: str) -> str:
         """Returns https://bsky.app/profile/<handle>."""
@@ -160,24 +164,47 @@ class BskyListToNotionConverter:
 
         return existing_prop
 
+    # -----------------------------------------------------------------
+    # PAGINATION HELPER
+    # -----------------------------------------------------------------
+    def _fetch_all_list_items(self, at_uri: str):
+        """
+        Returns (first_response, all_items).
+
+        first_response is the initial get_list call's full response model
+        (so you can read .list.name, etc.),
+        all_items is a combined list of .items across all pages.
+        """
+        # 1) First call
+        resp = self.blsky.client.app.bsky.graph.get_list({"list": at_uri})
+        all_items = resp.items[:]  # copy the first page of items
+        cursor = getattr(resp, "cursor", None)  # might be None if no more pages
+
+        # 2) While there's a next page, fetch it
+        while cursor:
+            next_resp = self.blsky.client.app.bsky.graph.get_list({"list": at_uri, "cursor": cursor})
+            all_items.extend(next_resp.items)
+            cursor = getattr(next_resp, "cursor", None)
+
+        return resp, all_items
+
+    # -----------------------------------------------------------------
+    # MAIN SYNC METHOD (now uses _fetch_all_list_items)
+    # -----------------------------------------------------------------
     def sync_list_to_notion(self, cluster_name: Optional[str] = None):
         """
-        - Fetch the list from Bluesky (including list name).
-        - For each profile in the list:
-          1) Build "Bluesky" URL from handle
-          2) Try to find an existing page by Bluesky URL
-          3) If not found, try DID
-          4) Create or update accordingly
+        - Fetch *all pages* of the Bluesky list (including list name).
+        - For each profile in the list, create/update a Notion page.
         """
         # 1) Convert user-supplied list URL to at://
         at_uri = self.blsky.get_list_uri(self.LIST_URL)
 
-        # 2) Retrieve the full list record to get the name + items
-        resp = self.blsky.client.app.bsky.graph.get_list({"list": at_uri})
-        list_name = resp.list.name or "Unnamed List"
+        # 2) Retrieve *ALL* items from the list (pagination)
+        resp_first, all_items = self._fetch_all_list_items(at_uri)
+        list_name = resp_first.list.name or "Unnamed List"
 
-        # 3) Iterate each profile
-        for item in resp.items:
+        # 3) Iterate over all items from all pages
+        for i, item in enumerate(all_items,start=1):
             subj = item.subject
             user_did = subj.did or ""
             display_name = subj.display_name or (subj.handle or "Unknown")
@@ -185,17 +212,19 @@ class BskyListToNotionConverter:
             user_handle = subj.handle or "unknown-user"
             bluesky_link = self.blsky.get_profile_link_from_handle(user_handle)
 
-            # 4) Try Bluesky first
+            # Look up by Bluesky URL first
             existing_page = self._find_page_by_bluesky_url(bluesky_link)
             found_by = "Bluesky"
 
-            # 5) If not found, try DID
+            # If not found, look by DID
             if existing_page is None:
                 existing_page = self._find_page_by_did(user_did)
                 found_by = "DID"
 
-            # 6) If still None => create
             if existing_page is None:
+                # -------------------------
+                # CREATE NEW PAGE
+                # -------------------------
                 new_props = {
                     "Name": {
                         "title": [
@@ -216,19 +245,21 @@ class BskyListToNotionConverter:
                         ]
                     },
                     "Clusters": {"multi_select": []},
-                    "list/starter_name": {"multi_select": []},
-                    "list_url": {"multi_select": []}
+                    "list/starter_name": {"multi_select": []}
                 }
 
                 # Add cluster, list name
                 if cluster_name:
                     new_props["Clusters"]["multi_select"].append({"name": cluster_name})
+
                 new_props["list/starter_name"]["multi_select"].append({"name": list_name})
-                new_props["list_url"]["multi_select"].append({"name": self.LIST_URL})
+
                 new_page_id = self.notion.create_page(self.NOTION_DB_ID, new_props)
-                print(f"[CREATE] => ID={new_page_id}, handle={user_handle}, DID={user_did}")
+                print(f"[CREATE profile {i} of {len(all_items)}] => ID={new_page_id}, handle={user_handle}, DID={user_did}")
             else:
-                # 7) Update existing
+                # -------------------------
+                # UPDATE EXISTING PAGE
+                # -------------------------
                 page_id = existing_page["id"]
                 page_props = existing_page["properties"]
 
@@ -278,8 +309,7 @@ class BskyListToNotionConverter:
                 }
 
                 updated_page_id = self.notion.update_page(page_id, update_props)
-                print(f"[UPDATE by {found_by}] => ID={updated_page_id}, handle={user_handle}, DID={user_did}")
-
+                print(f"[UPDATE by {found_by} profile {i} of {len(all_items)}] => ID={updated_page_id}, handle={user_handle}, DID={user_did}")
 
 # -----------------------------------------------------------------
 # 4) Main script logic
