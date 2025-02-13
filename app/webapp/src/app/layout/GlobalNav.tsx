@@ -114,24 +114,33 @@ export const GlobalNav = () => {
 
   const userButtons = !mobile ? (
     <Box align="start">
-      <NavButton
-        key="0"
-        label={t(AppGeneralKeys.feedTitle)}
-        icon={<FeedIcon selected={isFeed}></FeedIcon>}
-        onClick={() => backToHyperfeed()}
-        isSelected={isFeed}></NavButton>
-      <NavButton
-        key="0"
-        label={t(AppGeneralKeys.myPosts)}
-        icon={<DraftsIcon selected={isUserPosts}></DraftsIcon>}
-        onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
-        isSelected={isUserPosts}></NavButton>
-      <NavButton
-        key="2"
-        label={t(AppGeneralKeys.settings)}
-        icon={<SettignsIcon></SettignsIcon>}
-        onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
-        isSelected={isSettings}></NavButton>
+      {!connectedUser ? (
+        <AppButton
+          style={{ width: '100%' }}
+          label="Sign In"
+          onClick={() => signIn()}></AppButton>
+      ) : (
+        <>
+          <NavButton
+            key="0"
+            label={t(AppGeneralKeys.feedTitle)}
+            icon={<FeedIcon selected={isFeed}></FeedIcon>}
+            onClick={() => backToHyperfeed()}
+            isSelected={isFeed}></NavButton>
+          <NavButton
+            key="0"
+            label={t(AppGeneralKeys.myPosts)}
+            icon={<DraftsIcon selected={isUserPosts}></DraftsIcon>}
+            onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
+            isSelected={isUserPosts}></NavButton>
+          <NavButton
+            key="2"
+            label={t(AppGeneralKeys.settings)}
+            icon={<SettignsIcon></SettignsIcon>}
+            onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
+            isSelected={isSettings}></NavButton>
+        </>
+      )}
     </Box>
   ) : (
     <Box
