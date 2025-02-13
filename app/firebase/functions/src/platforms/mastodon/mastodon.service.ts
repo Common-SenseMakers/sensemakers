@@ -496,17 +496,36 @@ export class MastodonService
     return { platformPost };
   }
   async getPostMetrics(
-    post_id: string,
+    post_ids: string[],
     credentials?: AccountCredentials
-  ): Promise<{ engagementMetrics?: EngagementMetrics } & WithCredentials> {
-    const platformPost = await this.getSinglePost(post_id, credentials);
-    const rootPost = platformPost.platformPost.post.posts[0];
-    const engagementMetrics: EngagementMetrics | undefined = {
-      likes: rootPost.favouritesCount,
-      reposts: rootPost.reblogsCount,
-      replies: rootPost.repliesCount,
+  ): Promise<
+    { engagementMetrics?: Record<string, EngagementMetrics> } & WithCredentials
+  > {
+    const postMetricsPromises = post_ids.map(async (post_id) => {
+      const platformPost = await this.getSinglePost(post_id);
+      const rootPost = platformPost.platformPost.post.posts[0];
+      const engagementMetrics: EngagementMetrics = {
+        likes: rootPost.favouritesCount,
+        reposts: rootPost.reblogsCount,
+        replies: rootPost.repliesCount,
+      };
+      return {
+        post_id,
+        engagementMetrics,
+      };
+    });
+
+    const postMetricsResults = await Promise.all(postMetricsPromises);
+
+    const engagementMetrics: Record<string, EngagementMetrics> = {};
+
+    postMetricsResults.forEach(({ post_id, engagementMetrics: metrics }) => {
+      engagementMetrics[post_id] = metrics;
+    });
+
+    return {
+      engagementMetrics,
     };
-    return { engagementMetrics, credentials: platformPost.credentials };
   }
 
   public async getThread(

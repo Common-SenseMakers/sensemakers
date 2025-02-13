@@ -482,20 +482,50 @@ export class BlueskyService
 
     return { credentials: newCredentials, platformPost };
   }
+  async getPosts(post_ids: string[], credentials?: AccountCredentials) {
+    const { client: agent, credentials: newSession } = await this.getClient(
+      credentials?.read
+    );
+
+    let newCredentials: AccountCredentials | undefined = undefined;
+
+    if (newSession) {
+      newCredentials = { read: newSession };
+    }
+    console.log(newCredentials);
+    const result = await agent.getPosts({ uris: post_ids });
+    return result;
+  }
 
   async getPostMetrics(
-    post_id: string,
+    post_ids: string[],
     credentials?: AccountCredentials
-  ): Promise<{ engagementMetrics?: EngagementMetrics } & WithCredentials> {
-    const platformPost = await this.getThread(post_id, credentials);
-    const rootPost = platformPost.platformPost.post.posts[0];
-    const engagementMetrics: EngagementMetrics | undefined = {
-      likes: rootPost.likeCount || 0,
-      reposts: rootPost.repostCount || 0,
-      replies: rootPost.replyCount || 0,
-      quotes: rootPost.quoteCount,
-    };
-    return { engagementMetrics, credentials: platformPost.credentials };
+  ): Promise<
+    { engagementMetrics?: Record<string, EngagementMetrics> } & WithCredentials
+  > {
+    const result = await this.getPosts(post_ids, credentials);
+    const engagementMetricsArray: [string, EngagementMetrics][] =
+      result.data.posts.map((post) => {
+        return [
+          post.uri,
+          {
+            likes: post.likeCount || 0,
+            reposts: post.repostCount || 0,
+            replies: post.replyCount || 0,
+            quotes: post.quoteCount,
+          },
+        ];
+      });
+    const engagementMetrics: Record<string, EngagementMetrics> =
+      engagementMetricsArray.reduce(
+        (acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, EngagementMetrics>
+      );
+
+    return { engagementMetrics, credentials: credentials };
   }
 
   public async getThread(
