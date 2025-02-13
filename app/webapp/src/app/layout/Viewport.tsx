@@ -181,8 +181,6 @@ export const ViewportPage = (props: {
                 bottom: '0px',
                 height: '80px',
                 width: '100%',
-                backgroundImage:
-                  'linear-gradient(180deg, rgba(255,255,255,0) 0,  rgba(255,255,255,0.8) 50%, rgba(255,255,255,1) 100%)',
               }}
               justify="center">
               {props.nav}

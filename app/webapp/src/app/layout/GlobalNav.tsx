@@ -73,6 +73,7 @@ const NavButton = (props: {
 };
 
 export const GlobalNav = () => {
+  const { constants } = useThemeContext();
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -139,13 +140,26 @@ export const GlobalNav = () => {
           isSelected={isSettings}></NavButton>
       </Box>
     ) : (
-      <Box direction="row" align="center" gap="8px">
-        <AppCircleButton
-          onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
-          icon={<DraftsIcon color="white"></DraftsIcon>}></AppCircleButton>
+      <Box
+        style={{
+          borderRadius: '40px',
+          background: 'rgba(255, 255, 255, 0.10)',
+          backdropFilter: 'blur(8px)',
+        }}
+        direction="row"
+        align="center"
+        gap="8px"
+        pad="8px">
         <AppCircleButton
           onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
-          icon={<SettignsIcon color="white"></SettignsIcon>}></AppCircleButton>
+          icon={
+            <SettignsIcon
+              size={34}
+              color={constants.colors.textLight}></SettignsIcon>
+          }></AppCircleButton>
+        <AppCircleButton
+          onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
+          icon={<DraftsIcon size={34}></DraftsIcon>}></AppCircleButton>
       </Box>
     )
   ) : (
@@ -177,14 +191,28 @@ export const GlobalNav = () => {
           label="hyperfeed"
           onClick={() => backToHyperfeed()}></AppButton>
       ) : (
-        <Box direction="row" align="center" gap="8px">
+        <Box
+          style={{
+            borderRadius: '40px',
+            background: 'rgba(255, 255, 255, 0.10)',
+            backdropFilter: 'blur(8px)',
+          }}
+          justify="end"
+          direction="row"
+          align="center"
+          gap="8px"
+          pad="8px">
           <AppCircleButton
             onClick={() => showProfiles()}
             icon={
               searchParams.get('details') === 'true' ? (
-                <FeedIcon color="white"></FeedIcon>
+                <FeedIcon
+                  color={constants.colors.textLight}
+                  size={34}></FeedIcon>
               ) : (
-                <ClusterIcon color="white"></ClusterIcon>
+                <ClusterIcon
+                  color={constants.colors.textLight}
+                  size={34}></ClusterIcon>
               )
             }></AppCircleButton>
           <ClustersMenu></ClustersMenu>

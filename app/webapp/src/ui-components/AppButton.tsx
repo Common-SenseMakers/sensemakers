@@ -16,8 +16,6 @@ import { useThemeContext } from './ThemedApp';
 export type IButton = ButtonExtendedProps;
 
 const circleButtonStyle: React.CSSProperties = {
-  width: '32px',
-  height: '32px',
   padding: '5px',
   border: '2px solid',
   borderRadius: '50%',
@@ -56,7 +54,8 @@ export const AppButton = (props: IButton & { isLoading?: boolean }) => {
 
 export const AppCircleButton = (props: IButton) => {
   const { constants } = useThemeContext();
-  circleButtonStyle.backgroundColor = constants.colors.primary;
+  circleButtonStyle.backgroundColor = constants.colors.white;
+  circleButtonStyle.borderColor = constants.colors.border;
 
   return (
     <AppButton
