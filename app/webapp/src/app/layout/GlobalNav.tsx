@@ -136,7 +136,7 @@ export const GlobalNav = () => {
           <NavButton
             key="2"
             label={t(AppGeneralKeys.settings)}
-            icon={<SettignsIcon></SettignsIcon>}
+            icon={<SettignsIcon selected={isSettings}></SettignsIcon>}
             onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
             isSelected={isSettings}></NavButton>
         </>
@@ -151,7 +151,6 @@ export const GlobalNav = () => {
       }}
       direction="row"
       align="center"
-      gap="8px"
       pad="8px">
       {!connectedUser ? (
         <AppButton
@@ -160,18 +159,24 @@ export const GlobalNav = () => {
           label="Sign In"
           onClick={() => signIn()}></AppButton>
       ) : (
-        <>
+        <Box gap="8px" direction="row" align="center">
           <AppCircleButton
             onClick={() => handleNavClick(AbsoluteRoutes.Settings)}
             icon={
               <SettignsIcon
+                selected={isSettings}
                 size={34}
-                color={constants.colors.textLight}></SettignsIcon>
+                color={constants.colors.primary}></SettignsIcon>
             }></AppCircleButton>
           <AppCircleButton
             onClick={() => handleNavClick(AbsoluteRoutes.MyPosts)}
-            icon={<DraftsIcon size={34}></DraftsIcon>}></AppCircleButton>
-        </>
+            icon={
+              <DraftsIcon
+                size={34}
+                selected={isUserPosts}
+                color={constants.colors.primary}></DraftsIcon>
+            }></AppCircleButton>
+        </Box>
       )}
     </Box>
   );
@@ -195,9 +200,14 @@ export const GlobalNav = () => {
       pad={{ left: '20px', right: '10px' }}>
       {userButtons}
       {notFeed ? (
-        <AppButton
-          label="hyperfeed"
-          onClick={() => backToHyperfeed()}></AppButton>
+        <Box pad={{ right: '22px' }}>
+          <AppCircleButton
+            style={{ width: '60px', height: '60px' }}
+            onClick={() => backToHyperfeed()}
+            icon={
+              <FeedIcon size={34} color={constants.colors.primary}></FeedIcon>
+            }></AppCircleButton>
+        </Box>
       ) : (
         <Box
           style={{
