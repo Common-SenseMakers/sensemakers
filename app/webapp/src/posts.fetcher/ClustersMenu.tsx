@@ -28,6 +28,13 @@ const prettyClusterId = (cId?: string) => {
     .join(' ');
 };
 
+/** replaces spaces with dashes and makes it lowercase */
+const prettyToClusterId = (cId?: string) => {
+  if (!cId) return '';
+
+  return cId.split(' ').join('-').toLowerCase();
+};
+
 export const ClustersMenu = () => {
   const { t } = useTranslation();
   const { constants } = useThemeContext();
@@ -57,7 +64,7 @@ export const ClustersMenu = () => {
           options={allClusters.map((cId) => prettyClusterId(cId))}
           value={prettyClusterId(clusterId)}
           onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-            onClusterSelected(e.target.value)
+            onClusterSelected(prettyToClusterId(e.target.value))
           }></AppSelect>
       </Box>
     );
