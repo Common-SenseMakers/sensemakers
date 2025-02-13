@@ -13,6 +13,28 @@ import { useResponsive } from '../ui-components/ResponsiveApp';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { ALL_CLUSTER_NAME, useCluster } from './cluster.context';
 
+const ACRONYMS = ['nlp', 'ai', 'ml', 'nlp', 'llm', 'llms'];
+
+const prettyClusterId = (cId?: string) => {
+  if (!cId) return '';
+
+  return cId
+    .split('-')
+    .map((word) =>
+      ACRONYMS.includes(word)
+        ? word.toUpperCase()
+        : word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join(' ');
+};
+
+/** replaces spaces with dashes and makes it lowercase */
+const prettyToClusterId = (cId?: string) => {
+  if (!cId) return '';
+
+  return cId.split(' ').join('-').toLowerCase();
+};
+
 export const ClustersMenu = () => {
   const { t } = useTranslation();
   const { constants } = useThemeContext();
@@ -29,19 +51,22 @@ export const ClustersMenu = () => {
 
   if (mobile) {
     return (
-      <AppSelect
-        color="white"
-        style={{
-          height: '38px',
-          backgroundColor: 'black',
-          color: 'white',
-          textAlign: 'center',
-        }}
-        options={allClusters}
-        value={clusterId}
-        onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-          onClusterSelected(e.target.value)
-        }></AppSelect>
+      <Box width="250px">
+        <AppSelect
+          color="white"
+          style={{
+            width: '100%',
+            height: '50px',
+            backgroundColor: constants.colors.primary,
+            color: constants.colors.white,
+            textAlign: 'center',
+          }}
+          options={allClusters.map((cId) => prettyClusterId(cId))}
+          value={prettyClusterId(clusterId)}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+            onClusterSelected(prettyToClusterId(e.target.value))
+          }></AppSelect>
+      </Box>
     );
   }
 
@@ -53,6 +78,7 @@ export const ClustersMenu = () => {
       <Box gap="12px" pad={{ left: '12px' }}>
         {allClusters.map((cId) => {
           const isSelected = cId === clusterId;
+          const prettyId = prettyClusterId(cId);
           return (
             <AppButton key={cId} plain onClick={() => onClusterSelected(cId)}>
               <Box height={'24px'} direction="row" gap="8px" align="center">
@@ -81,7 +107,7 @@ export const ClustersMenu = () => {
                       textUnderlinePosition: 'from-font',
                       textWrap: 'nowrap',
                     }}>
-                    {cId}
+                    {prettyId}
                   </Text>
                 </Box>
               </Box>

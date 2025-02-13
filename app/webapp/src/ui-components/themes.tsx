@@ -17,6 +17,7 @@ export interface StyleConstants {
     xsmall: FontStyle;
   };
   colors: {
+    white: string;
     primary: string;
     textLight: string;
     textLight2: string;
@@ -54,6 +55,7 @@ const constants: StyleConstants = {
     },
   },
   colors: {
+    white: '#ffffff',
     primary: '#111827',
     textLight: '#4B5563',
     textLight2: '#6B7280',
