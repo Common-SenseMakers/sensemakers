@@ -41,6 +41,8 @@ import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
 import { ProfilesRepository } from '../profiles/profiles.repository';
 import { ProfilesService } from '../profiles/profiles.service';
+import { TasksRepository } from '../tasks/tasks.repository';
+import { TasksService } from '../tasks/tasks.service';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -65,6 +67,7 @@ export interface Services {
   links: LinksService;
   ontology: OntologiesService;
   clusters: ClustersService;
+  tasks: TasksService;
 }
 
 export interface ServicesConfig {
@@ -223,6 +226,11 @@ export const createServices = (
   /** feed */
   const feed = new FeedService(db, postsManager, clusters);
 
+  /** tasks */
+
+  const taskRepo = new TasksRepository(db);
+  const tasks = new TasksService(taskRepo);
+
   /** all services */
   const services: Services = {
     users: usersService,
@@ -236,6 +244,7 @@ export const createServices = (
     ontology: ontologiesService,
     profiles: profilesService,
     clusters,
+    tasks,
   };
 
   if (DEBUG) {

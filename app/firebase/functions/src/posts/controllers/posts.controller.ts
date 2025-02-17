@@ -11,7 +11,7 @@ import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
-import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { enqueueTask } from '../../tasks/tasks.support';
 import { IndexedPostsRepo } from '../indexed.posts.repository';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
