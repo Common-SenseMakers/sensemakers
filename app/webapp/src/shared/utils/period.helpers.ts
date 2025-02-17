@@ -19,11 +19,11 @@ interface PeriodRange {
 export function getPeriodPretty(periodSize: PeriodSize) {
   switch (periodSize) {
     case 'day':
-      return '1 day';
+      return 'One day';
     case 'week':
-      return '1 week';
+      return 'One week';
     case 'month':
-      return '1 month';
+      return 'One month';
   }
 }
 
@@ -62,6 +62,11 @@ export function getPeriodRange(
     start: start.getTime(),
     end: end.getTime(),
   };
+}
+
+export function getMonthAndYearOf(timestamp: number): string {
+  const date = new Date(timestamp);
+  return date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
 }
 
 export function getShortDateString(timestamp: number): string {

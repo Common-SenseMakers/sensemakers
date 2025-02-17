@@ -7,6 +7,7 @@ import { ViewportPage } from '../app/layout/Viewport';
 import { useDetailsParams } from '../app/layout/details.params.hook';
 import { KeywordsSuggestions } from '../clusters/keywords.suggestions';
 import { MultiTabFeeds } from '../feed/MultiTabFeeds';
+import { PeriodSelector } from '../feed/PeriodSelector';
 import { OverlayValue } from '../overlays/Overlay';
 import { OverlayContext, OverlayQueryParams } from '../overlays/OverlayContext';
 import { PublicFeedContext } from '../overlays/PublicFeedContext';
@@ -23,6 +24,7 @@ import {
 import { ClusterProfiles } from '../profiles/ClusterProfiles';
 import { AbsoluteRoutes } from '../route.names';
 import { PostClickEvent } from '../semantics/patterns/patterns';
+import { PeriodSize } from '../shared/types/types.posts';
 import { TabQuery, feedTabs } from '../shared/utils/feed.config';
 
 const DEBUG = false;
@@ -166,16 +168,21 @@ export const PublicFeedPage = () => {
     }
   };
 
+  const [periodSize, setPeriodSize] = useState<PeriodSize>(PeriodSize.Day);
+  const [shift, setShift] = useState(0);
+
   const feed0Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
       {
         tab: feedTabs[0].index,
         topic: feedTabs[0].topic,
         clusterId: clusterSelected,
+        periodSize,
+        shift,
       },
       '[FEED 0] '
     );
-  }, [clusterSelected]);
+  }, [clusterSelected, periodSize, shift]);
 
   const feed1Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -183,10 +190,12 @@ export const PublicFeedPage = () => {
         tab: feedTabs[1].index,
         topic: feedTabs[1].topic,
         clusterId: clusterSelected,
+        periodSize,
+        shift,
       },
       '[FEED 1] '
     );
-  }, [clusterSelected]);
+  }, [clusterSelected, periodSize, shift]);
 
   const feed2Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -194,10 +203,12 @@ export const PublicFeedPage = () => {
         tab: feedTabs[2].index,
         topic: feedTabs[2].topic,
         clusterId: clusterSelected,
+        periodSize,
+        shift,
       },
       '[FEED 2] '
     );
-  }, [clusterSelected]);
+  }, [clusterSelected, periodSize, shift]);
 
   const feed3Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -205,10 +216,12 @@ export const PublicFeedPage = () => {
         tab: feedTabs[3].index,
         topic: feedTabs[3].topic,
         clusterId: clusterSelected,
+        periodSize,
+        shift,
       },
       '[FEED 3] '
     );
-  }, [clusterSelected]);
+  }, [clusterSelected, periodSize, shift]);
 
   const feed4Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -216,10 +229,12 @@ export const PublicFeedPage = () => {
         tab: feedTabs[4].index,
         topic: feedTabs[4].topic,
         clusterId: clusterSelected,
+        periodSize,
+        shift,
       },
       '[FEED 4] '
     );
-  }, [clusterSelected]);
+  }, [clusterSelected, periodSize, shift]);
 
   const feed0 = usePostsFetcher(feed0Config);
   const feed1 = usePostsFetcher(feed1Config);
@@ -255,11 +270,20 @@ export const PublicFeedPage = () => {
     hideDetails();
   };
 
+  const handlePeriodChange = (optionSize: PeriodSize, shift: number) => {
+    setShift(shift);
+    setPeriodSize(optionSize);
+  };
+
   return (
     <ViewportPage
       fixed
       content={
         <Box style={{ position: 'relative', paddingTop: '16px' }}>
+          <PeriodSelector
+            boxProps={{ style: { marginBottom: '12px' } }}
+            onPeriodSelected={handlePeriodChange}></PeriodSelector>
+
           <PublicFeedContext isPublicFeed>
             {overlayInit !== undefined && (
               <OverlayContext

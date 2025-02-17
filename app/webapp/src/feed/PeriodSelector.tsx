@@ -1,5 +1,5 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
-import { CSSProperties, useMemo, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { LeftChevronIcon } from '../app/icons/LeftChveronIcon';
@@ -7,6 +7,7 @@ import { RightChevronIcon } from '../app/icons/RightChevronIcon';
 import { ClustersKeys } from '../i18n/i18n.clusters';
 import { PeriodSize } from '../shared/types/types.posts';
 import {
+  getMonthAndYearOf,
   getPeriodPretty,
   getPeriodRange,
   getShortDateString,
@@ -22,12 +23,10 @@ const textStyle: CSSProperties = {
   color: 'grey',
 };
 
-interface OptionDetails {
-  id: PeriodSize;
-  name: string;
-}
-
-export const PeriodSelector = (props: BoxExtendedProps) => {
+export const PeriodSelector = (props: {
+  boxProps: BoxExtendedProps;
+  onPeriodSelected: (period: PeriodSize, shift: number) => void;
+}) => {
   const { t } = useTranslation();
   const { constants } = useThemeContext();
 
@@ -42,15 +41,28 @@ export const PeriodSelector = (props: BoxExtendedProps) => {
       }
       return `${getShortDateString(start)}`;
     }
+    if (periodSize === PeriodSize.Month) {
+      return `${getMonthAndYearOf(start)}`;
+    }
     if (Math.abs(shift) > 0) {
       return `From ${getShortDateString(start)} to ${getShortDateString(end)}`;
     }
     return `Since ${getShortDateString(start)}`;
   }, [periodSize, shift]);
 
+  useEffect(() => {
+    props.onPeriodSelected(periodSize, shift);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [periodSize, shift]);
+
   const handleShiftChange = (direction: 'up' | 'down') => {
     const newShift = direction === 'up' ? Math.min(shift + 1, 0) : shift - 1;
     setShift(newShift);
+  };
+
+  const handlePeriodChange = (optionSize: PeriodSize) => {
+    setShift(0);
+    setPeriodSize(optionSize);
   };
 
   return (
@@ -59,8 +71,13 @@ export const PeriodSelector = (props: BoxExtendedProps) => {
       gap="4px"
       pad={{ left: '12px' }}
       justify="center"
-      {...props}>
-      <Box direction="row" align="center" gap="4px">
+      {...props.boxProps}>
+      <Box
+        direction="row"
+        align="center"
+        gap="4px"
+        style={{ width: '200px' }}
+        justify="center">
         <Text style={textStyle}>{t(ClustersKeys.periodCover)}</Text>
         <AppSelect
           color="white"
@@ -71,28 +88,31 @@ export const PeriodSelector = (props: BoxExtendedProps) => {
             color: constants.colors.primary,
             textAlign: 'center',
           }}
-          options={[
-            { id: PeriodSize.Day, name: '1 Day' },
-            { id: PeriodSize.Week, name: '1 Week' },
-            { id: PeriodSize.Month, name: '1 Month' },
-          ]}
+          options={[PeriodSize.Day, PeriodSize.Week, PeriodSize.Month]}
           value={
             <Text style={{ ...textStyle, textDecoration: 'underline' }}>
               {getPeriodPretty(periodSize)}
             </Text>
           }
-          onChange={({ option }: { option: OptionDetails }) => {
-            setPeriodSize(option.id);
+          onChange={({ option }: { option: PeriodSize }) => {
+            handlePeriodChange(option);
           }}>
-          {(option: OptionDetails) => (
+          {(option: PeriodSize) => (
             <Box pad={{ vertical: '8px', horizontal: '12px' }}>
-              <Text style={textStyle}>{option.name}</Text>
+              <Text style={textStyle}>{getPeriodPretty(option)}</Text>
             </Box>
           )}
         </AppSelect>
       </Box>
 
-      <Box direction="row" align="center" gap="12px">
+      <Box
+        direction="row"
+        align="center"
+        justify="between"
+        gap="12px"
+        flex="grow"
+        style={{ maxWidth: '300px' }}
+        pad={{ right: '12px' }}>
         <AppCircleButton
           onClick={() => handleShiftChange('down')}
           icon={

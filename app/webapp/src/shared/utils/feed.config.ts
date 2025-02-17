@@ -1,4 +1,4 @@
-import { TabsInfo } from '../types/types.posts';
+import { PeriodSize, TabsInfo } from '../types/types.posts';
 import { SCIENCE_TOPIC_URI } from './semantics.helper';
 
 export interface FeedTabConfig {
@@ -16,6 +16,8 @@ export interface TabQuery {
   tab: number;
   topic?: string;
   clusterId?: string;
+  periodSize?: PeriodSize;
+  shift?: number;
 }
 
 export const feedTabs: FeedTabConfig[] = [
