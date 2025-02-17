@@ -19,10 +19,18 @@ export interface GenericPost {
   quotedThread?: GenericThread;
 }
 
+export interface EngagementMetrics {
+  likes: number;
+  reposts: number;
+  replies: number;
+  quotes?: number;
+}
+
 export interface GenericThread {
   url?: string;
   thread: GenericPost[];
   author: GenericAuthor;
+  engagementMetrics?: EngagementMetrics;
 }
 
 /** Structured semantics */
