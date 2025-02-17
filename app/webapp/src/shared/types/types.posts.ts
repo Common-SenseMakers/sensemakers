@@ -158,6 +158,12 @@ export interface UnpublishPlatformPostPayload {
   post_id: string;
 }
 
+export enum PeriodSize {
+  Day = 'day',
+  Week = 'week',
+  Month = 'month',
+}
+
 export interface PostsQueryParams {
   userId?: string;
   profileId?: string;

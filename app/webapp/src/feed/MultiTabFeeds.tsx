@@ -6,6 +6,7 @@ import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import { PostFetcherInterface } from '../posts.fetcher/posts.fetcher.hook';
 import { FeedTabConfig } from '../shared/utils/feed.config';
 import { FeedTabs } from './FeedTabs';
+import { PeriodSelector } from './PeriodSelector';
 
 export const MultiTabFeeds = (props: {
   feeds: PostFetcherInterface[];
@@ -22,6 +23,7 @@ export const MultiTabFeeds = (props: {
 
   return (
     <>
+      <PeriodSelector style={{ marginBottom: '12px' }}></PeriodSelector>
       <FeedTabs
         feedIx={feedIx}
         onTabClicked={(ix) => onFeedIxChanged(ix)}

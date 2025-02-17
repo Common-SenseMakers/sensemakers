@@ -1,6 +1,6 @@
 import { Box } from 'grommet';
 
-import { RightChevronIcon } from '../app/icons/RightChveronIcon';
+import { RightChevronIcon } from '../app/icons/RightChevronIcon';
 import { AppButton } from '../ui-components';
 import { useThemeContext } from '../ui-components/ThemedApp';
 
