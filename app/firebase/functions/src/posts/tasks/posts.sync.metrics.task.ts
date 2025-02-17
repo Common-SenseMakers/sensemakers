@@ -1,5 +1,6 @@
-import { Services } from '../instances/services';
-import { splitIntoBatches } from '../tasks/tasks.support';
+import { AppPost } from '../../@shared/types/types.posts';
+import { Services } from '../../instances/services';
+import { splitIntoBatches } from '../../tasks/tasks.support';
 
 export const SYNC_POST_METRICS_TASK = 'syncPostMetrics';
 const ALL_CLUSTERS_NAME = 'all';
@@ -39,4 +40,20 @@ export const triggerPostMetricsSync = async (services: Services) => {
   await tasks.repo.setTaskMeta(SYNC_POST_METRICS_TASK, {
     lastBatchedPostId: posts[latestPostIndex].id,
   });
+};
+
+export const syncPostMetricsTask = async (
+  req: {
+    data: { posts: AppPost[]; syncNumber: number };
+  },
+  services: Services
+) => {
+  await services.db.run(async (manager) => {
+    services.postsManager.updatePostMetrics(req.data.posts, manager);
+  });
+  services.tasks.enqueue(
+    SYNC_POST_METRICS_TASK,
+    { data: { posts: req.data.posts, syncNumber: req.data.syncNumber + 1 } },
+    services
+  );
 };

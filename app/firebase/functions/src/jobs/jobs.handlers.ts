@@ -7,11 +7,11 @@ import {
 } from '../config/config.runtime';
 import { firestore, secrets } from '../firestore.config';
 import { createServices } from '../instances/services';
-import { triggerPostMetricsSync } from '../posts/posts.sync.metrics.task';
 import {
   triggerAutofetchPosts,
   triggerAutofetchPostsForNonUsers,
 } from '../posts/tasks/posts.autofetch.task';
+import { triggerPostMetricsSync } from '../posts/tasks/posts.sync.metrics.task';
 import { getConfig } from '../services.config';
 
 /** jobs */

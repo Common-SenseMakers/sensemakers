@@ -1,5 +1,5 @@
 import { DBInstance } from '../db/instance';
-import { SYNC_POST_METRICS_TASK } from '../posts/posts.sync.metrics.task';
+import { SYNC_POST_METRICS_TASK } from '../posts/tasks/posts.sync.metrics.task';
 
 export interface TasksMeta {
   [SYNC_POST_METRICS_TASK]: { lastBatchedPostId: string };

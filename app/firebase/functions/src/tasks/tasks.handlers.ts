@@ -11,6 +11,7 @@ import { fetchPlatformAccountTask } from '../platforms/platforms.tasks';
 import { FETCH_TASK_DISPATCH_RATES } from '../platforms/platforms.tasks.config';
 import { autofetchUserPosts } from '../posts/tasks/posts.autofetch.task';
 import { parsePostTask } from '../posts/tasks/posts.parse.task';
+import { syncPostMetricsTask } from '../posts/tasks/posts.sync.metrics.task';
 import { replaceUserTask } from '../posts/tasks/replace.user.task';
 import { getConfig } from '../services.config';
 
@@ -121,4 +122,12 @@ export const fetchBlueskyAccountTaskHandler = onTaskDispatched(
 export const replaceUserTaskHandler = onTaskDispatched(
   { ...deployConfigTasks, secrets },
   (req) => replaceUserTask(req, createServices(firestore, getConfig()))
+);
+
+export const syncPostMetricsTaskHandler = onTaskDispatched(
+  { ...deployConfigTasks, secrets },
+  async (req) => {
+    const services = createServices(firestore, getConfig());
+    await syncPostMetricsTask(req, services);
+  }
 );
