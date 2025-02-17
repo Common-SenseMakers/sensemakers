@@ -55,7 +55,7 @@ export const syncPostMetricsTask = async (
   });
   const nextDispatchDelay = HOUR_SEC * Math.pow(2, req.data.syncNumber); // exponential backoff of task delay, for 1 week
   if (nextDispatchDelay < MAX_PERIOD) {
-    services.tasks.enqueue(
+    await services.tasks.enqueue(
       SYNC_POST_METRICS_TASK,
       { data: { posts: req.data.posts, syncNumber: req.data.syncNumber + 1 } },
       services,
