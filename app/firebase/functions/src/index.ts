@@ -25,6 +25,7 @@ import {
   AUTOFETCH_NON_USER_PERIOD,
   AUTOFETCH_PERIOD,
   IS_EMULATOR,
+  SYNC_NEW_POSTS_PERIOD,
 } from './config/config.runtime';
 import { envDeploy } from './config/typedenv.deploy';
 import { envRuntime } from './config/typedenv.runtime';
@@ -38,6 +39,7 @@ import {
 } from './platforms/platforms.tasks.config';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
+import { triggerPostMetricsSync } from './posts/posts.sync.metrics.task';
 import {
   AUTOFETCH_POSTS_TASK,
   autofetchUserPosts,
@@ -122,6 +124,16 @@ exports.nonUserAccountFetch = onSchedule(
   async () => {
     const services = createServices(firestore, getConfig());
     await triggerAutofetchPostsForNonUsers(services);
+  }
+);
+exports.syncPostMetrics = onSchedule(
+  {
+    schedule: SYNC_NEW_POSTS_PERIOD,
+    secrets,
+  },
+  async () => {
+    const services = createServices(firestore, getConfig());
+    await triggerPostMetricsSync(services);
   }
 );
 
