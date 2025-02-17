@@ -6,6 +6,8 @@ export const SYNC_POST_METRICS_TASK = 'syncPostMetrics';
 const ALL_CLUSTERS_NAME = 'all';
 const MAX_POSTS_TO_BATCH = 10000;
 const BATCH_SIZE = 100;
+const HOUR_SEC = 60 * 60;
+const MAX_PERIOD = 7 * 24 * HOUR_SEC;
 
 export const triggerPostMetricsSync = async (services: Services) => {
   const { postsManager, tasks, clusters } = services;
@@ -51,9 +53,13 @@ export const syncPostMetricsTask = async (
   await services.db.run(async (manager) => {
     services.postsManager.updatePostMetrics(req.data.posts, manager);
   });
-  services.tasks.enqueue(
-    SYNC_POST_METRICS_TASK,
-    { data: { posts: req.data.posts, syncNumber: req.data.syncNumber + 1 } },
-    services
-  );
+  const nextDispatchDelay = HOUR_SEC * Math.pow(2, req.data.syncNumber); // exponential backoff of task delay, for 1 week
+  if (nextDispatchDelay < MAX_PERIOD) {
+    services.tasks.enqueue(
+      SYNC_POST_METRICS_TASK,
+      { data: { posts: req.data.posts, syncNumber: req.data.syncNumber + 1 } },
+      services,
+      { scheduleDelaySeconds: nextDispatchDelay }
+    );
+  }
 };
