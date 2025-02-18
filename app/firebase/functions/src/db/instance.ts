@@ -31,7 +31,7 @@ export class DBInstance {
     ontologies: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     clusters: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
     adminCredentials: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
-    tasks: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
+    jobs: FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>;
   };
 
   constructor(firestore: Firestore) {
@@ -52,7 +52,7 @@ export class DBInstance {
       adminCredentials: this.firestore.collection(
         CollectionNames.AdminCredentials
       ),
-      tasks: this.firestore.collection(CollectionNames.Tasks),
+      jobs: this.firestore.collection(CollectionNames.Tasks),
     };
   }
 
