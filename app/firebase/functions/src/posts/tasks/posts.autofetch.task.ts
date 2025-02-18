@@ -18,7 +18,10 @@ export const AUTOFETCH_POSTS_TASK = 'autofetchPosts';
 
 const DEBUG_PREFIX = 'AUTOFETCH';
 
-export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
+export const triggerAutofetchPostsForNonUsers = async (
+  services: Services,
+  check: boolean = true
+) => {
   if (DEBUG)
     logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
   const { users, db, profiles } = services;
@@ -71,7 +74,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
         DEBUG_PREFIX
       );
 
-    if (now - jobLastRun > fetchPlatformMinPeriod) {
+    if (now - jobLastRun > fetchPlatformMinPeriod || !check) {
       if (DEBUG)
         logger.debug(
           `Triggering non-user autofetch for ${platformId}`,

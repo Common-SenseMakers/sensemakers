@@ -18,11 +18,11 @@ interface PeriodRange {
 
 export function getPeriodPretty(periodSize: PeriodSize) {
   switch (periodSize) {
-    case 'day':
+    case PeriodSize.Day:
       return 'One day';
-    case 'week':
+    case PeriodSize.Week:
       return 'One week';
-    case 'month':
+    case PeriodSize.Month:
       return 'One month';
   }
 }
