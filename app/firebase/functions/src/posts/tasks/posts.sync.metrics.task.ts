@@ -1,4 +1,7 @@
-import { PUBLISHABLE_PLATFORM } from '../../@shared/types/types.platforms';
+import {
+  PLATFORM,
+  PUBLISHABLE_PLATFORM,
+} from '../../@shared/types/types.platforms';
 import { AppPost } from '../../@shared/types/types.posts';
 import { Services } from '../../instances/services';
 import { JOBS } from '../../jobs/types.jobs';
@@ -11,8 +14,6 @@ import {
 const ALL_CLUSTERS_NAME = 'all';
 const MAX_POSTS_TO_BATCH = 10000;
 const BATCH_SIZE = 100;
-const HOUR_SEC = 60 * 60;
-const MAX_PERIOD = 7 * 24 * HOUR_SEC;
 
 export const triggerPostMetricsSync = async (services: Services) => {
   const { postsManager, tasks, clusters, jobs } = services;
@@ -50,7 +51,7 @@ export const triggerPostMetricsSync = async (services: Services) => {
         {
           posts: batch,
           platformId: platform,
-          syncNumber: 1,
+          dispatchNumber: 1,
         },
         services
       );
@@ -71,13 +72,43 @@ export const syncPostMetricsTask = async (
   await services.db.run(async (manager) => {
     services.postsManager.updatePostMetrics(req.data.posts, manager);
   });
-  const nextDispatchDelay = HOUR_SEC * Math.pow(2, req.data.syncNumber); // exponential backoff of task delay, for 1 week
-  if (nextDispatchDelay < MAX_PERIOD) {
+  const nextDispatchDelay = calculateDispatchDelay(
+    req.data.platformId,
+    req.data.dispatchNumber
+  );
+  if (nextDispatchDelay) {
     await services.tasks.enqueue(
       PLATFORM_TASKS.SYNC_POST_METRICS_TASK[req.data.platformId],
-      { ...req.data, syncNumber: req.data.syncNumber + 1 },
+      { ...req.data, dispatchNumber: req.data.dispatchNumber + 1 },
       services,
       { scheduleDelaySeconds: nextDispatchDelay }
     );
   }
+};
+
+const calculateDispatchDelay = (
+  platformId: PUBLISHABLE_PLATFORM,
+  dispatchNumber: number
+) => {
+  /** first hour */
+  if (dispatchNumber < 13) {
+    return 60 * 5; // 5 minutes
+  }
+
+  /** first 24 hours */
+  if (dispatchNumber < 79) {
+    return 60 * 20; // 20 minutes
+  }
+
+  /** beyond one day, don't fetch tweets */
+  if (platformId === PLATFORM.Twitter) {
+    return undefined;
+  }
+
+  if (dispatchNumber < 110) {
+    return 60 * 60 * 24; // 1 day
+  }
+
+  /** if beyond 1 month, stop fetching */
+  return undefined;
 };

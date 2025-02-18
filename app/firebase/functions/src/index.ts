@@ -43,7 +43,11 @@ import {
   fetchTwitterAccountTaskHandler,
   parsePostTaskHandler,
   replaceUserTaskHandler,
+  syncBlueskyPostMetricsTaskHandler,
+  syncMastodonPostMetricsTaskHandler,
+  syncTwitterPostMetricsTaskHandler,
 } from './tasks/tasks.handlers';
+import { PLATFORM_TASKS } from './tasks/types.tasks';
 
 /** Registed the API as an HTTP triggered function */
 exports['api'] = functions
@@ -77,6 +81,13 @@ exports[FETCH_ACCOUNT_TASKS[PLATFORM.Mastodon]] =
 exports[FETCH_ACCOUNT_TASKS[PLATFORM.Bluesky]] = fetchBlueskyAccountTaskHandler;
 
 exports[REPLACE_USER_TASK] = replaceUserTaskHandler;
+
+exports[PLATFORM_TASKS.SYNC_POST_METRICS_TASK[PLATFORM.Twitter]] =
+  syncTwitterPostMetricsTaskHandler;
+exports[PLATFORM_TASKS.SYNC_POST_METRICS_TASK[PLATFORM.Mastodon]] =
+  syncMastodonPostMetricsTaskHandler;
+exports[PLATFORM_TASKS.SYNC_POST_METRICS_TASK[PLATFORM.Bluesky]] =
+  syncBlueskyPostMetricsTaskHandler;
 
 const getBeforeAndAfterOnUpdate = <T>(
   event: FirestoreEvent<functions.Change<QueryDocumentSnapshot> | undefined>,
