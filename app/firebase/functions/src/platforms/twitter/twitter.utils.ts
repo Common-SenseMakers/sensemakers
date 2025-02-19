@@ -86,15 +86,11 @@ export const convertToAppTweetBase = (tweet: TweetV2): AppTweetBase => {
     appTweetBase[field] = tweet[field] as any;
   });
 
-  Object.values(OPTIONAL_TWEET_FIELDS).forEach((field) => {
-    if (field in tweet) {
-      appTweetBase[field] = tweet[field] as any;
-    }
-  });
   appTweetBase[REQUIRED_TWEET_FIELDS.Text] = getTweetTextWithUrls(
     appTweetBase as AppTweetBase
   );
-  return appTweetBase as AppTweetBase;
+  const appTweet = { ...tweet, ...appTweetBase };
+  return appTweet as AppTweetBase;
 };
 
 export const convertToAppTweets = (

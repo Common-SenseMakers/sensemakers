@@ -9,7 +9,7 @@ import {
 } from '../../src/@shared/types/types.profiles';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { envRuntime } from '../../src/config/typedenv.runtime';
-import * as tasksSupport from '../../src/tasksUtils/tasks.support';
+import * as tasksSupport from '../../src/tasks/tasks.support';
 import { authenticateTestUser } from '../utils/authenticate.users';
 import { resetDB } from '../utils/db';
 import { enqueueTaskMockOnTests } from '../utils/tasks.enqueuer.mock.tests';

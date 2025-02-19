@@ -26,7 +26,7 @@ import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 import { IdentityServicesMap } from '../platforms/platforms.service';
 import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks.config';
-import { chunkNumber, enqueueTask } from '../tasksUtils/tasks.support';
+import { chunkNumber, enqueueTask } from '../tasks/tasks.support';
 import { ProfilesRepository } from './profiles.repository';
 
 const DEBUG = false;

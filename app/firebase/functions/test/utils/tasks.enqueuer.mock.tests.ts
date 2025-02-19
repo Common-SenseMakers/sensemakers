@@ -67,7 +67,7 @@ export const enqueueTaskMockOnTests = async (
       return;
     }
 
-    if (Object.values(FETCH_ACCOUNT_TASKS).includes(name)) {
+    if ((Object.values(FETCH_ACCOUNT_TASKS) as string[]).includes(name)) {
       await fetchPlatformAccountTask(
         {
           data: params,
