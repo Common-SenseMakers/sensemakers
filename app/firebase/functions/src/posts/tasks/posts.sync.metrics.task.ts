@@ -31,6 +31,10 @@ export const triggerPostMetricsSync = async (services: Services) => {
     allCluster
   );
 
+  /** if there are no posts, don't enqueue any tasks or update the job meta */
+  if (posts.length === 0) {
+    return;
+  }
   /** split posts into platforms, since each platform should be handled differently */
   const postsByPlatform: Map<PUBLISHABLE_PLATFORM, AppPost[]> = new Map();
 
