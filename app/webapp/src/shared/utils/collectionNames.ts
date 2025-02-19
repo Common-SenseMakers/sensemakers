@@ -16,5 +16,5 @@ export enum CollectionNames {
   Keywords = 'keywords',
   IndexedPostsSubcollection = 'indexedPosts',
 
-  Tasks = 'tasks',
+  Jobs = 'jobs',
 }
