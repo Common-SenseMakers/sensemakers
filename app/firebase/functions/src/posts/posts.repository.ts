@@ -20,6 +20,7 @@ import {
   AUTHOR_USER_KEY,
   CREATED_AT_KEY,
   ORIGIN_KEY,
+  SCORE_KEY,
   STRUCTURED_SEMANTICS_KEY,
   TABS_KEY,
   TOPIC_KEY,
@@ -194,13 +195,19 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
     /** two modes, forward sinceId or backwards untilId  */
     const paginated = await (async (_base: Query) => {
+      if (queryParams.fetchParams.rankByScore) {
+        const ordered = _base.orderBy(
+          `${SCORE_KEY}.${queryParams.fetchParams.rankByScore}`,
+          'desc'
+        );
+        return ordered;
+      }
       if (sinceCreatedAt) {
         const ordered = _base.orderBy(CREATED_AT_KEY, 'asc');
         return ordered.startAfter(sinceCreatedAt);
-      } else {
-        const ordered = _base.orderBy(CREATED_AT_KEY, 'desc');
-        return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
       }
+      const ordered = _base.orderBy(CREATED_AT_KEY, 'desc');
+      return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
     })(query);
 
     const postsIds = await paginated
@@ -212,6 +219,9 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const docIds = postsIds.docs.map((doc) => doc.id);
     const appPosts = await this.getFromIds(docIds);
 
+    if (queryParams.fetchParams.rankByScore) {
+      return appPosts;
+    }
     return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
   }
 

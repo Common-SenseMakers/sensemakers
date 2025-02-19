@@ -19,11 +19,12 @@ export class FeedService {
 
   async getFeed(params: PostsQuery): Promise<AppPostFull[]> {
     const queryParams: PostsQueryDefined = {
+      ...params,
       fetchParams: {
         ...params.fetchParams,
         expectedAmount: params.fetchParams?.expectedAmount || 10,
+        rankByScore: 'score1',
       },
-      ...params,
     };
 
     const addAggregatedLabels =

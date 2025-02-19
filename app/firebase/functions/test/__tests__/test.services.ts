@@ -15,6 +15,8 @@ import {
 import { DBInstance } from '../../src/db/instance';
 import { FeedService } from '../../src/feed/feed.service';
 import { Services } from '../../src/instances/services';
+import { JobsRepository } from '../../src/jobs/jobs.repository';
+import { JobsService } from '../../src/jobs/jobs.service';
 import { LinksRepository } from '../../src/links/links.repository';
 import { LinksMockConfig, LinksService } from '../../src/links/links.service';
 import { getLinksMock } from '../../src/links/links.service.mock';
@@ -51,6 +53,8 @@ import { PostsProcessing } from '../../src/posts/posts.processing';
 import { PostsRepository } from '../../src/posts/posts.repository';
 import { ProfilesRepository } from '../../src/profiles/profiles.repository';
 import { ProfilesService } from '../../src/profiles/profiles.service';
+import { TasksService } from '../../src/tasks/tasks.service';
+import { getTasksMock } from '../../src/tasks/tasks.service.mock';
 import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
@@ -215,6 +219,14 @@ export const getTestServices = (config: TestServicesConfig) => {
   const activity = new ActivityService(activityRepo);
 
   const feed = new FeedService(db, postsManager, clusters);
+  /** tasks */
+
+  const _tasks = new TasksService();
+  const tasks = getTasksMock(_tasks, 'mock');
+
+  /** jobs */
+  const jobsRepo = new JobsRepository(db);
+  const jobs = new JobsService(jobsRepo);
 
   const services: TestServices = {
     users: usersService,
@@ -228,6 +240,8 @@ export const getTestServices = (config: TestServicesConfig) => {
     ontology: ontologiesService,
     profiles: profilesService,
     clusters,
+    tasks,
+    jobs,
   };
 
   return services;

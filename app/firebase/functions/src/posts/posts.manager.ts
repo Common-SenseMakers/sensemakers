@@ -28,7 +28,9 @@ import {
   AppPost,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  GenericThread,
   HydrateConfig,
+  IndexedPost,
   PostUpdate,
   PostsQuery,
   PostsQueryDefined,
@@ -171,6 +173,60 @@ export class PostsManager {
       );
 
       return { post: undefined };
+    }
+  }
+
+  async updatePostMetrics(posts: AppPost[], manager: TransactionManager) {
+    const postsByPlatform = new Map<PLATFORM, AppPost[]>();
+    posts.forEach((post) => {
+      const platformId = post.origin;
+      const posts = postsByPlatform.get(platformId) || [];
+      posts.push(post);
+      postsByPlatform.set(platformId, posts);
+    });
+
+    for (const platformAndPosts of postsByPlatform.entries()) {
+      const [platformId, posts] = platformAndPosts;
+      const platformPostDocIds = posts.map((post) => post.mirrorsIds[0]);
+      const platformPosts =
+        await this.processing.platformPosts.getFromIds(platformPostDocIds);
+      const platformPostIds = platformPosts
+        .map((post) => post.post_id)
+        .filter((postId) => postId !== undefined);
+      const postsWithIds: [string, string, AppPost][] = posts.map((post) => {
+        const post_id = platformPosts.find(
+          (platformPost) => platformPost.id === post.mirrorsIds[0]
+        )?.post_id;
+        if (!post_id) {
+          throw new Error(
+            `could not find platformPost with mirror id ${post.mirrorsIds[0]}`
+          );
+        }
+        return [post.id, post_id, post];
+      });
+      const platformService = this.platforms.get(platformId);
+      const { engagementMetrics } =
+        await platformService.getPostMetrics(platformPostIds);
+      if (!engagementMetrics) {
+        return;
+      }
+
+      for (const postMetrics of Object.entries(engagementMetrics)) {
+        const [platformPostId, metrics] = postMetrics;
+        const postWithIds = postsWithIds.find(
+          (postWithIds) => postWithIds[1] === platformPostId
+        );
+        if (!postWithIds) {
+          return;
+        }
+        const [postId, , post] = postWithIds;
+        const newGeneric: GenericThread = {
+          ...post.generic,
+          engagementMetrics: metrics,
+        };
+        // TODO: also update platform post
+        await this.updatePost(postId, { generic: newGeneric }, manager);
+      }
     }
   }
 
@@ -1004,17 +1060,58 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
 
-    if (postUpdate.semantics) {
+    if (postUpdate.semantics || postUpdate.generic?.engagementMetrics) {
+      const post = await this.processing.posts.get(postId, manager, true);
+      let indexedPost: IndexedPost = {
+        id: postId,
+        authorProfileId: post.authorProfileId,
+        origin: post.origin,
+        createdAtMs: post.createdAtMs,
+      };
+      let updatedKeywords: { new: string[]; removed: string[] } | undefined;
+
       /** handle side-effects related to semantics when the post is updated */
-      const postUpdated = await this.processing.posts.get(
-        postId,
+      if (postUpdate.semantics) {
+        const processedSemantics = await this.processing.processSemantics(
+          postId,
+          manager,
+          post.semantics
+        );
+
+        if (processedSemantics) {
+          indexedPost = {
+            ...indexedPost,
+            ...processedSemantics.indexedPost,
+          };
+          updatedKeywords = processedSemantics.updatedKeywords;
+        }
+      }
+
+      /** handle side-effects related to the rank scoring */
+      if (postUpdate.generic?.engagementMetrics) {
+        const scores = this.processing.computeScores(post);
+        indexedPost = {
+          ...indexedPost,
+          scores,
+        };
+      }
+
+      await this.processing.syncPostInClusters(
+        'add',
+        post.id,
         manager,
-        true
+        indexedPost,
+        indexedPost.structuredSemantics?.refs || [],
+        updatedKeywords
       );
-      await this.processing.processSemantics(
+
+      await this.processing.posts.update(
         postId,
-        manager,
-        postUpdated.semantics
+        {
+          structuredSemantics: indexedPost.structuredSemantics,
+          generic: postUpdate.generic,
+        },
+        manager
       );
     }
   }

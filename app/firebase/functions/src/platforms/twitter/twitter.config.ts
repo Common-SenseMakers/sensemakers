@@ -16,6 +16,7 @@ export const tweetFields: TTweetv2TweetField[] = [
   'entities',
   'note_tweet',
   'conversation_id',
+  'public_metrics',
 ];
 
 export const userFields: TTweetv2UserField[] = [

@@ -1,6 +1,7 @@
 import { AppBskyFeedDefs, AppBskyFeedPost, RichText } from '@atproto/api';
 
 import {
+  BLUESKY_REPOST_URI_PARAM,
   BlueskyAccountCredentials,
   BlueskyAccountDetails,
   BlueskyCredentials,
@@ -23,6 +24,7 @@ import {
 } from '../../@shared/types/types.platform.posts';
 import { PLATFORM } from '../../@shared/types/types.platforms';
 import {
+  EngagementMetrics,
   GenericAuthor,
   GenericPost,
   GenericThread,
@@ -253,6 +255,13 @@ export class BlueskyService
     }
 
     const thread = platformPost.posted.post;
+    const rootPost = thread.posts[0];
+    const engagementMetrics: EngagementMetrics = {
+      likes: rootPost.likeCount || 0,
+      reposts: rootPost.repostCount || 0,
+      replies: rootPost.replyCount || 0,
+      quotes: rootPost.quoteCount || 0,
+    };
 
     const genericAuthor: GenericAuthor = {
       platformId: PLATFORM.Bluesky,
@@ -333,6 +342,7 @@ export class BlueskyService
     return {
       author: genericAuthor,
       thread: genericPosts,
+      engagementMetrics,
     };
   }
 
@@ -425,7 +435,9 @@ export class BlueskyService
   async getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
-  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+  ): Promise<
+    { platformPost: PlatformPostPosted<BlueskyThread> } & WithCredentials
+  > {
     const { client: agent, credentials: newSession } = await this.getClient(
       credentials?.read
     );
@@ -470,6 +482,54 @@ export class BlueskyService
     };
 
     return { credentials: newCredentials, platformPost };
+  }
+  async getPosts(post_ids: string[], credentials?: AccountCredentials) {
+    const { client: agent, credentials: newSession } = await this.getClient(
+      credentials?.read
+    );
+
+    let newCredentials: AccountCredentials | undefined = undefined;
+
+    if (newSession) {
+      newCredentials = { read: newSession };
+    }
+    console.log(newCredentials);
+    const result = await agent.getPosts({ uris: post_ids });
+    return result;
+  }
+
+  async getPostMetrics(
+    post_ids: string[],
+    credentials?: AccountCredentials
+  ): Promise<
+    { engagementMetrics?: Record<string, EngagementMetrics> } & WithCredentials
+  > {
+    const filteredPost_ids = post_ids.filter(
+      (post_id) => !post_id.includes(BLUESKY_REPOST_URI_PARAM)
+    );
+    const result = await this.getPosts(filteredPost_ids, credentials);
+    const engagementMetricsArray: [string, EngagementMetrics][] =
+      result.data.posts.map((post) => {
+        return [
+          post.uri,
+          {
+            likes: post.likeCount || 0,
+            reposts: post.repostCount || 0,
+            replies: post.replyCount || 0,
+            quotes: post.quoteCount,
+          },
+        ];
+      });
+    const engagementMetrics: Record<string, EngagementMetrics> =
+      engagementMetricsArray.reduce(
+        (acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, EngagementMetrics>
+      );
+
+    return { engagementMetrics, credentials: credentials };
   }
 
   public async getThread(
