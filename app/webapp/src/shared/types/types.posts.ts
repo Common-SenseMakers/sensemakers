@@ -97,8 +97,21 @@ interface AppPostBase {
   mirrorsIds: string[];
 }
 
+export interface RankingScores {
+  score1?: number;
+  score2?: number;
+  score3?: number;
+  score4?: number;
+  score5?: number;
+  score6?: number;
+  score7?: number;
+  score8?: number;
+  score9?: number;
+  score10?: number;
+}
 export interface AppPost extends AppPostBase {
   structuredSemantics?: StructuredSemantics; // for indexing purposes. Will be duplicated across subcollections
+  scores?: RankingScores;
 }
 
 export interface HydrateConfig {
@@ -212,6 +225,7 @@ export type IndexedPost = Pick<
   | 'authorProfileId'
   | 'createdAtMs'
   | 'structuredSemantics'
+  | 'scores'
 >;
 
 export interface IndexedCollectionEntry {

@@ -1,6 +1,7 @@
 import { AppBskyFeedDefs, AppBskyFeedPost, RichText } from '@atproto/api';
 
 import {
+  BLUESKY_REPOST_URI_PARAM,
   BlueskyAccountCredentials,
   BlueskyAccountDetails,
   BlueskyCredentials,
@@ -503,7 +504,10 @@ export class BlueskyService
   ): Promise<
     { engagementMetrics?: Record<string, EngagementMetrics> } & WithCredentials
   > {
-    const result = await this.getPosts(post_ids, credentials);
+    const filteredPost_ids = post_ids.filter(
+      (post_id) => !post_id.includes(BLUESKY_REPOST_URI_PARAM)
+    );
+    const result = await this.getPosts(filteredPost_ids, credentials);
     const engagementMetricsArray: [string, EngagementMetrics][] =
       result.data.posts.map((post) => {
         return [
