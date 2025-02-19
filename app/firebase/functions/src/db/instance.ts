@@ -52,7 +52,7 @@ export class DBInstance {
       adminCredentials: this.firestore.collection(
         CollectionNames.AdminCredentials
       ),
-      jobs: this.firestore.collection(CollectionNames.Tasks),
+      jobs: this.firestore.collection(CollectionNames.Jobs),
     };
   }
 
