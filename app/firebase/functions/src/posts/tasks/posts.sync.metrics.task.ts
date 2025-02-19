@@ -11,15 +11,15 @@ import {
   SyncPlatformPostMetricsRequest,
 } from '../../tasks/types.tasks';
 
-const ALL_CLUSTERS_NAME = 'all';
 const MAX_POSTS_TO_BATCH = 10000;
 const BATCH_SIZE = 100;
 
+// test this one that it updates the job meta
 export const triggerPostMetricsSync = async (services: Services) => {
   const { postsManager, tasks, clusters, jobs } = services;
 
   const jobMeta = await jobs.repo.getJobMeta(JOBS.SYNC_POST_METRICS);
-  const allCluster = clusters.getInstance(ALL_CLUSTERS_NAME);
+  const allCluster = clusters.getInstance(undefined);
 
   const posts = await postsManager.processing.posts.getAllOfQuery(
     {
@@ -58,8 +58,8 @@ export const triggerPostMetricsSync = async (services: Services) => {
     }
   }
 
-  /** if it's the first fetch, the order will be descending, otherwise ascending. */
-  const latestPostIndex = jobMeta ? 0 : posts.length - 1;
+  /** posts are always sorted in descending order in getAllOfQuery */
+  const latestPostIndex = 0;
   await jobs.repo.setJobMeta(JOBS.SYNC_POST_METRICS, {
     lastBatchedPostId: posts[latestPostIndex].id,
   });
