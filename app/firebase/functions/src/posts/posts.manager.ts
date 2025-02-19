@@ -185,40 +185,49 @@ export class PostsManager {
       postsByPlatform.set(platformId, posts);
     });
 
-    Promise.all(
-      Array.from(postsByPlatform.entries()).map(async ([platformId, posts]) => {
-        const platformPostIds = posts.map((post) => post.mirrorsIds[0]);
-        const postsWithIds: [string, string, AppPost][] = posts.map((post) => [
-          post.id,
-          post.mirrorsIds[0],
-          post,
-        ]);
-        const platformService = this.platforms.get(platformId);
-        const { engagementMetrics } =
-          await platformService.getPostMetrics(platformPostIds);
-        if (!engagementMetrics) {
+    for (const platformAndPosts of postsByPlatform.entries()) {
+      const [platformId, posts] = platformAndPosts;
+      const platformPostDocIds = posts.map((post) => post.mirrorsIds[0]);
+      const platformPosts =
+        await this.processing.platformPosts.getFromIds(platformPostDocIds);
+      const platformPostIds = platformPosts
+        .map((post) => post.post_id)
+        .filter((postId) => postId !== undefined);
+      const postsWithIds: [string, string, AppPost][] = posts.map((post) => {
+        const post_id = platformPosts.find(
+          (platformPost) => platformPost.id === post.mirrorsIds[0]
+        )?.post_id;
+        if (!post_id) {
+          throw new Error(
+            `could not find platformPost with mirror id ${post.mirrorsIds[0]}`
+          );
+        }
+        return [post.id, post_id, post];
+      });
+      const platformService = this.platforms.get(platformId);
+      const { engagementMetrics } =
+        await platformService.getPostMetrics(platformPostIds);
+      if (!engagementMetrics) {
+        return;
+      }
+
+      for (const postMetrics of Object.entries(engagementMetrics)) {
+        const [platformPostId, metrics] = postMetrics;
+        const postWithIds = postsWithIds.find(
+          (postWithIds) => postWithIds[1] === platformPostId
+        );
+        if (!postWithIds) {
           return;
         }
-
-        return Promise.all(
-          Object.entries(engagementMetrics).map(([platformPostId, metrics]) => {
-            const postWithIds = postsWithIds.find(
-              (postWithIds) => postWithIds[1] === platformPostId
-            );
-            if (!postWithIds) {
-              return;
-            }
-            const [postId, , post] = postWithIds;
-            const newGeneric: GenericThread = {
-              ...post.generic,
-              engagementMetrics: metrics,
-            };
-            // TODO: also update platform post
-            return this.updatePost(postId, { generic: newGeneric }, manager);
-          })
-        );
-      })
-    );
+        const [postId, , post] = postWithIds;
+        const newGeneric: GenericThread = {
+          ...post.generic,
+          engagementMetrics: metrics,
+        };
+        // TODO: also update platform post
+        await this.updatePost(postId, { generic: newGeneric }, manager);
+      }
+    }
   }
 
   private async getPlatformPostTimestamp(
