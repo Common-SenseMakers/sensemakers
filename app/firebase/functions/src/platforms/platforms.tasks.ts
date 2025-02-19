@@ -1,6 +1,7 @@
 import { logger } from 'firebase-functions';
 
 import { FetchParams } from '../@shared/types/types.fetch';
+import { FetchPlatfomAccountTaskData } from '../@shared/types/types.profiles';
 import { splitProfileId } from '../@shared/utils/profiles.utils';
 import { Services } from '../instances/services';
 
@@ -8,11 +9,7 @@ export const DEBUG = true;
 
 export const fetchPlatformAccountTask = async (
   req: {
-    data: {
-      profileId: string;
-      amount: number;
-      latest: boolean;
-    };
+    data: FetchPlatfomAccountTaskData;
   },
   services: Services
 ) => {

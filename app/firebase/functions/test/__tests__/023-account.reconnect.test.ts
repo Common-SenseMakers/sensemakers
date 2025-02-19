@@ -36,7 +36,7 @@ import {
 import { testCredentials } from './test.accounts';
 import { getTestServices } from './test.services';
 
-describe.only('023 Account Reconnect', () => {
+describe('023 Account Reconnect', () => {
   const platforms = [
     { name: 'Bluesky', platform: PLATFORM.Bluesky },
     { name: 'Twitter', platform: PLATFORM.Twitter },

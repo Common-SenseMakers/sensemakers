@@ -7,6 +7,8 @@ import { ClustersRepository } from '../clusters/clusters.repository';
 import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
 import { FeedService } from '../feed/feed.service';
+import { JobsRepository } from '../jobs/jobs.repository';
+import { JobsService } from '../jobs/jobs.service';
 import { LinksRepository } from '../links/links.repository';
 import { LinksConfig, LinksService } from '../links/links.service';
 import { getLinksMock } from '../links/links.service.mock';
@@ -41,6 +43,7 @@ import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
 import { ProfilesRepository } from '../profiles/profiles.repository';
 import { ProfilesService } from '../profiles/profiles.service';
+import { TasksService } from '../tasks/tasks.service';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -65,6 +68,8 @@ export interface Services {
   links: LinksService;
   ontology: OntologiesService;
   clusters: ClustersService;
+  tasks: TasksService;
+  jobs: JobsService;
 }
 
 export interface ServicesConfig {
@@ -223,6 +228,14 @@ export const createServices = (
   /** feed */
   const feed = new FeedService(db, postsManager, clusters);
 
+  /** tasks */
+
+  const tasks = new TasksService();
+
+  /** jobs */
+  const jobsRepo = new JobsRepository(db);
+  const jobs = new JobsService(jobsRepo);
+
   /** all services */
   const services: Services = {
     users: usersService,
@@ -236,6 +249,8 @@ export const createServices = (
     ontology: ontologiesService,
     profiles: profilesService,
     clusters,
+    tasks,
+    jobs,
   };
 
   if (DEBUG) {

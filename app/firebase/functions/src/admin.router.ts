@@ -4,7 +4,7 @@ import {
   addNonUserProfilesController,
   deleteProfilesController,
 } from './profiles/profiles.controller';
-import { triggerAutofetchNonUsersController } from './tasksUtils/tasks.controller';
+import { triggerAutofetchNonUsersController } from './tasks/tasks.controller';
 
 export const adminRouter = express.Router();
 

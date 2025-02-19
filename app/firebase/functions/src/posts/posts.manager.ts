@@ -28,6 +28,7 @@ import {
   AppPost,
   AppPostParsedStatus,
   AppPostParsingStatus,
+  GenericThread,
   HydrateConfig,
   PostUpdate,
   PostsQuery,
@@ -172,6 +173,50 @@ export class PostsManager {
 
       return { post: undefined };
     }
+  }
+
+  async updatePostMetrics(posts: AppPost[], manager: TransactionManager) {
+    const postsByPlatform = new Map<PLATFORM, AppPost[]>();
+    posts.forEach((post) => {
+      const platformId = post.origin;
+      const posts = postsByPlatform.get(platformId) || [];
+      posts.push(post);
+      postsByPlatform.set(platformId, posts);
+    });
+
+    Promise.all(
+      Array.from(postsByPlatform.entries()).map(async ([platformId, posts]) => {
+        const platformPostIds = posts.map((post) => post.mirrorsIds[0]);
+        const postsWithIds: [string, string, AppPost][] = posts.map((post) => [
+          post.id,
+          post.mirrorsIds[0],
+          post,
+        ]);
+        const platformService = this.platforms.get(platformId);
+        const { engagementMetrics } =
+          await platformService.getPostMetrics(platformPostIds);
+        if (!engagementMetrics) {
+          return;
+        }
+
+        return Promise.all(
+          Object.entries(engagementMetrics).map(([platformPostId, metrics]) => {
+            const postWithIds = postsWithIds.find(
+              (postWithIds) => postWithIds[1] === platformPostId
+            );
+            if (!postWithIds) {
+              return;
+            }
+            const [postId, , post] = postWithIds;
+            const newGeneric: GenericThread = {
+              ...post.generic,
+              engagementMetrics: metrics,
+            };
+            return this.updatePost(postId, { generic: newGeneric }, manager);
+          })
+        );
+      })
+    );
   }
 
   private async getPlatformPostTimestamp(

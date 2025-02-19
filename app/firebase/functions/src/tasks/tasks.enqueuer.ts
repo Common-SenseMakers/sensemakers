@@ -1,4 +1,4 @@
-import { getFunctions } from 'firebase-admin/functions';
+import { TaskOptions, getFunctions } from 'firebase-admin/functions';
 import { GoogleAuth } from 'google-auth-library';
 
 import { IS_EMULATOR, PROJECT_ID } from '../config/config.runtime';
@@ -50,7 +50,11 @@ export async function getFunctionUrl(name: string, location: string) {
   return realUri;
 }
 
-export const enqueueTaskProduction = async (name: string, params: any) => {
+export const enqueueTaskProduction = async (
+  name: string,
+  params: any,
+  taskOptions?: TaskOptions
+) => {
   const location = envRuntime.REGION || 'us-central1';
   const targetUri = await getFunctionUrl(name, location);
 
@@ -64,5 +68,5 @@ export const enqueueTaskProduction = async (name: string, params: any) => {
   /** enqueue */
   logger.debug(`enqueue ${name}`, { params, targetUri });
 
-  return queue.enqueue(params, { uri: targetUri });
+  return queue.enqueue(params, { ...taskOptions, uri: targetUri });
 };

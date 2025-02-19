@@ -7,7 +7,7 @@ import {
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
 import { REPLACE_USER_TASK } from '../../posts/tasks/replace.user.task';
-import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { enqueueTask } from '../../tasks/tasks.support';
 import {
   blueskySignupDataSchema,
   mastodonGetSignupContextSchema,
