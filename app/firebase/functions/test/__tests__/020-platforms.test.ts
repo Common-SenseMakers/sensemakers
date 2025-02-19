@@ -133,7 +133,7 @@ describe('02-platforms', () => {
         expect(result.avatar).to.be.a('string');
       }
     });
-    it.only('fetches the engagement metrics', async () => {
+    it('fetches the engagement metrics', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -347,7 +347,7 @@ describe('02-platforms', () => {
 
       expect(charAfterAccessibility).to.be.equal('\n');
     });
-    it.only('fetches the engagement metrics', async () => {
+    it('fetches the engagement metrics', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }
@@ -666,7 +666,7 @@ describe('02-platforms', () => {
         );
       }
     });
-    it.only('fetches the engagement metrics', async () => {
+    it('fetches the engagement metrics', async () => {
       if (!user) {
         throw new Error('appUser not created');
       }

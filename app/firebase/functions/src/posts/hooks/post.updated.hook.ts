@@ -11,7 +11,7 @@ import {
 } from '../../@shared/types/types.posts';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
-import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { enqueueTask } from '../../tasks/tasks.support';
 import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 
 const PREFIX = 'POST-UPDATED-HOOK';

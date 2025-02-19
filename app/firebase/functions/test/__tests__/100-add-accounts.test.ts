@@ -8,7 +8,7 @@ import {
 } from './setup';
 import { getTestServices } from './test.services';
 
-describe.only('100 add accounts', async () => {
+describe('100 add accounts', async () => {
   const services = getTestServices({
     time: 'mock',
     twitter: USE_REAL_TWITTER
