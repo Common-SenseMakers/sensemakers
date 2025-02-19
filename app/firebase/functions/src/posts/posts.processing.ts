@@ -15,6 +15,7 @@ import {
   AppPostParsingStatus,
   HydrateConfig,
   IndexedPost,
+  RankingScores,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import { RefDisplayMeta } from '../@shared/types/types.references';
@@ -134,6 +135,19 @@ export class PostsProcessing {
       manager
     );
 
+    /** compute score and sync with clusters */
+    const scores = this.computeScores(post);
+    if (scores) {
+      const indexedPost: IndexedPost = {
+        id: post.id,
+        authorProfileId: post.authorProfileId,
+        origin: post.origin,
+        createdAtMs: post.createdAtMs,
+        scores,
+      };
+      await this.syncPostInClusters('add', post.id, manager, indexedPost);
+    }
+
     /** set the postId of the platformPost */
     this.platformPosts.setPostId(platformPostCreated.id, post.id, manager);
 
@@ -226,7 +240,13 @@ export class PostsProcessing {
     postId: string,
     manager: TransactionManager,
     semantics?: string
-  ): Promise<void> {
+  ): Promise<
+    | {
+        indexedPost: IndexedPost;
+        updatedKeywords: { new: string[]; removed: string[] };
+      }
+    | undefined
+  > {
     if (!semantics) return undefined;
 
     const post = await this.posts.get(postId, manager, true);
@@ -280,20 +300,13 @@ export class PostsProcessing {
         )
       : [];
 
-    // TODO: this should come out of process semantics so it can be shared by both flows
-    await this.syncPostInClusters(
-      'add',
-      post.id,
-      manager,
-      postData,
-      structuredSemantics.refs || [],
-      {
+    return {
+      indexedPost: postData,
+      updatedKeywords: {
         new: structuredSemantics.keywords || [],
         removed: deletedKeywords,
-      }
-    );
-
-    await this.posts.update(postId, { structuredSemantics }, manager);
+      },
+    };
   }
 
   /** from postId make sure the post is updated on all clusters that include that post */
@@ -328,6 +341,21 @@ export class PostsProcessing {
         );
       })
     );
+  }
+
+  computeScores(post: AppPost): RankingScores | undefined {
+    const metrics = post.generic.engagementMetrics;
+    if (!metrics) {
+      return undefined;
+    }
+
+    const score1 =
+      2 * metrics.likes +
+      4 * (metrics.reposts + (metrics.quotes || 0)) +
+      1 * metrics.replies;
+    return {
+      score1,
+    };
   }
 
   async syncPostInCluster(

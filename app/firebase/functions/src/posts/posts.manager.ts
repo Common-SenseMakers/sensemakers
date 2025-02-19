@@ -30,6 +30,7 @@ import {
   AppPostParsingStatus,
   GenericThread,
   HydrateConfig,
+  IndexedPost,
   PostUpdate,
   PostsQuery,
   PostsQueryDefined,
@@ -1050,21 +1051,60 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
 
-    if (postUpdate.semantics) {
+    if (postUpdate.semantics || postUpdate.generic?.engagementMetrics) {
+      const post = await this.processing.posts.get(postId, manager, true);
+      let indexedPost: IndexedPost = {
+        id: postId,
+        authorProfileId: post.authorProfileId,
+        origin: post.origin,
+        createdAtMs: post.createdAtMs,
+      };
+      let updatedKeywords: { new: string[]; removed: string[] } | undefined;
+
       /** handle side-effects related to semantics when the post is updated */
-      const postUpdated = await this.processing.posts.get(
-        postId,
+      if (postUpdate.semantics) {
+        const processedSemantics = await this.processing.processSemantics(
+          postId,
+          manager,
+          post.semantics
+        );
+
+        if (processedSemantics) {
+          indexedPost = {
+            ...indexedPost,
+            ...processedSemantics.indexedPost,
+          };
+          updatedKeywords = processedSemantics.updatedKeywords;
+        }
+      }
+
+      /** handle side-effects related to the rank scoring */
+      if (postUpdate.generic?.engagementMetrics) {
+        const scores = this.processing.computeScores(post);
+        indexedPost = {
+          ...indexedPost,
+          scores,
+        };
+      }
+
+      await this.processing.syncPostInClusters(
+        'add',
+        post.id,
         manager,
-        true
+        indexedPost,
+        indexedPost.structuredSemantics?.refs || [],
+        updatedKeywords
       );
-      await this.processing.processSemantics(
+
+      await this.processing.posts.update(
         postId,
-        manager,
-        postUpdated.semantics
+        {
+          structuredSemantics: indexedPost.structuredSemantics,
+          generic: postUpdate.generic,
+        },
+        manager
       );
     }
-    // TODO: if update metrics - recompute ranking score process scores
-    // then sync post in clusters if anything to do with post indexes updates
   }
 
   /**
