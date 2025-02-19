@@ -54,6 +54,7 @@ import { PostsRepository } from '../../src/posts/posts.repository';
 import { ProfilesRepository } from '../../src/profiles/profiles.repository';
 import { ProfilesService } from '../../src/profiles/profiles.service';
 import { TasksService } from '../../src/tasks/tasks.service';
+import { getTasksMock } from '../../src/tasks/tasks.service.mock';
 import { TimeMock, getTimeMock } from '../../src/time/mock/time.service.mock';
 import { TimeService } from '../../src/time/time.service';
 import { UsersRepository } from '../../src/users/users.repository';
@@ -220,7 +221,8 @@ export const getTestServices = (config: TestServicesConfig) => {
   const feed = new FeedService(db, postsManager, clusters);
   /** tasks */
 
-  const tasks = new TasksService();
+  const _tasks = new TasksService();
+  const tasks = getTasksMock(_tasks, 'mock');
 
   /** jobs */
   const jobsRepo = new JobsRepository(db);
