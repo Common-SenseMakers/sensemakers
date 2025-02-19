@@ -1,5 +1,5 @@
 import { PLATFORM } from './types.platforms';
-import { AppPostFull } from './types.posts';
+import { AppPostFull, RankingScores } from './types.posts';
 
 export interface HandleSignupResult {
   linkProfile: boolean;
@@ -15,6 +15,7 @@ export interface FetchParams {
   sinceId?: string;
   untilId?: string;
   expectedAmount: number;
+  rankByScore?: keyof RankingScores;
 }
 
 /** ids are in terms of platformPost post_id */
