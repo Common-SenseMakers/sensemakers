@@ -280,6 +280,7 @@ export class PostsProcessing {
         )
       : [];
 
+    // TODO: this should come out of process semantics so it can be shared by both flows
     await this.syncPostInClusters(
       'add',
       post.id,

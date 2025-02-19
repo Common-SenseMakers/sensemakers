@@ -212,6 +212,7 @@ export class PostsManager {
               ...post.generic,
               engagementMetrics: metrics,
             };
+            // TODO: also update platform post
             return this.updatePost(postId, { generic: newGeneric }, manager);
           })
         );
@@ -1062,6 +1063,8 @@ export class PostsManager {
         postUpdated.semantics
       );
     }
+    // TODO: if update metrics - recompute ranking score process scores
+    // then sync post in clusters if anything to do with post indexes updates
   }
 
   /**

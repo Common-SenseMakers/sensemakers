@@ -99,6 +99,11 @@ interface AppPostBase {
 
 export interface AppPost extends AppPostBase {
   structuredSemantics?: StructuredSemantics; // for indexing purposes. Will be duplicated across subcollections
+  rankingScore: {
+    score1: number;
+    score2: number;
+    ...
+  }
 }
 
 export interface HydrateConfig {
@@ -200,6 +205,7 @@ export type IndexedPost = Pick<
   | 'authorProfileId'
   | 'createdAtMs'
   | 'structuredSemantics'
+  | 'rankingScore'
 >;
 
 export interface IndexedCollectionEntry {
