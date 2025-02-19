@@ -4,6 +4,8 @@ import { PLATFORM } from '../../src/@shared/types/types.platforms';
 import { GenericThread } from '../../src/@shared/types/types.posts';
 import { AppUser } from '../../src/@shared/types/types.user';
 import { logger } from '../../src/instances/logger';
+import { JOBS } from '../../src/jobs/types.jobs';
+import { triggerPostMetricsSync } from '../../src/posts/tasks/posts.sync.metrics.task';
 import { UsersHelper } from '../../src/users/users.helper';
 import { resetDB } from '../utils/db';
 import { createUsers } from '../utils/users.utils';
@@ -53,7 +55,7 @@ describe.only('Post Metrics Syncing', () => {
       );
     });
   });
-  it('updates the metrics of posts', async () => {
+  it('updates the metrics of posts and properly update related job meta', async () => {
     if (!user) {
       throw new Error('User not found');
     }
@@ -91,6 +93,7 @@ describe.only('Post Metrics Syncing', () => {
     });
     const updatedPosts = await services.postsManager.getOfUser({
       userId: user.userId,
+      origins: [PLATFORM.Bluesky],
     });
     updatedPosts.forEach((p) => {
       expect(p.generic.engagementMetrics).to.not.equal({
@@ -99,5 +102,27 @@ describe.only('Post Metrics Syncing', () => {
         replies: 100,
       });
     });
+
+    const jobsMeta = await services.jobs.repo.getJobMeta(
+      JOBS.SYNC_POST_METRICS
+    );
+    expect(jobsMeta).to.be.undefined;
+
+    await triggerPostMetricsSync(services);
+
+    const updatedJobsMeta = await services.jobs.repo.getJobMeta(
+      JOBS.SYNC_POST_METRICS
+    );
+    expect(updatedJobsMeta?.lastBatchedPostId).to.be.equal(updatedPosts[0].id);
+
+    await services.jobs.repo.setJobMeta(JOBS.SYNC_POST_METRICS, {
+      lastBatchedPostId: updatedPosts[4].id,
+    });
+    await triggerPostMetricsSync(services);
+
+    const lastJobsMeta = await services.jobs.repo.getJobMeta(
+      JOBS.SYNC_POST_METRICS
+    );
+    expect(lastJobsMeta?.lastBatchedPostId).to.be.equal(updatedPosts[0].id);
   });
 });
