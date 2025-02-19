@@ -68,35 +68,37 @@ describe.only('Post Metrics Syncing', () => {
     });
 
     await Promise.all(
-      posts.map((post) => {
-        return services.db.run(async (manager) => {
-          const newGeneric: GenericThread = {
-            ...post.post.generic,
-            engagementMetrics: {
-              likes: 100,
-              reposts: 100,
-              replies: 100,
-            },
-          };
-          return await services.postsManager.updatePost(
-            post.post.id,
-            { generic: newGeneric },
-            manager
-          );
-        });
-      })
+      posts
+        .filter((post) => post.post.generic.thread[0].content)
+        .map((post) => {
+          return services.db.run(async (manager) => {
+            const newGeneric: GenericThread = {
+              ...post.post.generic,
+              engagementMetrics: {
+                likes: 100,
+                reposts: 100,
+                replies: 100,
+              },
+            };
+            return await services.postsManager.updatePost(
+              post.post.id,
+              { generic: newGeneric },
+              manager
+            );
+          });
+        })
     );
 
     const appPosts = posts.map((p) => p.post);
     await services.db.run(async (manager) => {
-      return services.postsManager.updatePostMetrics(appPosts, manager);
+      return await services.postsManager.updatePostMetrics(appPosts, manager);
     });
     const updatedPosts = await services.postsManager.getOfUser({
       userId: user.userId,
       origins: [PLATFORM.Bluesky],
     });
     updatedPosts.forEach((p) => {
-      expect(p.generic.engagementMetrics).to.not.equal({
+      expect(p.generic.engagementMetrics).to.not.deep.equal({
         likes: 100,
         reposts: 100,
         replies: 100,
