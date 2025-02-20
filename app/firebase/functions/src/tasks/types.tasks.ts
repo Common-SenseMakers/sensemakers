@@ -3,6 +3,7 @@ import {
   PUBLISHABLE_PLATFORM,
 } from '../@shared/types/types.platforms';
 import { AppPost } from '../@shared/types/types.posts';
+import { FetchPlatfomAccountTaskData } from '../@shared/types/types.profiles';
 
 export const TASKS = {
   SYNC_TWITTER_POST_METRICS: 'syncTwitterPostMetrics',
@@ -11,7 +12,25 @@ export const TASKS = {
   FETCH_TWITTER_ACCOUNT: 'fetchTwitterAccount',
   FETCH_MASTODON_ACCOUNT: 'fetchMastodonAccount',
   FETCH_BLUESKY_ACCOUNT: 'fetchBlueskyAccount',
+  PARSE_POST: 'parsePost',
+  AUTOFETCH_POSTS: 'autofetchPosts',
+  REPLACE_USER: 'replaceUser',
 } as const;
+
+export type TASKS_NAMES = keyof typeof TASKS;
+
+export type TasksParams = Record<keyof typeof TASKS, any> & {
+  [TASKS.SYNC_BLUESKY_POST_METRICS]: SyncPlatformPostMetricsRequest;
+  [TASKS.SYNC_MASTODON_POST_METRICS]: SyncPlatformPostMetricsRequest;
+  [TASKS.SYNC_TWITTER_POST_METRICS]: SyncPlatformPostMetricsRequest;
+  [TASKS.FETCH_BLUESKY_ACCOUNT]: FetchPlatfomAccountTaskData;
+  [TASKS.FETCH_MASTODON_ACCOUNT]: FetchPlatfomAccountTaskData;
+  [TASKS.FETCH_TWITTER_ACCOUNT]: FetchPlatfomAccountTaskData;
+  [TASKS.PARSE_POST]: {
+    post: AppPost;
+    platformId: PUBLISHABLE_PLATFORM;
+  };
+};
 
 export const PLATFORM_TASKS = {
   SYNC_POST_METRICS_TASK: {
@@ -25,9 +44,4 @@ export interface SyncPlatformPostMetricsRequest {
   posts: AppPost[];
   platformId: PUBLISHABLE_PLATFORM;
   dispatchNumber: number;
-}
-export interface TaskRequest {
-  [TASKS.SYNC_BLUESKY_POST_METRICS]: SyncPlatformPostMetricsRequest;
-  [TASKS.SYNC_MASTODON_POST_METRICS]: SyncPlatformPostMetricsRequest;
-  [TASKS.SYNC_TWITTER_POST_METRICS]: SyncPlatformPostMetricsRequest;
 }

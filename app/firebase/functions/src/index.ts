@@ -28,12 +28,7 @@ import {
 import { FETCH_ACCOUNT_TASKS } from './platforms/platforms.tasks.config';
 import { platformPostUpdatedHook } from './posts/hooks/platformPost.updated.hook';
 import { postUpdatedHook } from './posts/hooks/post.updated.hook';
-import {
-  AUTOFETCH_POSTS_TASK,
-  triggerAutofetchPosts,
-} from './posts/tasks/posts.autofetch.task';
-import { PARSE_POST_TASK } from './posts/tasks/posts.parse.task';
-import { REPLACE_USER_TASK } from './posts/tasks/replace.user.task';
+import { triggerAutofetchPosts } from './posts/tasks/posts.autofetch.task';
 import { router } from './router';
 import { getConfig } from './services.config';
 import {
@@ -47,7 +42,7 @@ import {
   syncMastodonPostMetricsTaskHandler,
   syncTwitterPostMetricsTaskHandler,
 } from './tasks/tasks.handlers';
-import { PLATFORM_TASKS } from './tasks/types.tasks';
+import { PLATFORM_TASKS, TASKS } from './tasks/types.tasks';
 
 /** Registed the API as an HTTP triggered function */
 exports['api'] = functions
@@ -69,9 +64,9 @@ exports.nonUserAccountFetch = nonUserAccountFetchJobHandler;
 exports.syncPostMetrics = syncPostMetricsJobHandler;
 
 /** tasks */
-exports[PARSE_POST_TASK] = parsePostTaskHandler;
+exports[TASKS.PARSE_POST] = parsePostTaskHandler;
 
-exports[AUTOFETCH_POSTS_TASK] = autoFetchPostsTaskHandler;
+exports[TASKS.AUTOFETCH_POSTS] = autoFetchPostsTaskHandler;
 
 exports[FETCH_ACCOUNT_TASKS[PLATFORM.Twitter]] = fetchTwitterAccountTaskHandler;
 
@@ -80,7 +75,7 @@ exports[FETCH_ACCOUNT_TASKS[PLATFORM.Mastodon]] =
 
 exports[FETCH_ACCOUNT_TASKS[PLATFORM.Bluesky]] = fetchBlueskyAccountTaskHandler;
 
-exports[REPLACE_USER_TASK] = replaceUserTaskHandler;
+exports[TASKS.REPLACE_USER] = replaceUserTaskHandler;
 
 exports[PLATFORM_TASKS.SYNC_POST_METRICS_TASK[PLATFORM.Twitter]] =
   syncTwitterPostMetricsTaskHandler;

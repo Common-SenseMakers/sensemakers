@@ -3,18 +3,10 @@ import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 import { fetchPlatformAccountTask } from '../platforms/platforms.tasks';
 import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks.config';
-import {
-  AUTOFETCH_POSTS_TASK,
-  autofetchUserPosts,
-} from '../posts/tasks/posts.autofetch.task';
-import {
-  PARSE_POST_TASK,
-  parsePostTask,
-} from '../posts/tasks/posts.parse.task';
-import {
-  REPLACE_USER_TASK,
-  replaceUserTask,
-} from '../posts/tasks/replace.user.task';
+import { autofetchUserPosts } from '../posts/tasks/posts.autofetch.task';
+import { parsePostTask } from '../posts/tasks/posts.parse.task';
+import { replaceUserTask } from '../posts/tasks/replace.user.task';
+import { TASKS } from './types.tasks';
 
 const DEBUG = false;
 
@@ -27,12 +19,12 @@ export const enqueueTaskMockLocal = async (
 
   try {
     await (async () => {
-      if (name === PARSE_POST_TASK) {
+      if (name === TASKS.PARSE_POST) {
         await parsePostTask({ data: params } as any, services);
         return;
       }
 
-      if (name === AUTOFETCH_POSTS_TASK) {
+      if (name === TASKS.AUTOFETCH_POSTS) {
         await autofetchUserPosts({ data: params } as any, services);
         return;
       }
@@ -46,7 +38,7 @@ export const enqueueTaskMockLocal = async (
         return;
       }
 
-      if (name === REPLACE_USER_TASK) {
+      if (name === TASKS.REPLACE_USER) {
         await replaceUserTask({ data: params }, services);
         return;
       }

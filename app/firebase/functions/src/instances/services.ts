@@ -44,6 +44,7 @@ import { PostsRepository } from '../posts/posts.repository';
 import { ProfilesRepository } from '../profiles/profiles.repository';
 import { ProfilesService } from '../profiles/profiles.service';
 import { TasksService } from '../tasks/tasks.service';
+import { getTasksMock } from '../tasks/tasks.service.mock';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -89,6 +90,7 @@ export interface ServicesConfig {
     USE_REAL_NANOPUB: boolean;
     USE_REAL_EMAIL: boolean;
     USE_REAL_LINKS: boolean;
+    USE_REAL_TASKS: boolean;
   };
 }
 
@@ -230,7 +232,11 @@ export const createServices = (
 
   /** tasks */
 
-  const tasks = new TasksService();
+  const _tasks = new TasksService();
+  const tasks = getTasksMock(
+    _tasks,
+    config.mock.USE_REAL_TASKS ? 'real' : 'mock'
+  );
 
   /** jobs */
   const jobsRepo = new JobsRepository(db);

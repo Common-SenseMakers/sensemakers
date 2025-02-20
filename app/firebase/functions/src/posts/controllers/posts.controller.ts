@@ -11,9 +11,8 @@ import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
-import { enqueueTask } from '../../tasks/tasks.support';
+import { TASKS, TASKS_NAMES } from '../../tasks/types.tasks';
 import { IndexedPostsRepo } from '../indexed.posts.repository';
-import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
   getKeywordsSchema,
   getPostSchema,
@@ -98,8 +97,8 @@ export const parsePostController: RequestHandler = async (
     };
 
     const services = getServices(request);
-    const task = enqueueTask(
-      PARSE_POST_TASK,
+    const task = services.tasks.enqueue(
+      TASKS.PARSE_POST as TASKS_NAMES,
       { postId: payload.postId },
       services
     );

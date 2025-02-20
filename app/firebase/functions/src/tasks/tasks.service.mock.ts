@@ -17,6 +17,7 @@ export const getTasksMock = (
 
   when(Mocked.enqueue(anything(), anything(), anything())).thenCall(
     async (taskName: string, req: any, services: Services): Promise<void> => {
+      console.log(`enqueue ${taskName} called`);
       return new Promise((resolve) => {
         resolve();
       });

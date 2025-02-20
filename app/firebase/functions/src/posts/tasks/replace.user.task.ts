@@ -1,8 +1,6 @@
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
 
-export const REPLACE_USER_TASK = 'replaceUser';
-
 const DEBUG = true;
 
 export const replaceUserTask = async (

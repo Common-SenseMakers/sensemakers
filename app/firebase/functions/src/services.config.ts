@@ -56,6 +56,7 @@ export const getConfig = (): ServicesConfig => {
       USE_REAL_PARSER: USE_REAL_PARSER.value(),
       USE_REAL_TWITTER: USE_REAL_TWITTERX.value(),
       USE_REAL_LINKS: USE_REAL_LINKS.value(),
+      USE_REAL_TASKS: true,
     },
   };
 };
