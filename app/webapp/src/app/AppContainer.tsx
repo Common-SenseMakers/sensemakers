@@ -80,7 +80,7 @@ export const AppContainer = (props: React.PropsWithChildren) => {
     const referralCode = params.get('referral');
 
     if (referralCode) {
-      posthog.capture(POSTHOG_EVENTS.REFERRAL_DETECTED, {
+      posthog?.capture(POSTHOG_EVENTS.REFERRAL_DETECTED, {
         referral_code: referralCode,
         url: window.location.href,
       });

@@ -1,5 +1,6 @@
 export const POSTHOG_EVENTS = {
   CLICKED_GET_STARTED: 'clicked_get_started',
+  CLICKED_SIGN_IN: 'clicked_sign_in',
   CLICKED_CONTINUE: 'clicked_continue',
   CLICKED_KEYWORD: 'clicked_keyword',
   CLICKED_REF_LABEL: 'clicked_ref_label',
