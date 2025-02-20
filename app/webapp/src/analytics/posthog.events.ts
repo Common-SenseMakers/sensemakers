@@ -16,4 +16,5 @@ export const POSTHOG_EVENTS = {
   CLICKED_REF_URL: 'clicked_ref_url',
   CLICKED_PROFILE_URL: 'clicked_profile_url',
   TOGGLE_SHARE_TO_HYPERFEED: 'toggle_share_to_hyperfeed',
+  REFERRAL_DETECTED: 'referral_detected',
 };

@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Box } from 'grommet';
+import { usePostHog } from 'posthog-js/react';
 import { createContext, useContext, useEffect } from 'react';
-import { Outlet, Route, Routes } from 'react-router-dom';
+import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
 
+import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { AppHomePage } from '../pages/AppHomePage';
 import { ConnectPage } from '../pages/ConnectPage';
 import { ConnectSocialsPage } from '../pages/ConnectSocialsPage';
@@ -69,8 +71,21 @@ export const AppContainer0 = (props: React.PropsWithChildren) => {
 
 export const AppContainer = (props: React.PropsWithChildren) => {
   const { constants } = useThemeContext();
+  const location = useLocation();
+  const posthog = usePostHog();
 
   const topHeight = '0px';
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const referralCode = params.get('referral');
+
+    if (referralCode) {
+      posthog.capture(POSTHOG_EVENTS.REFERRAL_DETECTED, {
+        referral_code: referralCode,
+        url: window.location.href,
+      });
+    }
+  }, [location, posthog]);
 
   return (
     <>
