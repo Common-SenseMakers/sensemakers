@@ -1,5 +1,6 @@
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
+import { ParsePostTaskParams } from '../../tasks/types.tasks';
 
 const DEBUG = false;
 
