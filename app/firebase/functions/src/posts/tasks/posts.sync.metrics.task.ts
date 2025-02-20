@@ -69,8 +69,7 @@ export const triggerPostMetricsSync = async (services: Services) => {
           posts: batch,
           platformId: platform,
           dispatchNumber: 1,
-        },
-        services
+        }
       );
     }
   }
@@ -118,7 +117,6 @@ export const syncPostMetricsTask = async (
     await services.tasks.enqueue(
       PLATFORM_TASKS.SYNC_POST_METRICS_TASK[req.data.platformId] as TASKS_NAMES,
       { ...req.data, dispatchNumber: req.data.dispatchNumber + 1 },
-      services,
       { scheduleDelaySeconds: nextDispatchDelay }
     );
   } else if (DEBUG) {

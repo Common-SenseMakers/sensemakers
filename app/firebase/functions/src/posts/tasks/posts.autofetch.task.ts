@@ -109,7 +109,7 @@ export const triggerAutofetchPostsForNonUsers = async (
             { taskName, taskData },
             DEBUG_PREFIX
           );
-        await services.tasks.enqueue(taskName, taskData, services);
+        await services.tasks.enqueue(taskName, taskData);
       }
     } else {
       if (DEBUG)
@@ -143,11 +143,9 @@ export const triggerAutofetchPosts = async (services: Services) => {
           undefined,
           DEBUG_PREFIX
         );
-      return services.tasks.enqueue(
-        TASKS.AUTOFETCH_POSTS as TASKS_NAMES,
-        { userId },
-        services
-      );
+      return services.tasks.enqueue(TASKS.AUTOFETCH_POSTS as TASKS_NAMES, {
+        userId,
+      });
     })
   );
 };

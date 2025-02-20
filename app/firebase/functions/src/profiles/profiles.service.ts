@@ -334,7 +334,7 @@ export class ProfilesService {
       };
 
       if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
-      await services.tasks.enqueue(taskName, taskData, services);
+      await services.tasks.enqueue(taskName, taskData);
     }
   }
 }

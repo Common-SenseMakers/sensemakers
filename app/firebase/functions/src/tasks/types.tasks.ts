@@ -26,10 +26,7 @@ export type TasksParams = Record<keyof typeof TASKS, any> & {
   [TASKS.FETCH_BLUESKY_ACCOUNT]: FetchPlatfomAccountTaskData;
   [TASKS.FETCH_MASTODON_ACCOUNT]: FetchPlatfomAccountTaskData;
   [TASKS.FETCH_TWITTER_ACCOUNT]: FetchPlatfomAccountTaskData;
-  [TASKS.PARSE_POST]: {
-    post: AppPost;
-    platformId: PUBLISHABLE_PLATFORM;
-  };
+  [TASKS.PARSE_POST]: ParsePostTaskParams;
 };
 
 export const PLATFORM_TASKS = {
@@ -44,4 +41,8 @@ export interface SyncPlatformPostMetricsRequest {
   posts: AppPost[];
   platformId: PUBLISHABLE_PLATFORM;
   dispatchNumber: number;
+}
+
+export interface ParsePostTaskParams {
+  postId: string;
 }

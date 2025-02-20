@@ -119,8 +119,7 @@ export const handleSignupController: RequestHandler = async (
     if (result?.replaceLegacy) {
       await services.tasks.enqueue(
         TASKS.REPLACE_USER as TASKS_NAMES,
-        result.replaceLegacy,
-        services
+        result.replaceLegacy
       );
     }
 
