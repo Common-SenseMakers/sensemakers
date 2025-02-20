@@ -32,7 +32,9 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "ts-node",
-      "env": {},
+      "env": {
+        "USE_REAL_BLUESKY": "true"
+      },
       "args": [
         "--project",
         "./tsconfig.scripts.json",

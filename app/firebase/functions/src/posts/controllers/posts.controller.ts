@@ -99,6 +99,8 @@ export const parsePostController: RequestHandler = async (
     const services = getServices(request);
     const task = services.tasks.enqueue(TASK.PARSE_POST, {
       postId: payload.postId,
+      undefined,
+      services,
     });
 
     if (!IS_EMULATOR) {

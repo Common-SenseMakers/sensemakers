@@ -62,11 +62,16 @@ export const triggerPostMetricsSync = async (services: Services) => {
     const batchedPosts = splitIntoBatches(posts, BATCH_SIZE);
 
     for (const batch of batchedPosts) {
-      await tasks.enqueue(PLATFORM_TASKS.SYNC_POST_METRICS_TASK[platform], {
-        posts: batch,
-        platformId: platform,
-        dispatchNumber: 1,
-      });
+      await tasks.enqueue(
+        PLATFORM_TASKS.SYNC_POST_METRICS_TASK[platform],
+        {
+          posts: batch,
+          platformId: platform,
+          dispatchNumber: 1,
+        },
+        undefined,
+        services
+      );
     }
   }
 
@@ -113,7 +118,8 @@ export const syncPostMetricsTask = async (
     await services.tasks.enqueue(
       PLATFORM_TASKS.SYNC_POST_METRICS_TASK[req.data.platformId],
       { ...req.data, dispatchNumber: req.data.dispatchNumber + 1 },
-      { scheduleDelaySeconds: nextDispatchDelay }
+      { scheduleDelaySeconds: nextDispatchDelay },
+      services
     );
   } else if (DEBUG) {
     logger.debug(

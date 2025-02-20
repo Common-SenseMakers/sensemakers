@@ -4,6 +4,7 @@ import { GoogleAuth } from 'google-auth-library';
 import { NODE_ENV, PROJECT_ID } from '../config/config.runtime';
 import { envRuntime } from '../config/typedenv.runtime';
 import { logger } from '../instances/logger';
+import { Services } from '../instances/services';
 import { TASK, TasksParams } from './types.tasks';
 
 export class TasksService {
@@ -40,7 +41,8 @@ export class TasksService {
   async enqueue<T extends TASK>(
     name: T,
     params: TasksParams[T],
-    taskOptions?: TaskOptions
+    taskOptions?: TaskOptions,
+    services?: Services // user for mock
   ) {
     logger.debug(`enqueueTask ${name} on ${NODE_ENV}`, {
       params,

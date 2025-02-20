@@ -1,3 +1,4 @@
+import { TaskOptions } from 'firebase-admin/functions';
 import { anything, instance, mock, when } from 'ts-mockito';
 
 import { PLATFORM } from '../@shared/types/types.platforms';
@@ -25,9 +26,15 @@ export const getTasksMock = (
 
   const Mocked = mock(TasksService);
 
-  when(Mocked.enqueue(anything(), anything(), anything())).thenCall(
-    async (name: TASK, params: any, services: Services): Promise<void> => {
+  when(Mocked.enqueue(anything(), anything(), anything(), anything())).thenCall(
+    async (
+      name: TASK,
+      params: any,
+      taskOptions?: TaskOptions,
+      services?: Services
+    ): Promise<void> => {
       if (DEBUG) logger.debug('enqueueTaskMock', { name, params });
+      if (!services) throw new Error('services is required');
 
       try {
         await (async () => {
