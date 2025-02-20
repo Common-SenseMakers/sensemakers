@@ -9,9 +9,9 @@ import { autofetchUserPosts } from '../posts/tasks/posts.autofetch.task';
 import { parsePostTask } from '../posts/tasks/posts.parse.task';
 import { replaceUserTask } from '../posts/tasks/replace.user.task';
 import { TasksService } from './tasks.service';
-import { TASKS } from './types.tasks';
+import { TASK } from './types.tasks';
 
-const DEBUG = false;
+const DEBUG = true;
 
 export interface TasksMock extends TasksService {}
 
@@ -26,18 +26,17 @@ export const getTasksMock = (
   const Mocked = mock(TasksService);
 
   when(Mocked.enqueue(anything(), anything(), anything())).thenCall(
-    async (name: string, req: any, services: Services): Promise<void> => {
-      const params = req.data;
-      if (DEBUG) logger.debug('enqueueTaskStub', { name, params });
+    async (name: TASK, params: any, services: Services): Promise<void> => {
+      if (DEBUG) logger.debug('enqueueTaskMock', { name, params });
 
       try {
         await (async () => {
-          if (name === TASKS.PARSE_POST) {
+          if (name === TASK.PARSE_POST) {
             await parsePostTask({ data: params }, services);
             return;
           }
 
-          if (name === TASKS.AUTOFETCH_POSTS) {
+          if (name === TASK.AUTOFETCH_POSTS) {
             await autofetchUserPosts({ data: params } as any, services);
             return;
           }
@@ -51,7 +50,7 @@ export const getTasksMock = (
             return;
           }
 
-          if (name === TASKS.REPLACE_USER) {
+          if (name === TASK.REPLACE_USER) {
             await replaceUserTask({ data: params }, services);
             return;
           }

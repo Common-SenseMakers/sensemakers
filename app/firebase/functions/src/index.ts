@@ -42,7 +42,7 @@ import {
   syncMastodonPostMetricsTaskHandler,
   syncTwitterPostMetricsTaskHandler,
 } from './tasks/tasks.handlers';
-import { PLATFORM_TASKS, TASKS } from './tasks/types.tasks';
+import { PLATFORM_TASKS, TASK } from './tasks/types.tasks';
 
 /** Registed the API as an HTTP triggered function */
 exports['api'] = functions
@@ -64,9 +64,9 @@ exports.nonUserAccountFetch = nonUserAccountFetchJobHandler;
 exports.syncPostMetrics = syncPostMetricsJobHandler;
 
 /** tasks */
-exports[TASKS.PARSE_POST] = parsePostTaskHandler;
+exports[TASK.PARSE_POST] = parsePostTaskHandler;
 
-exports[TASKS.AUTOFETCH_POSTS] = autoFetchPostsTaskHandler;
+exports[TASK.AUTOFETCH_POSTS] = autoFetchPostsTaskHandler;
 
 exports[FETCH_ACCOUNT_TASKS[PLATFORM.Twitter]] = fetchTwitterAccountTaskHandler;
 
@@ -75,7 +75,7 @@ exports[FETCH_ACCOUNT_TASKS[PLATFORM.Mastodon]] =
 
 exports[FETCH_ACCOUNT_TASKS[PLATFORM.Bluesky]] = fetchBlueskyAccountTaskHandler;
 
-exports[TASKS.REPLACE_USER] = replaceUserTaskHandler;
+exports[TASK.REPLACE_USER] = replaceUserTaskHandler;
 
 exports[PLATFORM_TASKS.SYNC_POST_METRICS_TASK[PLATFORM.Twitter]] =
   syncTwitterPostMetricsTaskHandler;

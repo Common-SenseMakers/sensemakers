@@ -32,14 +32,11 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "ts-node",
-      "env": {
-        "NODE_ENV": "local",
-        "USER_ID": "bluesky:did:plc:r5lx5cznmnj6fftfy4hudgmm"
-      },
+      "env": {},
       "args": [
         "--project",
         "./tsconfig.scripts.json",
-        "./scripts/083-trigger-userFetch.ts"
+        "./scripts/082-trigger-autofetch-users.ts"
       ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",

@@ -4,7 +4,7 @@ import { GoogleAuth } from 'google-auth-library';
 import { NODE_ENV, PROJECT_ID } from '../config/config.runtime';
 import { envRuntime } from '../config/typedenv.runtime';
 import { logger } from '../instances/logger';
-import { TASKS_NAMES, TasksParams } from './types.tasks';
+import { TASK, TasksParams } from './types.tasks';
 
 export class TasksService {
   private async getFunctionUrl(name: string, location: string) {
@@ -37,7 +37,7 @@ export class TasksService {
     return realUri;
   }
 
-  async enqueue<T extends TASKS_NAMES>(
+  async enqueue<T extends TASK>(
     name: T,
     params: TasksParams[T],
     taskOptions?: TaskOptions

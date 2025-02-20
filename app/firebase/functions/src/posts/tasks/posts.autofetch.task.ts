@@ -9,7 +9,7 @@ import {
   FETCH_ACCOUNT_TASKS,
   FETCH_TASK_DISPATCH_RATES,
 } from '../../platforms/platforms.tasks.config';
-import { TASKS, TASKS_NAMES } from '../../tasks/types.tasks';
+import { TASK } from '../../tasks/types.tasks';
 import { AutofetchNonUserPostsJobMeta } from './types.posts.tasks';
 
 const DEBUG = true;
@@ -95,7 +95,7 @@ export const triggerAutofetchPostsForNonUsers = async (
           continue;
         }
 
-        const taskName = FETCH_ACCOUNT_TASKS[platformId] as TASKS_NAMES;
+        const taskName = FETCH_ACCOUNT_TASKS[platformId];
 
         const taskData: FetchPlatfomAccountTaskData = {
           profileId,
@@ -143,7 +143,7 @@ export const triggerAutofetchPosts = async (services: Services) => {
           undefined,
           DEBUG_PREFIX
         );
-      return services.tasks.enqueue(TASKS.AUTOFETCH_POSTS as TASKS_NAMES, {
+      return services.tasks.enqueue(TASK.AUTOFETCH_POSTS, {
         userId,
       });
     })

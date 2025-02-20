@@ -10,7 +10,6 @@ import { splitIntoBatches } from '../../tasks/tasks.support';
 import {
   PLATFORM_TASKS,
   SyncPlatformPostMetricsRequest,
-  TASKS_NAMES,
 } from '../../tasks/types.tasks';
 
 const MAX_POSTS_TO_BATCH = 10000;
@@ -63,14 +62,11 @@ export const triggerPostMetricsSync = async (services: Services) => {
     const batchedPosts = splitIntoBatches(posts, BATCH_SIZE);
 
     for (const batch of batchedPosts) {
-      await tasks.enqueue(
-        PLATFORM_TASKS.SYNC_POST_METRICS_TASK[platform] as TASKS_NAMES,
-        {
-          posts: batch,
-          platformId: platform,
-          dispatchNumber: 1,
-        }
-      );
+      await tasks.enqueue(PLATFORM_TASKS.SYNC_POST_METRICS_TASK[platform], {
+        posts: batch,
+        platformId: platform,
+        dispatchNumber: 1,
+      });
     }
   }
 
@@ -115,7 +111,7 @@ export const syncPostMetricsTask = async (
       );
     }
     await services.tasks.enqueue(
-      PLATFORM_TASKS.SYNC_POST_METRICS_TASK[req.data.platformId] as TASKS_NAMES,
+      PLATFORM_TASKS.SYNC_POST_METRICS_TASK[req.data.platformId],
       { ...req.data, dispatchNumber: req.data.dispatchNumber + 1 },
       { scheduleDelaySeconds: nextDispatchDelay }
     );

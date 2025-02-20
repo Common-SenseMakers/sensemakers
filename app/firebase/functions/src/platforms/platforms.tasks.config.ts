@@ -1,10 +1,10 @@
 import { PLATFORM } from '../@shared/types/types.platforms';
-import { TASKS } from '../tasks/types.tasks';
+import { TASK } from '../tasks/types.tasks';
 
 export const FETCH_ACCOUNT_TASKS = {
-  [PLATFORM.Twitter]: TASKS.FETCH_TWITTER_ACCOUNT,
-  [PLATFORM.Mastodon]: TASKS.FETCH_MASTODON_ACCOUNT,
-  [PLATFORM.Bluesky]: TASKS.FETCH_BLUESKY_ACCOUNT,
+  [PLATFORM.Twitter]: TASK.FETCH_TWITTER_ACCOUNT,
+  [PLATFORM.Mastodon]: TASK.FETCH_MASTODON_ACCOUNT,
+  [PLATFORM.Bluesky]: TASK.FETCH_BLUESKY_ACCOUNT,
 };
 
 export const FETCH_TASK_DISPATCH_RATES = {
