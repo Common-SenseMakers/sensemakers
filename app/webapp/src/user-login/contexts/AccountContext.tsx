@@ -11,6 +11,7 @@ import {
   useState,
 } from 'react';
 
+import { POSTHOG_EVENTS } from '../../analytics/posthog.events';
 import { _appFetch } from '../../api/app.fetch';
 import { NotificationFreq } from '../../shared/types/types.notifications';
 import { OrcidProfile } from '../../shared/types/types.orcid';
@@ -126,8 +127,10 @@ export const AccountContext = (props: PropsWithChildren) => {
   const { isSignedIn } = useUser();
   const { getToken, signOut } = useAuth();
   const { openSignIn } = useClerk();
+  const posthog = usePostHog();
 
   const signIn = () => {
+    posthog?.capture(POSTHOG_EVENTS.CLICKED_SIGN_IN);
     openSignIn();
   };
 
@@ -159,7 +162,6 @@ export const AccountContext = (props: PropsWithChildren) => {
     );
 
   const [, setHideShareInfo] = usePersist<boolean>(HIDE_SHARE_INFO, false);
-  const posthog = usePostHog();
   const identifiedRef = useRef(false);
 
   const refresh = useCallback(async () => {
