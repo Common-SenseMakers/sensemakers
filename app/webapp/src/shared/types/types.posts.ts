@@ -196,10 +196,6 @@ export interface PostsQuery extends PostsQueryParams {
   clusterId?: string;
 }
 
-export type PostsQueryDefined = Omit<PostsQuery, 'fetchParams'> & {
-  fetchParams: FetchParams;
-};
-
 export interface ProfilePostsQuery {
   platformId: PLATFORM;
   username: string;

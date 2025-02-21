@@ -8,7 +8,7 @@ import {
   AppPostCreate,
   AppPostParsedStatus,
   PostUpdate,
-  PostsQueryDefined,
+  PostsQuery,
 } from '../@shared/types/types.posts';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance, Query } from '../db/instance';
@@ -112,7 +112,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
   /** checks if this query should use a subcollection and set up the query object on the best collection */
   private getBaseQuery = (
-    queryParams: PostsQueryDefined,
+    queryParams: PostsQuery,
     cluster: ClusterInstance
   ) => {
     if (queryParams.semantics?.ref) {
@@ -136,10 +136,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   };
 
   /** Cannot be part of a transaction */
-  public async getMany(
-    queryParams: PostsQueryDefined,
-    cluster: ClusterInstance
-  ) {
+  public async getMany(queryParams: PostsQuery, cluster: ClusterInstance) {
     /** type protection against properties renaming */
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
@@ -226,7 +223,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   }
 
   public async getAllOfQuery(
-    queryParams: PostsQueryDefined,
+    queryParams: PostsQuery,
     cluster: ClusterInstance,
     limit?: number
   ) {

@@ -73,7 +73,7 @@ export const UserPostsContext: React.FC<{
     if (nProfilesPrev.current !== nProfiles) {
       /** force refetch */
       console.log('-------- PROFILE ADDED ------');
-      feed.fetchOlder();
+      feed.fetchDown();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nProfiles]);

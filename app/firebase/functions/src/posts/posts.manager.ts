@@ -33,7 +33,6 @@ import {
   IndexedPost,
   PostUpdate,
   PostsQuery,
-  PostsQueryDefined,
 } from '../@shared/types/types.posts';
 import { FetchedDetails } from '../@shared/types/types.profiles';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
@@ -623,7 +622,7 @@ export class PostsManager {
    * from any platform
    * */
   private async fetchIfNecessary(
-    queryParams: PostsQueryDefined,
+    queryParams: PostsQuery,
     cluster: ClusterInstance
   ): Promise<{
     posts: AppPost[];
@@ -694,7 +693,7 @@ export class PostsManager {
 
   /** get AppPost and fetch for new posts if necessary */
   private async getAndFetchIfNecessary(
-    queryParams: PostsQueryDefined,
+    queryParams: PostsQuery,
     cluster: ClusterInstance
   ) {
     if (!queryParams.userId) {
@@ -748,13 +747,7 @@ export class PostsManager {
       addMirrors,
     };
 
-    const queryParams: PostsQueryDefined = {
-      fetchParams: {
-        ..._queryParams.fetchParams,
-        expectedAmount: _queryParams.fetchParams?.expectedAmount || 10,
-      },
-      ..._queryParams,
-    };
+    const queryParams = _queryParams;
 
     const cluster = this.clusters.getInstance(queryParams.clusterId);
     const appPosts = await this.getAndFetchIfNecessary(queryParams, cluster);
