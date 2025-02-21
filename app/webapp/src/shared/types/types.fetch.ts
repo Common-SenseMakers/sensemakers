@@ -7,6 +7,11 @@ export interface HandleSignupResult {
   replaceLegacy?: { existingUserId: string; newUserId: string };
 }
 
+export interface PeriodRange {
+  start: number;
+  end: number;
+}
+
 /** there are two fetch modes:
  * - sinceId !== undefined: try to return expectedAmount or all posts after this provided sinceId
  * - untilId !== undefined : try to return expectedAmount or all posts before this provided untilId
@@ -16,6 +21,7 @@ export interface FetchParams {
   untilId?: string;
   expectedAmount: number;
   rankByScore?: keyof RankingScores;
+  range?: PeriodRange;
 }
 
 /** ids are in terms of platformPost post_id */

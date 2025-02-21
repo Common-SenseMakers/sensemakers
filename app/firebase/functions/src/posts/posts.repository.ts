@@ -2,6 +2,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
 import { ClusterInstance } from '../@shared/types/types.clusters';
+import { PeriodRange } from '../@shared/types/types.fetch';
 import { ArrayIncludeQuery, RankingScores } from '../@shared/types/types.posts';
 import {
   AppPost,
@@ -79,6 +80,14 @@ export const filterByArrayContainsAny = (
   }
 
   return query;
+};
+
+export const filterByRange = (_base: Query, range?: PeriodRange) => {
+  if (!range) return _base;
+
+  return _base
+    .where(CREATED_AT_KEY, '>=', range.start)
+    .where(CREATED_AT_KEY, '<', range.end);
 };
 
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
@@ -164,55 +173,71 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.topic
     );
 
+    query = filterByRange(query, queryParams.fetchParams.range);
+
     const fetchParams = queryParams.fetchParams;
 
-    /** get the page details */
-    const startAfter = await (async (): Promise<{
-      value?: number;
-      orderedKey: string;
+    interface StartAfter {
       direction: 'asc' | 'desc';
-    }> => {
+      rankByScore?: string;
+      scoreValue?: number;
+      createdAtValue?: number;
+    }
+
+    /** get the pagination page details */
+    const startAfter = await (async (): Promise<StartAfter> => {
       const pageId = fetchParams.untilId || fetchParams.sinceId;
-      const orderedKey = fetchParams.rankByScore
-        ? `${SCORE_KEY}.${queryParams.fetchParams.rankByScore}`
-        : CREATED_AT_KEY;
 
       if (pageId) {
         const post = await this.db.run(async (manager) => {
           return this.get(pageId as string, manager, true);
         });
 
-        const value = pageId
-          ? fetchParams.rankByScore
+        const scoreValue =
+          pageId && fetchParams.rankByScore
             ? (post.scores as RankingScores)[fetchParams.rankByScore]
-            : post.createdAtMs
-          : undefined;
+            : undefined;
 
         return {
-          value,
-          orderedKey,
+          scoreValue,
+          createdAtValue: post.createdAtMs,
+          rankByScore: fetchParams.rankByScore,
           direction: fetchParams.untilId ? 'desc' : 'asc',
         };
       }
 
       /** if no until or sinceId provided, first page */
       return {
-        orderedKey,
         direction: 'desc',
+        rankByScore: fetchParams.rankByScore,
       };
     })();
 
     const paginated = await (async (_base: Query) => {
-      const ordered = _base
-        .orderBy(startAfter.orderedKey, startAfter.direction)
-        .orderBy('__name__', 'desc'); // Secondary sort by document ID
+      let preordered = _base;
 
-      if (startAfter.value) {
-        return ordered.startAfter(startAfter.value);
+      if (startAfter.rankByScore) {
+        preordered = _base.orderBy(
+          `${SCORE_KEY}.${startAfter.rankByScore}`,
+          startAfter.direction
+        );
+      }
+
+      const ordered = preordered.orderBy(CREATED_AT_KEY, startAfter.direction);
+
+      if (startAfter.rankByScore && startAfter.scoreValue) {
+        return ordered.startAfter(
+          startAfter.scoreValue,
+          startAfter.createdAtValue
+        );
+      }
+
+      if (startAfter.createdAtValue) {
+        return ordered.startAfter(startAfter.createdAtValue);
       }
 
       return ordered;
-    })(baseQuery);
+    })(query);
 
     const postsIds = await paginated
       .limit(queryParams.fetchParams.expectedAmount)

@@ -27,6 +27,7 @@ import { AbsoluteRoutes } from '../route.names';
 import { PostClickEvent } from '../semantics/patterns/patterns';
 import { PeriodSize } from '../shared/types/types.posts';
 import { TabQuery, feedTabs } from '../shared/utils/feed.config';
+import { getPeriodRange } from '../shared/utils/period.helpers';
 
 const DEBUG = false;
 
@@ -34,6 +35,11 @@ const getFeedConfig = (
   tabQuery: TabQuery,
   DEBUG_PREFIX: string
 ): FetcherConfig => {
+  const range =
+    tabQuery.shift !== undefined && tabQuery.periodSize !== undefined
+      ? getPeriodRange(Date.now(), tabQuery.shift, tabQuery.periodSize)
+      : undefined;
+
   return {
     endpoint: '/api/feed/get',
     queryParams: {
@@ -46,6 +52,7 @@ const getFeedConfig = (
       fetchParams: {
         expectedAmount: PAGE_SIZE,
         rankByScore: 'score1',
+        range,
       },
     },
     DEBUG_PREFIX,

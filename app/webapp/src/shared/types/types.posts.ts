@@ -177,18 +177,12 @@ export enum PeriodSize {
   Month = 'month',
 }
 
-export interface PeriodRange {
-  start: number;
-  end: number;
-}
-
 export interface PostsQueryParams {
   userId?: string;
   profileId?: string;
   origins?: ArrayIncludeQuery;
   semantics?: StructuredSemanticsQuery;
   hydrateConfig?: HydrateConfig;
-  range?: PeriodRange;
 }
 
 export interface PostsQuery extends PostsQueryParams {
