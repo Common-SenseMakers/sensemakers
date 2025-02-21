@@ -90,15 +90,17 @@ export const syncPostMetricsTask = async (
     logger.debug(
       `syncPostMetricsTask for platform ${req.data.platformId}`,
       {
-        postsCount: req.data.posts.length,
+        postIdsCount: req.data.posts.length,
         dispatchNumber: req.data.dispatchNumber,
       },
       DEBUG_PREFIX
     );
   }
+
   await services.db.run(async (manager) => {
-    services.postsManager.updatePostMetrics(req.data.posts, manager);
+    await services.postsManager.fetchAndUpdatePostsMetrics(req.data.posts);
   });
+
   const nextDispatchDelay = calculateDispatchDelay(
     req.data.platformId,
     req.data.dispatchNumber

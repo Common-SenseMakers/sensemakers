@@ -11,6 +11,7 @@ import {
   MastodonThread,
 } from '../../@shared/types/types.mastodon';
 import {
+  EngagementMetrics,
   FetchedResult,
   PlatformPost,
   PlatformPostCreate,
@@ -25,7 +26,6 @@ import {
   PlatformSessionRefreshError,
 } from '../../@shared/types/types.platforms';
 import {
-  EngagementMetrics,
   GenericAuthor,
   GenericPost,
   GenericThread,
@@ -52,6 +52,7 @@ import { PlatformService, WithCredentials } from '../platforms.interface';
 import {
   cleanMastodonContent,
   convertMastodonPostsToThreads,
+  extractPostMetrics,
   extractPrimaryThread,
 } from './mastodon.utils';
 
@@ -336,6 +337,7 @@ export class MastodonService
             ...thread,
             thread_id: rootPostId,
           },
+          metrics: extractPostMetrics(thread.posts[0]),
         };
       })
     );
@@ -370,12 +372,7 @@ export class MastodonService
     }
 
     const thread = platformPost.posted.post;
-    const rootPost = thread.posts[0];
-    const engagementMetrics: EngagementMetrics = {
-      likes: rootPost.favouritesCount,
-      reposts: rootPost.reblogsCount,
-      replies: rootPost.repliesCount,
-    };
+
     const { globalUsername } = parseMastodonAccountURI(thread.author.url);
     const genericAuthor: GenericAuthor = {
       platformId: PLATFORM.Mastodon,
@@ -416,7 +413,6 @@ export class MastodonService
     return {
       author: genericAuthor,
       thread: genericPosts,
-      metrics: engagementMetrics,
     };
   }
 
@@ -491,40 +487,36 @@ export class MastodonService
       user_id: parseMastodonAccountURI(thread.author.url).globalUsername,
       timestampMs: new Date(thread.posts[0].createdAt).getTime(),
       post: thread,
+      metrics: extractPostMetrics(thread.posts[0]),
     };
 
     return { platformPost };
   }
-  async getPostMetrics(
+
+  async getPostsMetrics(
     post_ids: string[],
     credentials?: AccountCredentials
-  ): Promise<
-    { engagementMetrics?: Record<string, EngagementMetrics> } & WithCredentials
-  > {
-    const postMetricsPromises = post_ids.map(async (post_id) => {
-      const platformPost = await this.getSinglePost(post_id);
-      const rootPost = platformPost.platformPost.post.posts[0];
-      const engagementMetrics: EngagementMetrics = {
-        likes: rootPost.favouritesCount,
-        reposts: rootPost.reblogsCount,
-        replies: rootPost.repliesCount,
-      };
-      return {
-        post_id,
-        engagementMetrics,
-      };
-    });
+  ): Promise<{ metrics: Record<string, EngagementMetrics> } & WithCredentials> {
+    const postMetrics = await Promise.all(
+      post_ids.map(async (post_id) => {
+        const platformPost = await this.getSinglePost(post_id);
+        const rootPost = platformPost.platformPost.post.posts[0];
+        const metrics = extractPostMetrics(rootPost);
+        return {
+          post_id,
+          metrics,
+        };
+      })
+    );
 
-    const postMetricsResults = await Promise.all(postMetricsPromises);
+    const allMetrics: Record<string, EngagementMetrics> = {};
 
-    const engagementMetrics: Record<string, EngagementMetrics> = {};
-
-    postMetricsResults.forEach(({ post_id, engagementMetrics: metrics }) => {
-      engagementMetrics[post_id] = metrics;
+    postMetrics.forEach(({ post_id, metrics }) => {
+      allMetrics[post_id] = metrics;
     });
 
     return {
-      engagementMetrics,
+      metrics: allMetrics,
     };
   }
 

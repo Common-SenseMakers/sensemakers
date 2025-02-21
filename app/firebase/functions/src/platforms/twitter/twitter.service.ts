@@ -1,5 +1,6 @@
 import fs from 'fs';
 import {
+  TweetV2,
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
   Tweetv2SearchParams,
@@ -12,6 +13,7 @@ import {
   PlatformFetchParams,
 } from '../../@shared/types/types.fetch';
 import {
+  EngagementMetrics,
   FetchedResult,
   PlatformPost,
   PlatformPostCreate,
@@ -31,7 +33,6 @@ import {
 import '../../@shared/types/types.posts';
 import {
   AppPostFull,
-  EngagementMetrics,
   GenericAuthor,
   GenericPost,
   GenericThread,
@@ -156,40 +157,25 @@ export class TwitterService
     }
   }
 
-  async getPostMetrics(
+  async getPostsMetrics(
     post_ids: string[],
     credentials?: AccountCredentials
-  ): Promise<
-    { engagementMetrics?: Record<string, EngagementMetrics> } & WithCredentials
-  > {
+  ): Promise<{ metrics: Record<string, EngagementMetrics> } & WithCredentials> {
     const { tweets, newCredentials } = await this.getPosts(
       post_ids,
       credentials?.read
     );
 
-    const engagementMetricsArray: [string, EngagementMetrics][] = tweets.map(
-      (post) => {
-        return [
-          post.id,
-          {
-            likes: post.public_metrics?.like_count || 0,
-            reposts: post.public_metrics?.retweet_count || 0,
-            replies: post.public_metrics?.reply_count || 0,
-            quotes: post.public_metrics?.quote_count,
-          },
-        ];
-      }
-    );
-    const engagementMetrics: Record<string, EngagementMetrics> =
-      engagementMetricsArray.reduce(
-        (acc, [key, value]) => {
-          acc[key] = value;
-          return acc;
-        },
-        {} as Record<string, EngagementMetrics>
-      );
+    const allMetrics: Record<string, EngagementMetrics> = {};
 
-    return { engagementMetrics, credentials: { read: newCredentials } };
+    tweets.forEach((post) => {
+      const metrics = this.extractPostMetrics(post);
+      if (metrics) {
+        allMetrics[post.id] = metrics;
+      }
+    });
+
+    return { metrics: allMetrics, credentials: { read: newCredentials } };
   }
 
   async getThread(
@@ -473,6 +459,17 @@ export class TwitterService
     }
   }
 
+  private extractPostMetrics(tweet: TweetV2): EngagementMetrics | undefined {
+    return (
+      tweet.public_metrics && {
+        reposts: tweet.public_metrics.retweet_count,
+        replies: tweet.public_metrics.reply_count,
+        likes: tweet.public_metrics.like_count,
+        quotes: tweet.public_metrics.quote_count,
+      }
+    );
+  }
+
   public async fetch(
     user_id: string,
     params: FetchParams,
@@ -501,6 +498,7 @@ export class TwitterService
         timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
         post: thread,
         author: thread.author,
+        metrics: this.extractPostMetrics(thread.tweets[0]),
       };
     });
 
@@ -535,14 +533,6 @@ export class TwitterService
     }
 
     const twitterThread = platformPost.posted.post;
-
-    const publicMetrics = twitterThread.tweets[0].public_metrics;
-    const engagementMetrics = publicMetrics && {
-      likes: publicMetrics.like_count,
-      reposts: publicMetrics.retweet_count,
-      replies: publicMetrics.reply_count,
-      quotes: publicMetrics.quote_count,
-    };
 
     const genericAuthor: GenericAuthor = {
       id: twitterThread.author.id,
@@ -583,7 +573,6 @@ export class TwitterService
     return {
       author: genericAuthor,
       thread: genericThread,
-      metrics: engagementMetrics,
     };
   }
 

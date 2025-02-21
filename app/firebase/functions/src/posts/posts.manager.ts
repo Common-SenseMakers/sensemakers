@@ -10,6 +10,7 @@ import {
   TopicsParams,
 } from '../@shared/types/types.parser';
 import {
+  EngagementMetrics,
   PlatformPost,
   PlatformPostCreate,
   PlatformPostCreated,
@@ -28,11 +29,11 @@ import {
   AppPost,
   AppPostParsedStatus,
   AppPostParsingStatus,
-  GenericThread,
   HydrateConfig,
   IndexedPost,
   PostUpdate,
   PostsQuery,
+  UpdatedKeywords,
 } from '../@shared/types/types.posts';
 import { FetchedDetails } from '../@shared/types/types.profiles';
 import { AccountCredentials, AppUser } from '../@shared/types/types.user';
@@ -175,8 +176,26 @@ export class PostsManager {
     }
   }
 
-  async updatePostMetrics(posts: AppPost[], manager: TransactionManager) {
+  async fetchAndUpdatePostsMetrics(posts: AppPost[]) {
+    const metrics = await this.fetchPostsMetrics(posts);
+    await this.db.run(async (manager) => {
+      for (const postMetrics of Object.entries(metrics)) {
+        const [postId, metrics] = postMetrics;
+        this.updatePost(postId, { generic: metrics });
+      }
+    });
+  }
+
+  /**
+   * Split an array of posts by platforms, get the metrics for all posts of one platform in a batch
+   * and returns an updated map of posts with their new
+   */
+  async fetchPostsMetrics(
+    posts: AppPost[]
+  ): Promise<Record<string, EngagementMetrics>> {
     const postsByPlatform = new Map<PLATFORM, AppPost[]>();
+    const postsMetrics: Record<string, EngagementMetrics> = {};
+
     posts.forEach((post) => {
       const platformId = post.origin;
       const posts = postsByPlatform.get(platformId) || [];
@@ -187,46 +206,54 @@ export class PostsManager {
     for (const platformAndPosts of postsByPlatform.entries()) {
       const [platformId, posts] = platformAndPosts;
       const platformPostDocIds = posts.map((post) => post.mirrorsIds[0]);
+
       const platformPosts =
         await this.processing.platformPosts.getFromIds(platformPostDocIds);
+
       const platformPostIds = platformPosts
         .map((post) => post.post_id)
         .filter((postId) => postId !== undefined);
-      const postsWithIds: [string, string, AppPost][] = posts.map((post) => {
+
+      interface PostWithIds {
+        post_id: string;
+        post: AppPost;
+      }
+
+      /** keep the links between the AppPost and the post_id */
+      const postsWithIds: PostWithIds[] = posts.map((post) => {
         const post_id = platformPosts.find(
           (platformPost) => platformPost.id === post.mirrorsIds[0]
         )?.post_id;
+
         if (!post_id) {
           throw new Error(
             `could not find platformPost with mirror id ${post.mirrorsIds[0]}`
           );
         }
-        return [post.id, post_id, post];
-      });
-      const platformService = this.platforms.get(platformId);
-      const { metrics: engagementMetrics } =
-        await platformService.getPostMetrics(platformPostIds);
-      if (!engagementMetrics) {
-        return;
-      }
 
-      for (const postMetrics of Object.entries(engagementMetrics)) {
+        return { post_id, post };
+      });
+
+      const platformService = this.platforms.get(platformId);
+      const { metrics } =
+        await platformService.getPostsMetrics(platformPostIds);
+
+      for (const postMetrics of Object.entries(metrics)) {
         const [platformPostId, metrics] = postMetrics;
         const postWithIds = postsWithIds.find(
-          (postWithIds) => postWithIds[1] === platformPostId
+          (postWithIds) => postWithIds.post_id === platformPostId
         );
+
         if (!postWithIds) {
-          return;
+          throw new Error('Unexpected');
         }
-        const [postId, , post] = postWithIds;
-        const newGeneric: GenericThread = {
-          ...post.generic,
-          metrics: metrics,
-        };
-        // TODO: also update platform post
-        await this.updatePost(postId, { generic: newGeneric }, manager);
+
+        const { post } = postWithIds;
+        postsMetrics[post.id] = metrics;
       }
     }
+
+    return postsMetrics;
   }
 
   private async getPlatformPostTimestamp(
@@ -1053,40 +1080,37 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
 
-    if (postUpdate.semantics || postUpdate.generic?.metrics) {
+    if (postUpdate.semantics || postUpdate.generic) {
       const post = await this.processing.posts.get(postId, manager, true);
-      let indexedPost: IndexedPost = {
+
+      const indexedPost: IndexedPost = {
         id: postId,
         authorProfileId: post.authorProfileId,
         origin: post.origin,
         createdAtMs: post.createdAtMs,
+        structuredSemantics: post.structuredSemantics,
+        scores: post.scores,
       };
-      let updatedKeywords: { new: string[]; removed: string[] } | undefined;
+
+      let updatedKeywords: UpdatedKeywords | undefined = undefined;
 
       /** handle side-effects related to semantics when the post is updated */
       if (postUpdate.semantics) {
         const processedSemantics = await this.processing.processSemantics(
           postId,
           manager,
-          post.semantics
+          postUpdate.semantics
         );
 
-        if (processedSemantics) {
-          indexedPost = {
-            ...indexedPost,
-            ...processedSemantics.indexedPost,
-          };
-          updatedKeywords = processedSemantics.updatedKeywords;
-        }
+        indexedPost.structuredSemantics =
+          processedSemantics?.structuredSemantics;
+        updatedKeywords = processedSemantics.updatedKeywords;
       }
 
       /** handle side-effects related to the rank scoring */
-      if (postUpdate.generic?.metrics) {
+      if (postUpdate.generic) {
         const scores = this.processing.computeScores(post);
-        indexedPost = {
-          ...indexedPost,
-          scores,
-        };
+        indexedPost.scores = scores;
       }
 
       await this.processing.syncPostInClusters(

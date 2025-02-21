@@ -15,6 +15,7 @@ import {
   AppPostParsingStatus,
   HydrateConfig,
   IndexedPost,
+  ProcessedSemantics,
   RankingScores,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
@@ -89,7 +90,7 @@ export class PostsProcessing {
     }
 
     /** if the root doesn't exist, create the thread */
-    return await this.createPlatformPost(platformPost, manager, authorUserId);
+    return this.createPlatformPost(platformPost, manager, authorUserId);
   }
   async createPlatformPost(
     platformPost: PlatformPostCreate,
@@ -134,19 +135,6 @@ export class PostsProcessing {
       },
       manager
     );
-
-    /** compute score and sync with clusters */
-    const scores = this.computeScores(post);
-    if (scores) {
-      const indexedPost: IndexedPost = {
-        id: post.id,
-        authorProfileId: post.authorProfileId,
-        origin: post.origin,
-        createdAtMs: post.createdAtMs,
-        scores,
-      };
-      await this.syncPostInClusters('add', post.id, manager, indexedPost);
-    }
 
     /** set the postId of the platformPost */
     this.platformPosts.setPostId(platformPostCreated.id, post.id, manager);
@@ -213,7 +201,7 @@ export class PostsProcessing {
   ) {
     const postsCreated = await Promise.all(
       platformPosts.map(async (platformPost) => {
-        return await this.createOrMergePlatformPost(
+        return this.createOrMergePlatformPost(
           platformPost,
           manager,
           authorUserId
@@ -239,16 +227,8 @@ export class PostsProcessing {
   async processSemantics(
     postId: string,
     manager: TransactionManager,
-    semantics?: string
-  ): Promise<
-    | {
-        indexedPost: IndexedPost;
-        updatedKeywords: { new: string[]; removed: string[] };
-      }
-    | undefined
-  > {
-    if (!semantics) return undefined;
-
+    semantics: string
+  ): Promise<ProcessedSemantics> {
     const post = await this.posts.get(postId, manager, true);
     const originalStructuredSemantics = post.structuredSemantics;
     const store = await parseRDF(semantics);
@@ -283,16 +263,6 @@ export class PostsProcessing {
       refs: Object.keys(refsMeta),
     };
 
-    /** Indexed post */
-    const postData: IndexedPost = {
-      id: post.id,
-      authorProfileId: post.authorProfileId,
-      createdAtMs: post.createdAtMs,
-      structuredSemantics,
-      origin: post.origin,
-      authorUserId: post.authorUserId,
-    };
-
     // Detect deleted keywords
     const deletedKeywords = originalStructuredSemantics?.keywords
       ? originalStructuredSemantics?.keywords.filter(
@@ -301,7 +271,7 @@ export class PostsProcessing {
       : [];
 
     return {
-      indexedPost: postData,
+      structuredSemantics,
       updatedKeywords: {
         new: structuredSemantics.keywords || [],
         removed: deletedKeywords,
@@ -343,8 +313,8 @@ export class PostsProcessing {
     );
   }
 
-  computeScores(post: AppPost): RankingScores | undefined {
-    const metrics = post.generic.metrics;
+  computeScores(post: AppPostFull): RankingScores | undefined {
+    const metrics = post.metrics;
     if (!metrics) {
       return undefined;
     }
