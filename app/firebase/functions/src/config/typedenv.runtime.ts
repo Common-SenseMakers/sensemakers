@@ -32,6 +32,8 @@ const USE_REAL_BLUESKY = defineBoolean('USE_REAL_BLUESKY');
 const USE_REAL_NANOPUB = defineBoolean('USE_REAL_NANOPUB');
 const USE_REAL_EMAIL = defineBoolean('USE_REAL_EMAIL');
 const USE_REAL_LINKS = defineBoolean('USE_REAL_LINKS');
+const USE_REAL_TASKS = defineBoolean('USE_REAL_TASKS');
+
 const TEST_USER_ACCOUNTS = defineString('TEST_USER_ACCOUNTS');
 
 const LOG_LEVEL_MSG = defineString('LOG_LEVEL_MSG');
@@ -81,4 +83,5 @@ export const envRuntime = {
   ADMIN_API_KEY: ADMIN_API_KEY,
   IFRAMELY_API_KEY: IFRAMELY_API_KEY,
   USE_REAL_LINKS: USE_REAL_LINKS,
+  USE_REAL_TASKS: USE_REAL_TASKS,
 };

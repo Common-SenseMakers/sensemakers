@@ -44,6 +44,8 @@ import {
 } from './tasks/tasks.handlers';
 import { PLATFORM_TASKS, TASK } from './tasks/types.tasks';
 
+const DEBUG = true;
+
 /** Registed the API as an HTTP triggered function */
 exports['api'] = functions
   .region(region)
@@ -144,6 +146,7 @@ exports.postCreateListener = onDocumentCreated(
     secrets,
   },
   async (event) => {
+    if (DEBUG) logger.debug(`postCreateListener ${event.params.postId}`);
     const created = getCreatedOnCreate<AppPost>(event, 'postId');
     await postUpdatedHook(created, createServices(firestore, getConfig()));
   }
