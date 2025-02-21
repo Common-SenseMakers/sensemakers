@@ -192,7 +192,7 @@ export interface PostsQueryParams {
 }
 
 export interface PostsQuery extends PostsQueryParams {
-  fetchParams?: FetchParams;
+  fetchParams: FetchParams;
   clusterId?: string;
 }
 

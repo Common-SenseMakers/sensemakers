@@ -3,12 +3,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { FetchParams } from '../shared/types/types.fetch';
 import { AppPostFull, PostsQuery } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { arraysEqual } from '../utils/general';
 
 const DEBUG = false;
+
+export const PAGE_SIZE = 5;
 
 export interface PostFetcherInterface {
   feedNameDebug: string;
@@ -34,7 +35,6 @@ export interface FetcherConfig {
   queryParams: PostsQuery;
   subscribe?: boolean;
   onPostsAdded?: (posts: AppPostFull[]) => void;
-  PAGE_SIZE?: number;
   DEBUG_PREFIX?: string;
 }
 
@@ -45,11 +45,9 @@ export interface FetcherConfig {
 export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const { connectedUser, connectedPlatforms } = useAccountContext();
 
-  const { endpoint, queryParams, onPostsAdded, PAGE_SIZE: _PAGE_SIZE } = input;
+  const { endpoint, queryParams, onPostsAdded } = input;
 
   const DEBUG_PREFIX = input.DEBUG_PREFIX || '';
-
-  const PAGE_SIZE = _PAGE_SIZE || 5;
 
   const appFetch = useAppFetch();
 
@@ -209,11 +207,12 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
       try {
         const params: PostsQuery = {
+          ...queryParams,
           fetchParams: {
+            ...queryParams.fetchParams,
             expectedAmount: PAGE_SIZE,
             untilId: oldestPostId,
           },
-          ...queryParams,
         };
         if (DEBUG) console.log(`${DEBUG_PREFIX}fetching for older`, params);
         const readPosts = await appFetch<AppPostFull[], PostsQuery>(
@@ -225,9 +224,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
           console.log(`${DEBUG_PREFIX}fetching for older retrieved`, readPosts);
         addPosts(readPosts, 'end');
         setIsLoading(false);
-        if (
-          readPosts.length < (params.fetchParams as FetchParams).expectedAmount
-        ) {
+        if (readPosts.length < params.fetchParams.expectedAmount) {
           setMoreToFetch(false);
         } else {
           setMoreToFetch(true);

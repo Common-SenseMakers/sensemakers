@@ -23,7 +23,6 @@ export class FeedService {
       fetchParams: {
         ...params.fetchParams,
         expectedAmount: params.fetchParams?.expectedAmount || 10,
-        rankByScore: 'score1',
       },
     };
 

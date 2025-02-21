@@ -19,6 +19,7 @@ import {
 import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
 import {
   FetcherConfig,
+  PAGE_SIZE,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { ClusterProfiles } from '../profiles/ClusterProfiles';
@@ -42,6 +43,10 @@ const getFeedConfig = (
         tabQuery.clusterId !== ALL_CLUSTER_NAME
           ? tabQuery.clusterId
           : undefined,
+      fetchParams: {
+        expectedAmount: PAGE_SIZE,
+        rankByScore: 'score1',
+      },
     },
     DEBUG_PREFIX,
   };

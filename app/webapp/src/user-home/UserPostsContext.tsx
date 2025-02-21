@@ -10,6 +10,7 @@ import { createContext } from 'react';
 import { useAppFetch } from '../api/app.fetch';
 import {
   FetcherConfig,
+  PAGE_SIZE,
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
@@ -87,7 +88,14 @@ export const UserPostsContext: React.FC<{
     queryParams: PostsQuery;
     status: PostsQueryStatus;
   } => {
-    return { queryParams: {}, status: PostsQueryStatus.ALL };
+    return {
+      queryParams: {
+        fetchParams: {
+          expectedAmount: PAGE_SIZE,
+        },
+      },
+      status: PostsQueryStatus.ALL,
+    };
   }, []);
 
   const onPostsAdded = useCallback((newPosts: AppPostFull[]) => {

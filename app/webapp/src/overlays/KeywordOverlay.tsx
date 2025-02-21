@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
+  PAGE_SIZE,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
@@ -23,6 +24,10 @@ export const KeywordOverlay = (props: { keyword: string }) => {
       queryParams: {
         semantics: { keyword: keyword, topic: SCIENCE_TOPIC_URI },
         hydrateConfig: { addAggregatedLabels: false },
+        fetchParams: {
+          expectedAmount: PAGE_SIZE,
+          rankByScore: 'score1',
+        },
       },
       DEBUG_PREFIX: 'REF FEED',
     };

@@ -7,6 +7,7 @@ import { OverlayContext } from '../overlays/OverlayContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
+  PAGE_SIZE,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { AccountProfileHeader } from '../profiles/AccountProfileHeader';
@@ -92,6 +93,10 @@ export const UserProfileOverlay = (props: {
         profileId: userId !== undefined ? undefined : profileId,
         semantics: { topic: SCIENCE_TOPIC_URI },
         hydrateConfig: { addAggregatedLabels: true },
+        fetchParams: {
+          rankByScore: 'score1',
+          expectedAmount: PAGE_SIZE,
+        },
       },
       DEBUG_PREFIX: 'REF FEED',
     };
