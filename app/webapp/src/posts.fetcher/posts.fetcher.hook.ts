@@ -178,13 +178,10 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     setIsLoading(true);
   };
 
-  const _oldestPostId = useMemo(() => {
-    const oldest = posts ? posts[posts.length - 1]?.id : undefined;
-    if (DEBUG)
-      console.log(
-        `${DEBUG_PREFIX}recomputing oldest _oldestPostId ${oldest || ''}`
-      );
-    return oldest;
+  const _bottomPostId = useMemo(() => {
+    const bottom = posts ? posts[posts.length - 1]?.id : undefined;
+    if (DEBUG) console.log(`${DEBUG_PREFIX}recomputing bottom ${bottom || ''}`);
+    return bottom;
   }, [DEBUG_PREFIX, posts]);
 
   /** fetch for more post backwards, receives an optional oldestPostId and is updated when the queryParameters change */
@@ -254,10 +251,10 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
   /** public function to trigger fetching for older posts since the current oldest one */
   const fetchDown = useCallback(() => {
-    if (DEBUG) console.log(`${DEBUG_PREFIX}external fetchDown`, _oldestPostId);
-    _fetchDown(_oldestPostId);
+    if (DEBUG) console.log(`${DEBUG_PREFIX}external fetchDown`, _bottomPostId);
+    _fetchDown(_bottomPostId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_oldestPostId]);
+  }, [_bottomPostId]);
 
   /** reset at every status change  */
   useEffect(() => {
@@ -302,7 +299,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         const params: PostsQuery = {
           ...queryParams,
           fetchParams: {
-            expectedAmount: PAGE_SIZE,
+            ...queryParams.fetchParams,
             sinceId: _topPostId,
           },
         };

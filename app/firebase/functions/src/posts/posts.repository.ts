@@ -2,7 +2,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
 import { ClusterInstance } from '../@shared/types/types.clusters';
-import { ArrayIncludeQuery } from '../@shared/types/types.posts';
+import { ArrayIncludeQuery, RankingScores } from '../@shared/types/types.posts';
 import {
   AppPost,
   AppPostCreate,
@@ -164,48 +164,55 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.topic
     );
 
-    /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
-    const { sinceCreatedAt, untilCreatedAt } = await (async () => {
-      return this.db.run(async (manager) => {
-        let sinceCreatedAt: number | undefined;
-        let untilCreatedAt: number | undefined;
+    const fetchParams = queryParams.fetchParams;
 
-        if (queryParams.fetchParams.sinceId) {
-          const since = await this.get(
-            queryParams.fetchParams.sinceId,
-            manager
-          );
-          sinceCreatedAt = since ? since.createdAtMs : undefined;
-        }
+    /** get the page details */
+    const startAfter = await (async (): Promise<{
+      value?: number;
+      orderedKey: string;
+      direction: 'asc' | 'desc';
+    }> => {
+      const pageId = fetchParams.untilId || fetchParams.sinceId;
+      const orderedKey = fetchParams.rankByScore
+        ? `${SCORE_KEY}.${queryParams.fetchParams.rankByScore}`
+        : CREATED_AT_KEY;
 
-        if (queryParams.fetchParams.untilId) {
-          const until = await this.get(
-            queryParams.fetchParams.untilId,
-            manager
-          );
-          untilCreatedAt = until ? until.createdAtMs : undefined;
-        }
+      if (pageId) {
+        const post = await this.db.run(async (manager) => {
+          return this.get(pageId as string, manager, true);
+        });
 
-        return { sinceCreatedAt, untilCreatedAt };
-      });
+        const value = pageId
+          ? fetchParams.rankByScore
+            ? (post.scores as RankingScores)[fetchParams.rankByScore]
+            : post.createdAtMs
+          : undefined;
+
+        return {
+          value,
+          orderedKey,
+          direction: fetchParams.untilId ? 'desc' : 'asc',
+        };
+      }
+
+      /** if no until or sinceId provided, first page */
+      return {
+        orderedKey,
+        direction: 'desc',
+      };
     })();
 
-    /** two modes, forward sinceId or backwards untilId  */
     const paginated = await (async (_base: Query) => {
-      if (queryParams.fetchParams.rankByScore) {
-        const ordered = _base.orderBy(
-          `${SCORE_KEY}.${queryParams.fetchParams.rankByScore}`,
-          'desc'
-        );
-        return ordered;
+      const ordered = _base
+        .orderBy(startAfter.orderedKey, startAfter.direction)
+        .orderBy('__name__', 'desc'); // Secondary sort by document ID
+
+      if (startAfter.value) {
+        return ordered.startAfter(startAfter.value);
       }
-      if (sinceCreatedAt) {
-        const ordered = _base.orderBy(CREATED_AT_KEY, 'asc');
-        return ordered.startAfter(sinceCreatedAt);
-      }
-      const ordered = _base.orderBy(CREATED_AT_KEY, 'desc');
-      return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
-    })(query);
+
+      return ordered;
+    })(baseQuery);
 
     const postsIds = await paginated
       .limit(queryParams.fetchParams.expectedAmount)
@@ -216,10 +223,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const docIds = postsIds.docs.map((doc) => doc.id);
     const appPosts = await this.getFromIds(docIds);
 
-    if (queryParams.fetchParams.rankByScore) {
-      return appPosts;
-    }
-    return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
+    return appPosts;
   }
 
   public async getAllOfQuery(
