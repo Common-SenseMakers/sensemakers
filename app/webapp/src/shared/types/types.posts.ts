@@ -1,6 +1,6 @@
 import { FetchParams } from './types.fetch';
 import { AppPostSemantics, ParsePostResult, RefMeta } from './types.parser';
-import { PlatformPost } from './types.platform.posts';
+import { EngagementMetrics, PlatformPost } from './types.platform.posts';
 import { PLATFORM } from './types.platforms';
 import { RefDisplayMeta } from './types.references';
 import { AppUserRead } from './types.user';
@@ -88,6 +88,7 @@ export interface AppPost {
   semantics?: AppPostSemantics;
   mirrorsIds: string[];
   structuredSemantics?: StructuredSemantics; // for indexing purposes. Will be duplicated across subcollections
+  metrics?: EngagementMetrics;
   scores?: RankingScores;
 }
 
@@ -147,6 +148,7 @@ export type PostUpdate = Partial<
     | 'parsingStartedAtMs'
     | 'parsedStatus'
     | 'editStatus'
+    | 'metrics'
   >
 >;
 

@@ -61,6 +61,7 @@ import { ClustersService } from '../clusters/clusters.service';
 import { PARSING_TIMEOUT_MS } from '../config/config.runtime';
 import { processInBatches } from '../db/db.utils';
 import { DBInstance } from '../db/instance';
+import { removeUndefined } from '../db/repo.base';
 import { TransactionManager } from '../db/transaction.manager';
 import { logger } from '../instances/logger';
 import { OntologiesService } from '../ontologies/ontologies.service';
@@ -118,6 +119,7 @@ export class PostsManager {
       publishStatus: PlatformPostPublishStatus.PUBLISHED,
       publishOrigin: PlatformPostPublishOrigin.FETCHED,
       posted: fetchedPost,
+      metrics: fetchedPost.metrics,
     };
 
     return platformPost;
@@ -178,10 +180,11 @@ export class PostsManager {
 
   async fetchAndUpdatePostsMetrics(posts: AppPost[]) {
     const metrics = await this.fetchPostsMetrics(posts);
+
     await this.db.run(async (manager) => {
       for (const postMetrics of Object.entries(metrics)) {
         const [postId, metrics] = postMetrics;
-        this.updatePost(postId, { generic: metrics });
+        this.updatePost(postId, { metrics }, manager);
       }
     });
   }
@@ -545,12 +548,22 @@ export class PostsManager {
       /** make sure the profiles of each post exist */
       const profileIds = new Set<string>();
 
-      /** fetch all unique profiles presets in the platform posts */
-      platformPostsCreated.forEach((posts) => {
-        if (!profileIds.has(posts.post.authorProfileId)) {
-          profileIds.add(posts.post.authorProfileId);
-        }
-      });
+      /** Perform actions en each created post */
+      await Promise.all(
+        platformPostsCreated.map(async (created) => {
+          /** keep track of author profiles to create them later */
+          if (!profileIds.has(created.post.authorProfileId)) {
+            profileIds.add(created.post.authorProfileId);
+          }
+
+          /** update the scores at creating (will also sync in clusters already) */
+          await this.updatePost(
+            created.post.id,
+            { metrics: created.post.metrics },
+            manager
+          );
+        })
+      );
 
       await Promise.all(
         Array.from(profileIds).map((profileId) => {
@@ -1080,7 +1093,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
 
-    if (postUpdate.semantics || postUpdate.generic) {
+    if (postUpdate.semantics || postUpdate.metrics) {
       const post = await this.processing.posts.get(postId, manager, true);
 
       const indexedPost: IndexedPost = {
@@ -1104,11 +1117,12 @@ export class PostsManager {
 
         indexedPost.structuredSemantics =
           processedSemantics?.structuredSemantics;
+
         updatedKeywords = processedSemantics.updatedKeywords;
       }
 
       /** handle side-effects related to the rank scoring */
-      if (postUpdate.generic) {
+      if (postUpdate.metrics) {
         const scores = this.processing.computeScores(post);
         indexedPost.scores = scores;
       }
@@ -1117,18 +1131,9 @@ export class PostsManager {
         'add',
         post.id,
         manager,
-        indexedPost,
+        removeUndefined(indexedPost),
         indexedPost.structuredSemantics?.refs || [],
         updatedKeywords
-      );
-
-      await this.processing.posts.update(
-        postId,
-        {
-          structuredSemantics: indexedPost.structuredSemantics,
-          generic: postUpdate.generic,
-        },
-        manager
       );
     }
   }

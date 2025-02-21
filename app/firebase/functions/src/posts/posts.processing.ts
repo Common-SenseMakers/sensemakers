@@ -132,6 +132,7 @@ export class PostsProcessing {
         mirrorsIds: [platformPostCreated.id],
         createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
         editStatus: AppPostEditStatus.PENDING,
+        metrics: platformPostCreated.metrics,
       },
       manager
     );
@@ -313,7 +314,7 @@ export class PostsProcessing {
     );
   }
 
-  computeScores(post: AppPostFull): RankingScores | undefined {
+  computeScores(post: AppPost): RankingScores | undefined {
     const metrics = post.metrics;
     if (!metrics) {
       return undefined;
