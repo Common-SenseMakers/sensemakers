@@ -99,6 +99,7 @@ export const UserProfileOverlay = (props: {
         },
       },
       DEBUG_PREFIX: 'REF FEED',
+      enabled: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

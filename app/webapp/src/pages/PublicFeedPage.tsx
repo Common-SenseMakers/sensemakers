@@ -49,6 +49,7 @@ const getFeedConfig = (
       },
     },
     DEBUG_PREFIX,
+    enabled: true,
   };
 };
 

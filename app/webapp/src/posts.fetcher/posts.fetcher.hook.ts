@@ -36,6 +36,7 @@ export interface FetcherConfig {
   subscribe?: boolean;
   onPostsAdded?: (posts: AppPostFull[]) => void;
   DEBUG_PREFIX?: string;
+  enabled: boolean;
 }
 
 /**
@@ -45,7 +46,7 @@ export interface FetcherConfig {
 export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const { connectedUser, connectedPlatforms } = useAccountContext();
 
-  const { endpoint, queryParams, onPostsAdded } = input;
+  const { endpoint, queryParams, onPostsAdded, enabled } = input;
 
   const DEBUG_PREFIX = input.DEBUG_PREFIX || '';
 
@@ -268,6 +269,10 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         }
       );
     reset();
+    if (!enabled) {
+      return;
+    }
+
     setIsFetchingDown(true);
     fetchDownCallback(undefined)
       .then(() => {
@@ -278,7 +283,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         setIsFetchingDown(false);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectedUser, queryParams, endpoint]);
+  }, [connectedUser, queryParams, endpoint, enabled]);
 
   const topPostId = useMemo(() => {
     const top = posts ? posts[0]?.id : undefined;
@@ -386,12 +391,15 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
 
   /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
     if (posts && posts.length > 0 && !fetchedUpFirst) {
       if (DEBUG) console.log(`${DEBUG_PREFIX}first fetch newer`);
       _fetchUp(posts[0].id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [posts, fetchedUpFirst, connectedUser, DEBUG_PREFIX]);
+  }, [posts, fetchedUpFirst, connectedUser, DEBUG_PREFIX, enabled]);
 
   /** turn off errors automatically */
   useEffect(() => {

@@ -120,8 +120,9 @@ export const UserPostsContext: React.FC<{
       subscribe: true,
       onPostsAdded,
       DEBUG_PREFIX: '[USER POSTS] ',
+      enabled: connectedUser !== undefined,
     };
-  }, [onPostsAdded, queryParams]);
+  }, [onPostsAdded, queryParams, connectedUser]);
 
   const feed = usePostsFetcher(config);
 
