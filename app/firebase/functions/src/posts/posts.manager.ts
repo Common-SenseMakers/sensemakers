@@ -205,7 +205,7 @@ export class PostsManager {
         return [post.id, post_id, post];
       });
       const platformService = this.platforms.get(platformId);
-      const { engagementMetrics } =
+      const { metrics: engagementMetrics } =
         await platformService.getPostMetrics(platformPostIds);
       if (!engagementMetrics) {
         return;
@@ -222,7 +222,7 @@ export class PostsManager {
         const [postId, , post] = postWithIds;
         const newGeneric: GenericThread = {
           ...post.generic,
-          engagementMetrics: metrics,
+          metrics: metrics,
         };
         // TODO: also update platform post
         await this.updatePost(postId, { generic: newGeneric }, manager);
@@ -1060,7 +1060,7 @@ export class PostsManager {
     if (DEBUG) logger.debug(`updatePost ${postId}`, { postId, postUpdate });
     await this.processing.posts.update(postId, postUpdate, manager);
 
-    if (postUpdate.semantics || postUpdate.generic?.engagementMetrics) {
+    if (postUpdate.semantics || postUpdate.generic?.metrics) {
       const post = await this.processing.posts.get(postId, manager, true);
       let indexedPost: IndexedPost = {
         id: postId,
@@ -1088,7 +1088,7 @@ export class PostsManager {
       }
 
       /** handle side-effects related to the rank scoring */
-      if (postUpdate.generic?.engagementMetrics) {
+      if (postUpdate.generic?.metrics) {
         const scores = this.processing.computeScores(post);
         indexedPost = {
           ...indexedPost,

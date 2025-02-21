@@ -416,7 +416,7 @@ export class MastodonService
     return {
       author: genericAuthor,
       thread: genericPosts,
-      engagementMetrics,
+      metrics: engagementMetrics,
     };
   }
 

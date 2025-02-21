@@ -30,7 +30,7 @@ export interface GenericThread {
   url?: string;
   thread: GenericPost[];
   author: GenericAuthor;
-  engagementMetrics?: EngagementMetrics;
+  metrics?: EngagementMetrics;
 }
 
 /** Structured semantics */

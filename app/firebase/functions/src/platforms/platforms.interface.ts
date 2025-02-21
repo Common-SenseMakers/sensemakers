@@ -69,9 +69,7 @@ export interface PlatformService<
   getPostMetrics(
     post_ids: string[],
     credentials?: AccountCredentials
-  ): Promise<
-    { engagementMetrics?: Record<string, EngagementMetrics> } & WithCredentials
-  >;
+  ): Promise<{ metrics?: Record<string, EngagementMetrics> } & WithCredentials>;
 
   getThread(
     post_id: string,

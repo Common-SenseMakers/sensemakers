@@ -344,7 +344,7 @@ export class PostsProcessing {
   }
 
   computeScores(post: AppPost): RankingScores | undefined {
-    const metrics = post.generic.engagementMetrics;
+    const metrics = post.generic.metrics;
     if (!metrics) {
       return undefined;
     }

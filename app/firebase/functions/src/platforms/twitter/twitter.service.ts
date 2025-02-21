@@ -583,7 +583,7 @@ export class TwitterService
     return {
       author: genericAuthor,
       thread: genericThread,
-      engagementMetrics,
+      metrics: engagementMetrics,
     };
   }
 

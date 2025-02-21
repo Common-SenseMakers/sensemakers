@@ -342,7 +342,7 @@ export class BlueskyService
     return {
       author: genericAuthor,
       thread: genericPosts,
-      engagementMetrics,
+      metrics: engagementMetrics,
     };
   }
 
