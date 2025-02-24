@@ -3,23 +3,24 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { FetchParams } from '../shared/types/types.fetch';
 import { AppPostFull, PostsQuery } from '../shared/types/types.posts';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { arraysEqual } from '../utils/general';
 
 const DEBUG = false;
 
+export const PAGE_SIZE = 5;
+
 export interface PostFetcherInterface {
   feedNameDebug: string;
   posts?: AppPostFull[];
   isLoading: boolean;
-  isFetchingOlder: boolean;
-  errorFetchingOlder?: Error;
-  isFetchingNewer: boolean;
-  errorFetchingNewer?: Error;
-  fetchOlder: () => void;
-  fetchNewer: () => void;
+  isFetchingDown: boolean;
+  errorFetchingDown?: Error;
+  isFetchingUp: boolean;
+  errorFetchingUp?: Error;
+  fetchDown: () => void;
+  fetchUp: () => void;
   getPost: (postId: string) => AppPostFull | undefined;
   removePost: (postId: string) => void;
   moreToFetch: boolean;
@@ -34,36 +35,34 @@ export interface FetcherConfig {
   queryParams: PostsQuery;
   subscribe?: boolean;
   onPostsAdded?: (posts: AppPostFull[]) => void;
-  PAGE_SIZE?: number;
   DEBUG_PREFIX?: string;
+  enabled: boolean;
 }
 
 /**
- * Handles one array of posts by keeping track of the newest and oldest post ids and
- * fething newer and older posts as requested by a consuming component
+ * Handles one array of posts by keeping track of the top and bottom post ids and
+ * fething up and down posts as requested by a consuming component
  */
 export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const { connectedUser, connectedPlatforms } = useAccountContext();
 
-  const { endpoint, queryParams, onPostsAdded, PAGE_SIZE: _PAGE_SIZE } = input;
+  const { endpoint, queryParams, onPostsAdded, enabled } = input;
 
   const DEBUG_PREFIX = input.DEBUG_PREFIX || '';
-
-  const PAGE_SIZE = _PAGE_SIZE || 5;
 
   const appFetch = useAppFetch();
 
   const [posts, setPosts] = useState<AppPostFull[] | undefined>(undefined);
-  const [fetchedOlderFirst, setFetchedOlderFirst] = useState(false);
-  const [fetchedNewerFirst, setFetchedNewerFirst] = useState(false);
+  const [fetchedDownFirst, setFetchedDownFirst] = useState(false);
+  const [fetchedUpFirst, setFetchedUpFirst] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const [isFetchingOlder, setIsFetchingOlder] = useState<boolean>(false);
-  const [errorFetchingOlder, setErrorFetchingOlder] = useState<Error>();
+  const [isFetchingDown, setIsFetchingDown] = useState<boolean>(false);
+  const [errorFetchingDown, setErrorFetchingDown] = useState<Error>();
 
-  const [isFetchingNewer, setIsFetchingNewer] = useState(false);
-  const [errorFetchingNewer, setErrorFetchingNewer] = useState<Error>();
+  const [isFetchingUp, setIsFetchingUp] = useState(false);
+  const [errorFetchingUp, setErrorFetchingUp] = useState<Error>();
   const [moreToFetch, setMoreToFetch] = useState(true);
 
   const [connectedPlatformsInit] = useState(connectedPlatforms);
@@ -133,7 +132,6 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
           console.log(`${DEBUG_PREFIX}pushing posts`, { prev, allPosts });
 
         /** resort in case posts come from another platform unsorted from the current ones */
-        allPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
 
         return allPosts;
       });
@@ -177,25 +175,22 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
   const reset = () => {
     if (DEBUG) console.log(`${DEBUG_PREFIX}resetting posts`);
     removeAllPosts();
-    setFetchedOlderFirst(false);
+    setFetchedDownFirst(false);
     setIsLoading(true);
   };
 
-  const _oldestPostId = useMemo(() => {
-    const oldest = posts ? posts[posts.length - 1]?.id : undefined;
-    if (DEBUG)
-      console.log(
-        `${DEBUG_PREFIX}recomputing oldest _oldestPostId ${oldest || ''}`
-      );
-    return oldest;
+  const _bottomPostId = useMemo(() => {
+    const bottom = posts ? posts[posts.length - 1]?.id : undefined;
+    if (DEBUG) console.log(`${DEBUG_PREFIX}recomputing bottom ${bottom || ''}`);
+    return bottom;
   }, [DEBUG_PREFIX, posts]);
 
   /** fetch for more post backwards, receives an optional oldestPostId and is updated when the queryParameters change */
-  const fetchOlderCallback = useCallback(
-    async (oldestPostId?: string) => {
+  const fetchDownCallback = useCallback(
+    async (bottomPostId?: string) => {
       if (DEBUG)
-        console.log(`${DEBUG_PREFIX}fetching for older`, {
-          oldestPostId,
+        console.log(`${DEBUG_PREFIX}fetching down`, {
+          bottomPostId,
           connectedUser,
           code,
         });
@@ -204,40 +199,38 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       }
 
       if (DEBUG)
-        console.log(`${DEBUG_PREFIX}fetching for older`, {
-          oldestPostId,
+        console.log(`${DEBUG_PREFIX}fetching down`, {
+          bottomPostId,
         });
 
       try {
         const params: PostsQuery = {
-          fetchParams: {
-            expectedAmount: PAGE_SIZE,
-            untilId: oldestPostId,
-          },
           ...queryParams,
+          fetchParams: {
+            ...queryParams.fetchParams,
+            untilId: bottomPostId,
+          },
         };
-        if (DEBUG) console.log(`${DEBUG_PREFIX}fetching for older`, params);
+        if (DEBUG) console.log(`${DEBUG_PREFIX}fetching down`, params);
         const readPosts = await appFetch<AppPostFull[], PostsQuery>(
           endpoint,
           params
         );
 
         if (DEBUG)
-          console.log(`${DEBUG_PREFIX}fetching for older retrieved`, readPosts);
+          console.log(`${DEBUG_PREFIX}fetching down retrieved`, readPosts);
         addPosts(readPosts, 'end');
         setIsLoading(false);
-        if (
-          readPosts.length < (params.fetchParams as FetchParams).expectedAmount
-        ) {
+        if (readPosts.length < params.fetchParams.expectedAmount) {
           setMoreToFetch(false);
         } else {
           setMoreToFetch(true);
         }
       } catch (e) {
-        console.error(`${DEBUG_PREFIX}error fetching older`, {
+        console.error(`${DEBUG_PREFIX}error fetching down`, {
           e,
         });
-        setErrorFetchingOlder(e as Error);
+        setErrorFetchingDown(e as Error);
         setIsLoading(false);
       }
     },
@@ -245,71 +238,74 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     [connectedUser, code, queryParams, endpoint]
   );
 
-  const _fetchOlder = (oldestPostId?: string) => {
-    setIsFetchingOlder(true);
-    fetchOlderCallback(oldestPostId)
+  const _fetchDown = (bottomPostId?: string) => {
+    setIsFetchingDown(true);
+    fetchDownCallback(bottomPostId)
       .then(() => {
-        setIsFetchingOlder(false);
+        setIsFetchingDown(false);
       })
       .catch((e) => {
         console.error(e);
-        setIsFetchingOlder(false);
+        setIsFetchingDown(false);
       });
   };
 
   /** public function to trigger fetching for older posts since the current oldest one */
-  const fetchOlder = useCallback(() => {
-    if (DEBUG) console.log(`${DEBUG_PREFIX}external fetchOlder`, _oldestPostId);
-    _fetchOlder(_oldestPostId);
+  const fetchDown = useCallback(() => {
+    if (DEBUG) console.log(`${DEBUG_PREFIX}external fetchDown`, _bottomPostId);
+    _fetchDown(_bottomPostId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_oldestPostId]);
+  }, [_bottomPostId]);
 
   /** reset at every status change  */
   useEffect(() => {
     if (DEBUG)
       console.log(
-        `${DEBUG_PREFIX}resetting and _fetchOlder due to status, labels, keywords, endpoint change`,
+        `${DEBUG_PREFIX}resetting and _fetchDown due to status, labels, keywords, endpoint change`,
         {
           queryParams,
           endpoint,
-          fetchedOlderFirst,
+          fetchedDownFirst: fetchedDownFirst,
         }
       );
     reset();
-    setIsFetchingOlder(true);
-    fetchOlderCallback(undefined)
+    if (!enabled) {
+      return;
+    }
+
+    setIsFetchingDown(true);
+    fetchDownCallback(undefined)
       .then(() => {
-        setIsFetchingOlder(false);
+        setIsFetchingDown(false);
       })
       .catch((e) => {
         console.error(e);
-        setIsFetchingOlder(false);
+        setIsFetchingDown(false);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connectedUser, queryParams, endpoint]);
+  }, [connectedUser, queryParams, endpoint, enabled]);
 
-  const newestPostId = useMemo(() => {
-    const newest = posts ? posts[0]?.id : undefined;
-    if (DEBUG)
-      console.log(`${DEBUG_PREFIX}recomputing newestPostId ${newest || ''}`);
-    return newest;
+  const topPostId = useMemo(() => {
+    const top = posts ? posts[0]?.id : undefined;
+    if (DEBUG) console.log(`${DEBUG_PREFIX}recomputing topPostId ${top || ''}`);
+    return top;
   }, [DEBUG_PREFIX, posts]);
 
-  const fetchNewerCallback = useCallback(
-    async (_newestPostId: string) => {
-      if (!_newestPostId || code) {
+  const fetchUpCallback = useCallback(
+    async (_topPostId: string) => {
+      if (!_topPostId || code) {
         return;
       }
 
-      if (DEBUG) console.log(`${DEBUG_PREFIX}fetching for newer`);
-      setFetchedNewerFirst(true);
+      if (DEBUG) console.log(`${DEBUG_PREFIX}fetching up`);
+      setFetchedUpFirst(true);
 
       try {
         const params: PostsQuery = {
           ...queryParams,
           fetchParams: {
-            expectedAmount: PAGE_SIZE,
-            sinceId: _newestPostId,
+            ...queryParams.fetchParams,
+            sinceId: _topPostId,
           },
         };
         if (DEBUG) console.log(`${DEBUG_PREFIX}fetching for newer`, params);
@@ -323,7 +319,7 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
         addPosts(readPosts, 'start');
         setIsLoading(false);
       } catch (e) {
-        setErrorFetchingNewer(e as Error);
+        setErrorFetchingUp(e as Error);
         setIsLoading(false);
       }
     },
@@ -340,43 +336,42 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     ]
   );
 
-  const _fetchNewer = (_newestPostId: string) => {
-    setIsFetchingNewer(true);
-    fetchNewerCallback(_newestPostId)
+  const _fetchUp = (_topPostId: string) => {
+    setIsFetchingUp(true);
+    fetchUpCallback(_topPostId)
       .then(() => {
-        setIsFetchingNewer(false);
+        setIsFetchingUp(false);
       })
       .catch(console.error);
   };
 
-  /** public function to trigger fetching for older posts */
-  const fetchNewer = useCallback(() => {
-    if (newestPostId) {
-      if (DEBUG)
-        console.log(`${DEBUG_PREFIX}external fetchNewer`, newestPostId);
-      _fetchNewer(newestPostId);
+  /** public function to trigger fetching for up posts */
+  const fetchUp = useCallback(() => {
+    if (topPostId) {
+      if (DEBUG) console.log(`${DEBUG_PREFIX}external fetchUp`, topPostId);
+      _fetchUp(topPostId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [DEBUG_PREFIX, newestPostId]);
+  }, [DEBUG_PREFIX, topPostId]);
 
   /** first data fill happens everytime a new source platform is added/removed */
   useEffect(() => {
     if (DEBUG)
       console.log(
-        `${DEBUG_PREFIX} checking first fetch older with new platform added`,
+        `${DEBUG_PREFIX} checking first fetch down with new platform added`,
         {
           posts,
-          fetchedOlderFirst,
+          fetchedDownFirst,
           connectedPlatforms,
         }
       );
     if (
       !arraysEqual(connectedPlatforms, connectedPlatformsInit) &&
-      !isFetchingOlder
+      !isFetchingDown
     ) {
       if (DEBUG)
         console.log(
-          `${DEBUG_PREFIX} resetting and _fetchOlder due to connectedSourcePlatforms`,
+          `${DEBUG_PREFIX} resetting and _fetchDown due to connectedSourcePlatforms`,
           { connectedPlatforms }
         );
       // console.warn('skipping reset due to connectedPlatforms');
@@ -389,29 +384,32 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     DEBUG_PREFIX,
     connectedPlatforms,
     connectedPlatformsInit,
-    fetchedOlderFirst,
-    isFetchingOlder,
+    fetchedDownFirst,
+    isFetchingDown,
     posts,
   ]);
 
   /** whenever posts have been fetched, check if we have fetched for newer posts yet, and if not, fetch for newer */
   useEffect(() => {
-    if (posts && posts.length > 0 && !fetchedNewerFirst) {
+    if (!enabled) {
+      return;
+    }
+    if (posts && posts.length > 0 && !fetchedUpFirst) {
       if (DEBUG) console.log(`${DEBUG_PREFIX}first fetch newer`);
-      _fetchNewer(posts[0].id);
+      _fetchUp(posts[0].id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [posts, fetchedNewerFirst, connectedUser, DEBUG_PREFIX]);
+  }, [posts, fetchedUpFirst, connectedUser, DEBUG_PREFIX, enabled]);
 
   /** turn off errors automatically */
   useEffect(() => {
-    if (errorFetchingNewer) {
-      setErrorFetchingNewer(undefined);
+    if (errorFetchingUp) {
+      setErrorFetchingUp(undefined);
     }
-    if (errorFetchingOlder) {
-      setErrorFetchingOlder(undefined);
+    if (errorFetchingDown) {
+      setErrorFetchingDown(undefined);
     }
-  }, [errorFetchingNewer, errorFetchingOlder]);
+  }, [errorFetchingUp, errorFetchingDown]);
 
   const removePost = useCallback(
     (postId: string) => {
@@ -464,12 +462,12 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
       posts,
       getPost,
       removePost,
-      fetchOlder,
-      isFetchingOlder,
-      errorFetchingOlder,
-      fetchNewer,
-      isFetchingNewer,
-      errorFetchingNewer,
+      fetchDown,
+      isFetchingDown,
+      errorFetchingDown,
+      fetchUp,
+      isFetchingUp,
+      errorFetchingUp,
       isLoading,
       moreToFetch,
       getNextAndPrev,
@@ -479,12 +477,12 @@ export const usePostsFetcher = (input: FetcherConfig): PostFetcherInterface => {
     posts,
     getPost,
     removePost,
-    fetchOlder,
-    isFetchingOlder,
-    errorFetchingOlder,
-    fetchNewer,
-    isFetchingNewer,
-    errorFetchingNewer,
+    fetchDown,
+    isFetchingDown,
+    errorFetchingDown,
+    fetchUp,
+    isFetchingUp,
+    errorFetchingUp,
     isLoading,
     moreToFetch,
     getNextAndPrev,

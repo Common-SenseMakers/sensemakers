@@ -1,5 +1,6 @@
 import { PlatformFetchParams } from '../@shared/types/types.fetch';
 import {
+  EngagementMetrics,
   FetchedResult,
   PlatformPost,
   PlatformPostCreate,
@@ -65,6 +66,10 @@ export interface PlatformService<
       platformPost: PlatformPostPosted;
     } & WithCredentials
   >;
+  getPostsMetrics(
+    post_ids: string[],
+    credentials?: AccountCredentials
+  ): Promise<{ metrics: Record<string, EngagementMetrics> } & WithCredentials>;
 
   getThread(
     post_id: string,

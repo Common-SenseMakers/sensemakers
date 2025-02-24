@@ -1,8 +1,21 @@
+import { mastodon } from 'masto';
+
 import {
   MastodonAccount,
   MastodonPost,
   MastodonThread,
 } from '../../@shared/types/types.mastodon';
+import { EngagementMetrics } from '../../@shared/types/types.platform.posts';
+
+export const extractPostMetrics = (
+  post: mastodon.v1.Status
+): EngagementMetrics => {
+  return {
+    likes: post.favouritesCount,
+    reposts: post.reblogsCount,
+    replies: post.repliesCount,
+  };
+};
 
 export const convertMastodonPostsToThreads = (
   posts: MastodonPost[],

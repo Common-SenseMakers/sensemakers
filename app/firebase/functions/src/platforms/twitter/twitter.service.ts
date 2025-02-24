@@ -1,5 +1,6 @@
 import fs from 'fs';
 import {
+  TweetV2,
   TweetV2UserTimelineParams,
   Tweetv2FieldsParams,
   Tweetv2SearchParams,
@@ -12,6 +13,7 @@ import {
   PlatformFetchParams,
 } from '../../@shared/types/types.fetch';
 import {
+  EngagementMetrics,
   FetchedResult,
   PlatformPost,
   PlatformPostCreate,
@@ -109,11 +111,71 @@ export class TwitterService
       this.cache = {};
     }
   }
-  getSinglePost(
+  async getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
-  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
-    throw new Error('Method not implemented.');
+  ): Promise<
+    { platformPost: PlatformPostPosted<TwitterThread> } & WithCredentials
+  > {
+    const { client: readOnlyClient, credentials: newCredentials } =
+      await this.getClient(credentials?.read, 'read');
+
+    try {
+      const options: Partial<Tweetv2FieldsParams> = {
+        'tweet.fields': tweetFields,
+        expansions,
+      };
+
+      const original = await readOnlyClient.v2.singleTweet(post_id, options);
+      const authorId = original.data.author_id;
+      if (!authorId) {
+        throw new Error('author_id not found');
+      }
+      const { data: originalAuthor } = await readOnlyClient.v2.user(authorId);
+      const appTweets = convertToAppTweets([original.data], original.includes);
+      const twitterThreads = convertTweetsToThreads(appTweets, originalAuthor);
+      const thread = twitterThreads[0];
+
+      const platformPost: PlatformPostPosted<TwitterThread, TwitterUser> = {
+        post_id: thread.conversation_id,
+        user_id: thread.author.id,
+        timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
+        post: thread,
+        author: originalAuthor,
+      };
+
+      const newAccountCredentials: TwitterAccountCredentials | undefined =
+        newCredentials ? { read: newCredentials } : undefined;
+
+      if (credentials?.write && newAccountCredentials) {
+        newAccountCredentials.write = newCredentials;
+      }
+
+      return { platformPost, credentials: newAccountCredentials };
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
+    }
+  }
+
+  async getPostsMetrics(
+    post_ids: string[],
+    credentials?: AccountCredentials
+  ): Promise<{ metrics: Record<string, EngagementMetrics> } & WithCredentials> {
+    const { tweets, newCredentials } = await this.getPosts(
+      post_ids,
+      credentials?.read
+    );
+
+    const allMetrics: Record<string, EngagementMetrics> = {};
+
+    tweets.forEach((post) => {
+      const metrics = this.extractPostMetrics(post);
+      if (metrics) {
+        allMetrics[post.id] = metrics;
+      }
+    });
+
+    return { metrics: allMetrics, credentials: { read: newCredentials } };
   }
 
   async getThread(
@@ -397,6 +459,17 @@ export class TwitterService
     }
   }
 
+  private extractPostMetrics(tweet: TweetV2): EngagementMetrics | undefined {
+    return (
+      tweet.public_metrics && {
+        reposts: tweet.public_metrics.retweet_count,
+        replies: tweet.public_metrics.reply_count,
+        likes: tweet.public_metrics.like_count,
+        quotes: tweet.public_metrics.quote_count,
+      }
+    );
+  }
+
   public async fetch(
     user_id: string,
     params: FetchParams,
@@ -425,6 +498,7 @@ export class TwitterService
         timestampMs: dateStrToTimestampMs(thread.tweets[0].created_at),
         post: thread,
         author: thread.author,
+        metrics: this.extractPostMetrics(thread.tweets[0]),
       };
     });
 
@@ -459,6 +533,7 @@ export class TwitterService
     }
 
     const twitterThread = platformPost.posted.post;
+
     const genericAuthor: GenericAuthor = {
       id: twitterThread.author.id,
       name: twitterThread.author.name || twitterThread.author.username,
@@ -514,17 +589,21 @@ export class TwitterService
   }
 
   /** if user_id is provided it must be from the authenticated userId */
-  public async getPosts(tweetIds: string, credentials?: TwitterCredentials) {
-    const options: Partial<Tweetv2FieldsParams> = {
-      'tweet.fields': tweetFields,
-      expansions,
-    };
+  public async getPosts(tweetIds: string[], credentials?: TwitterCredentials) {
+    const { client: readOnlyClient, credentials: newCredentials } =
+      await this.getClient(credentials, 'read');
 
-    const { client } = await this.getClient(credentials, 'read');
-    tweetIds;
-    return tweetIds.length === 1
-      ? client.v2.singleTweet(tweetIds[0], options)
-      : client.v2.tweets(tweetIds, options);
+    try {
+      const options: Partial<Tweetv2FieldsParams> = {
+        'tweet.fields': tweetFields,
+        expansions,
+      };
+
+      const result = await readOnlyClient.v2.tweets(tweetIds, options);
+      return { tweets: result.data, newCredentials };
+    } catch (e: any) {
+      throw new Error(handleTwitterError(e));
+    }
   }
 
   public async getProfile(

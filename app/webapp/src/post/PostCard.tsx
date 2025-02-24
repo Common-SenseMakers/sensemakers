@@ -209,6 +209,7 @@ export const PostCard = (props: {
                 }}></SemanticsEditor>
             </Box>
           )}
+          <Text>score: {post.scores?.score1}</Text>
           <GenericThreadText
             onClick={handleInternalClick}
             thread={truncatedGenericThread}></GenericThreadText>

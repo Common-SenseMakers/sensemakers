@@ -99,9 +99,23 @@ export class BaseRepository<DataType, DataCreateType> {
 
     const refs = Array.from(ids).map((id) => this.getRef(id));
     const snapshot = await this.collection.firestore.getAll(...refs);
-    return snapshot.map((doc) => {
-      return { id: this.decode(doc.id), ...doc.data() } as DataType;
+    const docs = snapshot.map((doc) => {
+      return { id: this.decode(doc.id), ...doc.data() } as DataType & {
+        id: string;
+      };
     });
+
+    /** make sure the results are oredered like the input ids */
+    const reordered: (DataType & { id: string })[] = [];
+    for (const id of ids) {
+      const doc = docs.find((doc) => doc.id === id);
+      if (!doc) {
+        throw new Error(`Doc for id: ${id} not found, unexpected`);
+      }
+      reordered.push(doc);
+    }
+
+    return reordered;
   }
 
   public async exists(id: string, manager: TransactionManager) {

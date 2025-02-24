@@ -2,7 +2,6 @@ import {
   AppPostFull,
   HydrateConfig,
   PostsQuery,
-  PostsQueryDefined,
 } from '../@shared/types/types.posts';
 import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
@@ -18,12 +17,12 @@ export class FeedService {
   ) {}
 
   async getFeed(params: PostsQuery): Promise<AppPostFull[]> {
-    const queryParams: PostsQueryDefined = {
+    const queryParams: PostsQuery = {
+      ...params,
       fetchParams: {
         ...params.fetchParams,
         expectedAmount: params.fetchParams?.expectedAmount || 10,
       },
-      ...params,
     };
 
     const addAggregatedLabels =

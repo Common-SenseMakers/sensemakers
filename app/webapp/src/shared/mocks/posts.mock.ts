@@ -54,6 +54,7 @@ export const getMockPublishedPost = () => {
     originalParsed,
     mirrors: [
       {
+        post_id: 'pp_id',
         id: 'pp-id',
         platformId: PLATFORM.Twitter,
         publishOrigin: PlatformPostPublishOrigin.FETCHED,
@@ -134,6 +135,7 @@ export const getMockAutoPublishedPost = () => {
     originalParsed,
     mirrors: [
       {
+        post_id: 'pp_id',
         id: 'pp-id',
         platformId: PLATFORM.Twitter,
         publishOrigin: PlatformPostPublishOrigin.FETCHED,
@@ -217,6 +219,7 @@ export const getMockPendingPost = () => {
     originalParsed,
     mirrors: [
       {
+        post_id: 'pp_id',
         id: 'pp-id',
         platformId: PLATFORM.Twitter,
         publishOrigin: PlatformPostPublishOrigin.FETCHED,

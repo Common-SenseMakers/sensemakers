@@ -50,10 +50,10 @@ export const PostsFetcherComponent = (props: {
 
   const {
     posts,
-    fetchOlder,
-    errorFetchingOlder,
-    isFetchingOlder,
-    errorFetchingNewer,
+    fetchDown,
+    errorFetchingDown,
+    isFetchingDown,
+    errorFetchingUp,
     isLoading,
     moreToFetch,
   } = feed;
@@ -66,19 +66,19 @@ export const PostsFetcherComponent = (props: {
   useEffect(() => {
     if (isAtBottom && !isLoading && moreToFetch) {
       if (DEBUG)
-        console.log(`${feed.feedNameDebug}fetchingOlder due to isAtBottom`, {
+        console.log(`${feed.feedNameDebug}fetchDown due to isAtBottom`, {
           isAtBottom,
           isLoading,
           moreToFetch,
         });
 
-      fetchOlder();
+      fetchDown();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAtBottom]);
 
   useEffect(() => {
-    const error = errorFetchingOlder || errorFetchingNewer;
+    const error = errorFetchingDown || errorFetchingUp;
     if (error) {
       const message = (() => {
         const regexCode = /code:\s*(\d+)/;
@@ -103,7 +103,7 @@ export const PostsFetcherComponent = (props: {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errorFetchingOlder, errorFetchingNewer]);
+  }, [errorFetchingDown, errorFetchingUp]);
 
   const showLoading = [1, 2, 4, 5].map((ix) => (
     <PostCardLoading key={ix}></PostCardLoading>
@@ -141,13 +141,13 @@ export const PostsFetcherComponent = (props: {
         </Box>
       ))}
 
-      {isFetchingOlder && (
+      {isFetchingDown && (
         <Box style={{ flexShrink: 0 }}>
           <LoadingDiv height="120px" width="100%"></LoadingDiv>
         </Box>
       )}
 
-      {moreToFetch && !isFetchingOlder && (
+      {moreToFetch && !isFetchingDown && (
         <Box
           margin={{ vertical: 'medium', horizontal: 'medium' }}
           align="center"
@@ -164,7 +164,7 @@ export const PostsFetcherComponent = (props: {
               textDecoration: 'underline',
               cursor: 'pointer',
             }}
-            onClick={() => fetchOlder()}>
+            onClick={() => fetchDown()}>
             {t(AppGeneralKeys.loadMorePosts)}
           </Text>
         </Box>

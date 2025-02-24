@@ -6,6 +6,7 @@ import { useAppFetch } from '../api/app.fetch';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
+  PAGE_SIZE,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
 import { RefWithLabels } from '../semantics/patterns/refs-labels/RefWithLabels';
@@ -68,8 +69,13 @@ export const RefOverlay = (props: { refUrl: string }) => {
       queryParams: {
         semantics: { ref: refUrl, topic: SCIENCE_TOPIC_URI },
         hydrateConfig: { addAggregatedLabels: false },
+        fetchParams: {
+          expectedAmount: PAGE_SIZE,
+          rankByScore: 'score1',
+        },
       },
       DEBUG_PREFIX: 'REF FEED',
+      enabled: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

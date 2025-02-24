@@ -1,13 +1,13 @@
-import { Request } from 'firebase-functions/v2/tasks';
-
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
-
-export const PARSE_POST_TASK = 'parsePost';
+import { ParsePostTaskParams } from '../../tasks/types.tasks';
 
 const DEBUG = false;
 
-export const parsePostTask = async (req: Request, services: Services) => {
+export const parsePostTask = async (
+  req: { data: ParsePostTaskParams },
+  services: Services
+) => {
   if (DEBUG) logger.debug(`parsePostTask: postId: ${req.data.postId}`);
   const postId = req.data.postId as string;
 

@@ -26,7 +26,7 @@ import { logger } from '../instances/logger';
 import { Services } from '../instances/services';
 import { IdentityServicesMap } from '../platforms/platforms.service';
 import { FETCH_ACCOUNT_TASKS } from '../platforms/platforms.tasks.config';
-import { chunkNumber, enqueueTask } from '../tasksUtils/tasks.support';
+import { chunkNumber } from '../tasks/tasks.support';
 import { ProfilesRepository } from './profiles.repository';
 
 const DEBUG = false;
@@ -331,7 +331,7 @@ export class ProfilesService {
       };
 
       if (DEBUG) logger.debug('Enqueueing task', { taskName, taskData });
-      await enqueueTask(taskName, taskData, services);
+      await services.tasks.enqueue(taskName, taskData);
     }
   }
 }

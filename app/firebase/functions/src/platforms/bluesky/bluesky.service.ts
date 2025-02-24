@@ -1,6 +1,7 @@
 import { AppBskyFeedDefs, AppBskyFeedPost, RichText } from '@atproto/api';
 
 import {
+  BLUESKY_REPOST_URI_PARAM,
   BlueskyAccountCredentials,
   BlueskyAccountDetails,
   BlueskyCredentials,
@@ -12,6 +13,7 @@ import {
 } from '../../@shared/types/types.bluesky';
 import { PlatformFetchParams } from '../../@shared/types/types.fetch';
 import {
+  EngagementMetrics,
   FetchedResult,
   PlatformPost,
   PlatformPostCreate,
@@ -103,6 +105,15 @@ export class BlueskyService
         `Error getting Bluesky account by username: ${e.message}`
       );
     }
+  }
+
+  private extractPostMetrics(post: BlueskyPost): EngagementMetrics {
+    return {
+      likes: post.likeCount || 0,
+      reposts: post.repostCount || 0,
+      replies: post.replyCount || 0,
+      quotes: post.quoteCount || 0,
+    };
   }
 
   public async fetch(
@@ -211,18 +222,21 @@ export class BlueskyService
 
     const threads = convertBlueskyPostsToThreads(allPosts, user_id);
 
-    const platformPosts = threads.map((thread) => ({
-      post_id: thread.thread_id,
-      user_id: thread.author.id,
-      timestampMs: new Date(
-        thread.posts[0].repostedBy
-          ? thread.posts[0].repostedBy.indexedAt
-          : thread.posts[0].record.createdAt
-      ).getTime(),
-      post: thread,
-    }));
+    const platformPosts: PlatformPostPosted<BlueskyThread>[] = threads.map(
+      (thread) => ({
+        post_id: thread.thread_id,
+        user_id: thread.author.id,
+        timestampMs: new Date(
+          thread.posts[0].repostedBy
+            ? thread.posts[0].repostedBy.indexedAt
+            : thread.posts[0].record.createdAt
+        ).getTime(),
+        post: thread,
+        metrics: this.extractPostMetrics(thread.posts[0]),
+      })
+    );
 
-    const result = {
+    const result: FetchedResult = {
       fetched: {
         newest_id: newestId,
         oldest_id: oldestId,
@@ -425,7 +439,9 @@ export class BlueskyService
   async getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
-  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
+  ): Promise<
+    { platformPost: PlatformPostPosted<BlueskyThread> } & WithCredentials
+  > {
     const { client: agent, credentials: newSession } = await this.getClient(
       credentials?.read
     );
@@ -470,6 +486,44 @@ export class BlueskyService
     };
 
     return { credentials: newCredentials, platformPost };
+  }
+  async getPosts(post_ids: string[], credentials?: AccountCredentials) {
+    const { client: agent, credentials: newSession } = await this.getClient(
+      credentials?.read
+    );
+
+    let newCredentials: AccountCredentials | undefined = undefined;
+
+    if (newSession) {
+      newCredentials = { read: newSession };
+    }
+    console.log(newCredentials);
+    const result = await agent.getPosts({ uris: post_ids });
+    return result;
+  }
+
+  async getPostsMetrics(
+    post_ids: string[],
+    credentials?: AccountCredentials
+  ): Promise<{ metrics: Record<string, EngagementMetrics> } & WithCredentials> {
+    const filteredPost_ids = post_ids.filter(
+      (post_id) => !post_id.includes(BLUESKY_REPOST_URI_PARAM)
+    );
+    const result = await this.getPosts(filteredPost_ids, credentials);
+    const engagementMetricsArray: [string, EngagementMetrics][] =
+      result.data.posts.map((post) => {
+        return [post.uri, this.extractPostMetrics(post as BlueskyPost)];
+      });
+    const metrics: Record<string, EngagementMetrics> =
+      engagementMetricsArray.reduce(
+        (acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, EngagementMetrics>
+      );
+
+    return { metrics, credentials };
   }
 
   public async getThread(

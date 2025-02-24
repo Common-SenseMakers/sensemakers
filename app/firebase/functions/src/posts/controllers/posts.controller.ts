@@ -11,9 +11,8 @@ import { IS_EMULATOR } from '../../config/config.runtime';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { queryParamsSchema } from '../../feed/feed.schema';
 import { logger } from '../../instances/logger';
-import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { TASK } from '../../tasks/types.tasks';
 import { IndexedPostsRepo } from '../indexed.posts.repository';
-import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
 import {
   getKeywordsSchema,
   getPostSchema,
@@ -98,11 +97,11 @@ export const parsePostController: RequestHandler = async (
     };
 
     const services = getServices(request);
-    const task = enqueueTask(
-      PARSE_POST_TASK,
-      { postId: payload.postId },
-      services
-    );
+    const task = services.tasks.enqueue(TASK.PARSE_POST, {
+      postId: payload.postId,
+      undefined,
+      services,
+    });
 
     if (!IS_EMULATOR) {
       // can await if not emulator

@@ -7,7 +7,7 @@ import { services } from './scripts.services';
     const profiles = await services.users.profiles.repo.getAll();
 
     profiles.map((profile) => {
-      logger.info(`Profile: ${profile.id}`, profile);
+      logger.info(`Profile: ${profile}`, profile);
     });
 
     const users = await services.users.repo.getAll();

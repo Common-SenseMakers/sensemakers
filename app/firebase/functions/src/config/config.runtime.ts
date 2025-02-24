@@ -64,6 +64,7 @@ export const USE_REAL_BLUESKY = envRuntime.USE_REAL_BLUESKY;
 export const USE_REAL_NANOPUB = envRuntime.USE_REAL_NANOPUB;
 export const USE_REAL_EMAIL = envRuntime.USE_REAL_EMAIL;
 export const USE_REAL_LINKS = envRuntime.USE_REAL_LINKS;
+export const USE_REAL_TASKS = envRuntime.USE_REAL_TASKS;
 
 export const TEST_USER_ACCOUNTS = envRuntime.TEST_USER_ACCOUNTS;
 
@@ -77,6 +78,7 @@ export const NANOPUBS_PUBLISH_SERVERS_STR = envRuntime.NANOPUBS_PUBLISH_SERVERS;
 export const QUIET_SIGNUP_PERIOD = 5 * 60 * 1000; // 5 minutes
 export const AUTOFETCH_PERIOD = 'every 30 minutes';
 export const AUTOFETCH_NON_USER_PERIOD = 'every 5 minutes';
+export const SYNC_NEW_POSTS_PERIOD = 'every 1 hours';
 
 export const DAILY_NOTIFICATION_PERIOD = 'every day 18:00';
 export const WEEKLY_NOTIFICATION_PERIOD = 'every monday 18:00';

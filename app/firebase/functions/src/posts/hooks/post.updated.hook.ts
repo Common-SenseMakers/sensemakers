@@ -11,8 +11,7 @@ import {
 } from '../../@shared/types/types.posts';
 import { logger } from '../../instances/logger';
 import { Services } from '../../instances/services';
-import { enqueueTask } from '../../tasksUtils/tasks.support';
-import { PARSE_POST_TASK } from '../tasks/posts.parse.task';
+import { TASK } from '../../tasks/types.tasks';
 
 const PREFIX = 'POST-UPDATED-HOOK';
 const DEBUG = false;
@@ -46,17 +45,27 @@ export const postUpdatedHook = async (
   /** Handle post create */
   if (postBefore === undefined) {
     // trigger parsePostTask
-    if (DEBUG) logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
+    if (DEBUG) logger.debug(`triggerTask ${TASK.PARSE_POST}-${postId}`);
     if (post.parsedStatus !== AppPostParsedStatus.PROCESSED) {
-      await enqueueTask(PARSE_POST_TASK, { postId }, services);
+      await services.tasks.enqueue(
+        TASK.PARSE_POST,
+        { postId },
+        undefined,
+        services
+      );
     }
   } else if (
     /** Handle post merged */
     post.parsedStatus !== AppPostParsedStatus.PROCESSED &&
     postBefore?.parsingStatus === AppPostParsingStatus.IDLE
   ) {
-    if (DEBUG) logger.debug(`triggerTask ${PARSE_POST_TASK}-${postId}`);
-    await enqueueTask(PARSE_POST_TASK, { postId }, services);
+    if (DEBUG) logger.debug(`triggerTask ${TASK.PARSE_POST}-${postId}`);
+    await services.tasks.enqueue(
+      TASK.PARSE_POST,
+      { postId },
+      undefined,
+      services
+    );
   }
 
   const activitiesCreated: ActivityEventBase[] = [];
@@ -73,7 +82,7 @@ export const postUpdatedHook = async (
       if (wasParsed) {
         if (DEBUG)
           logger.debug(
-            `wasParsed ${PARSE_POST_TASK}-${postId}`,
+            `wasParsed ${TASK.PARSE_POST}-${postId}`,
             undefined,
             PREFIX
           );

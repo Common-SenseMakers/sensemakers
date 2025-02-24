@@ -7,6 +7,8 @@ import { ClustersRepository } from '../clusters/clusters.repository';
 import { ClustersService } from '../clusters/clusters.service';
 import { DBInstance } from '../db/instance';
 import { FeedService } from '../feed/feed.service';
+import { JobsRepository } from '../jobs/jobs.repository';
+import { JobsService } from '../jobs/jobs.service';
 import { LinksRepository } from '../links/links.repository';
 import { LinksConfig, LinksService } from '../links/links.service';
 import { getLinksMock } from '../links/links.service.mock';
@@ -41,6 +43,8 @@ import { PostsProcessing } from '../posts/posts.processing';
 import { PostsRepository } from '../posts/posts.repository';
 import { ProfilesRepository } from '../profiles/profiles.repository';
 import { ProfilesService } from '../profiles/profiles.service';
+import { TasksService } from '../tasks/tasks.service';
+import { getTasksMock } from '../tasks/tasks.service.mock';
 import { TimeService } from '../time/time.service';
 import { UsersRepository } from '../users/users.repository';
 import { UsersService } from '../users/users.service';
@@ -65,6 +69,8 @@ export interface Services {
   links: LinksService;
   ontology: OntologiesService;
   clusters: ClustersService;
+  tasks: TasksService;
+  jobs: JobsService;
 }
 
 export interface ServicesConfig {
@@ -84,6 +90,7 @@ export interface ServicesConfig {
     USE_REAL_NANOPUB: boolean;
     USE_REAL_EMAIL: boolean;
     USE_REAL_LINKS: boolean;
+    USE_REAL_TASKS: boolean;
   };
 }
 
@@ -223,6 +230,18 @@ export const createServices = (
   /** feed */
   const feed = new FeedService(db, postsManager, clusters);
 
+  /** tasks */
+
+  const _tasks = new TasksService();
+  const tasks = getTasksMock(
+    _tasks,
+    config.mock.USE_REAL_TASKS ? 'real' : 'mock'
+  );
+
+  /** jobs */
+  const jobsRepo = new JobsRepository(db);
+  const jobs = new JobsService(jobsRepo);
+
   /** all services */
   const services: Services = {
     users: usersService,
@@ -236,6 +255,8 @@ export const createServices = (
     ontology: ontologiesService,
     profiles: profilesService,
     clusters,
+    tasks,
+    jobs,
   };
 
   if (DEBUG) {

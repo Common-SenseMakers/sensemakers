@@ -11,6 +11,7 @@ import {
   MastodonThread,
 } from '../../@shared/types/types.mastodon';
 import {
+  EngagementMetrics,
   FetchedResult,
   PlatformPost,
   PlatformPostCreate,
@@ -51,6 +52,7 @@ import { PlatformService, WithCredentials } from '../platforms.interface';
 import {
   cleanMastodonContent,
   convertMastodonPostsToThreads,
+  extractPostMetrics,
   extractPrimaryThread,
 } from './mastodon.utils';
 
@@ -335,6 +337,7 @@ export class MastodonService
             ...thread,
             thread_id: rootPostId,
           },
+          metrics: extractPostMetrics(thread.posts[0]),
         };
       })
     );
@@ -369,6 +372,7 @@ export class MastodonService
     }
 
     const thread = platformPost.posted.post;
+
     const { globalUsername } = parseMastodonAccountURI(thread.author.url);
     const genericAuthor: GenericAuthor = {
       platformId: PLATFORM.Mastodon,
@@ -459,11 +463,61 @@ export class MastodonService
     };
   }
 
-  getSinglePost(
+  async getSinglePost(
     post_id: string,
     credentials?: AccountCredentials
-  ): Promise<{ platformPost: PlatformPostPosted } & WithCredentials> {
-    throw new Error('Method not implemented.');
+  ): Promise<
+    { platformPost: PlatformPostPosted<MastodonThread> } & WithCredentials
+  > {
+    const { server, postId } = parseMastodonPostURI(post_id);
+    const client = await this.getClient(server, credentials?.read);
+
+    const status = await client.v1.statuses.$select(postId).fetch();
+    const thread = this.constructThread(
+      status,
+      {
+        ancestors: [],
+        descendants: [],
+      },
+      status.account.id
+    );
+
+    const platformPost = {
+      post_id: thread.thread_id,
+      user_id: parseMastodonAccountURI(thread.author.url).globalUsername,
+      timestampMs: new Date(thread.posts[0].createdAt).getTime(),
+      post: thread,
+      metrics: extractPostMetrics(thread.posts[0]),
+    };
+
+    return { platformPost };
+  }
+
+  async getPostsMetrics(
+    post_ids: string[],
+    credentials?: AccountCredentials
+  ): Promise<{ metrics: Record<string, EngagementMetrics> } & WithCredentials> {
+    const postMetrics = await Promise.all(
+      post_ids.map(async (post_id) => {
+        const platformPost = await this.getSinglePost(post_id);
+        const rootPost = platformPost.platformPost.post.posts[0];
+        const metrics = extractPostMetrics(rootPost);
+        return {
+          post_id,
+          metrics,
+        };
+      })
+    );
+
+    const allMetrics: Record<string, EngagementMetrics> = {};
+
+    postMetrics.forEach(({ post_id, metrics }) => {
+      allMetrics[post_id] = metrics;
+    });
+
+    return {
+      metrics: allMetrics,
+    };
   }
 
   public async getThread(

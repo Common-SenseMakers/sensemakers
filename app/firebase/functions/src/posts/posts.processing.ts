@@ -15,6 +15,8 @@ import {
   AppPostParsingStatus,
   HydrateConfig,
   IndexedPost,
+  ProcessedSemantics,
+  RankingScores,
   StructuredSemantics,
 } from '../@shared/types/types.posts';
 import { RefDisplayMeta } from '../@shared/types/types.references';
@@ -88,7 +90,7 @@ export class PostsProcessing {
     }
 
     /** if the root doesn't exist, create the thread */
-    return await this.createPlatformPost(platformPost, manager, authorUserId);
+    return this.createPlatformPost(platformPost, manager, authorUserId);
   }
   async createPlatformPost(
     platformPost: PlatformPostCreate,
@@ -130,6 +132,7 @@ export class PostsProcessing {
         mirrorsIds: [platformPostCreated.id],
         createdAtMs: platformPost.posted?.timestampMs || this.time.now(),
         editStatus: AppPostEditStatus.PENDING,
+        metrics: platformPostCreated.metrics,
       },
       manager
     );
@@ -199,7 +202,7 @@ export class PostsProcessing {
   ) {
     const postsCreated = await Promise.all(
       platformPosts.map(async (platformPost) => {
-        return await this.createOrMergePlatformPost(
+        return this.createOrMergePlatformPost(
           platformPost,
           manager,
           authorUserId
@@ -225,10 +228,8 @@ export class PostsProcessing {
   async processSemantics(
     postId: string,
     manager: TransactionManager,
-    semantics?: string
-  ): Promise<void> {
-    if (!semantics) return undefined;
-
+    semantics: string
+  ): Promise<ProcessedSemantics> {
     const post = await this.posts.get(postId, manager, true);
     const originalStructuredSemantics = post.structuredSemantics;
     const store = await parseRDF(semantics);
@@ -263,16 +264,6 @@ export class PostsProcessing {
       refs: Object.keys(refsMeta),
     };
 
-    /** Indexed post */
-    const postData: IndexedPost = {
-      id: post.id,
-      authorProfileId: post.authorProfileId,
-      createdAtMs: post.createdAtMs,
-      structuredSemantics,
-      origin: post.origin,
-      authorUserId: post.authorUserId,
-    };
-
     // Detect deleted keywords
     const deletedKeywords = originalStructuredSemantics?.keywords
       ? originalStructuredSemantics?.keywords.filter(
@@ -280,19 +271,13 @@ export class PostsProcessing {
         )
       : [];
 
-    await this.syncPostInClusters(
-      'add',
-      post.id,
-      manager,
-      postData,
-      structuredSemantics.refs || [],
-      {
+    return {
+      structuredSemantics,
+      updatedKeywords: {
         new: structuredSemantics.keywords || [],
         removed: deletedKeywords,
-      }
-    );
-
-    await this.posts.update(postId, { structuredSemantics }, manager);
+      },
+    };
   }
 
   /** from postId make sure the post is updated on all clusters that include that post */
@@ -327,6 +312,21 @@ export class PostsProcessing {
         );
       })
     );
+  }
+
+  computeScores(post: AppPost): RankingScores | undefined {
+    const metrics = post.metrics;
+    if (!metrics) {
+      return undefined;
+    }
+
+    const score1 =
+      2 * metrics.likes +
+      4 * (metrics.reposts + (metrics.quotes || 0)) +
+      1 * metrics.replies;
+    return {
+      score1,
+    };
   }
 
   async syncPostInCluster(

@@ -2,13 +2,14 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from 'firebase-functions/v1';
 
 import { ClusterInstance } from '../@shared/types/types.clusters';
-import { ArrayIncludeQuery } from '../@shared/types/types.posts';
+import { PeriodRange } from '../@shared/types/types.fetch';
+import { ArrayIncludeQuery, RankingScores } from '../@shared/types/types.posts';
 import {
   AppPost,
   AppPostCreate,
   AppPostParsedStatus,
   PostUpdate,
-  PostsQueryDefined,
+  PostsQuery,
 } from '../@shared/types/types.posts';
 import { CollectionNames } from '../@shared/utils/collectionNames';
 import { DBInstance, Query } from '../db/instance';
@@ -20,6 +21,7 @@ import {
   AUTHOR_USER_KEY,
   CREATED_AT_KEY,
   ORIGIN_KEY,
+  SCORE_KEY,
   STRUCTURED_SEMANTICS_KEY,
   TABS_KEY,
   TOPIC_KEY,
@@ -80,6 +82,14 @@ export const filterByArrayContainsAny = (
   return query;
 };
 
+export const filterByRange = (_base: Query, range?: PeriodRange) => {
+  if (!range) return _base;
+
+  return _base
+    .where(CREATED_AT_KEY, '>=', range.start)
+    .where(CREATED_AT_KEY, '<', range.end);
+};
+
 export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   constructor(protected db: DBInstance) {
     super(db.collections.posts);
@@ -111,7 +121,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
 
   /** checks if this query should use a subcollection and set up the query object on the best collection */
   private getBaseQuery = (
-    queryParams: PostsQueryDefined,
+    queryParams: PostsQuery,
     cluster: ClusterInstance
   ) => {
     if (queryParams.semantics?.ref) {
@@ -135,10 +145,7 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
   };
 
   /** Cannot be part of a transaction */
-  public async getMany(
-    queryParams: PostsQueryDefined,
-    cluster: ClusterInstance
-  ) {
+  public async getMany(queryParams: PostsQuery, cluster: ClusterInstance) {
     /** type protection against properties renaming */
     if (DEBUG) logger.debug('getMany', queryParams, DEBUG_PREFIX);
 
@@ -166,41 +173,70 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
       queryParams.semantics?.topic
     );
 
-    /** get the sinceCreatedAt and untilCreatedAt timestamps from the elements ids */
-    const { sinceCreatedAt, untilCreatedAt } = await (async () => {
-      return this.db.run(async (manager) => {
-        let sinceCreatedAt: number | undefined;
-        let untilCreatedAt: number | undefined;
+    query = filterByRange(query, queryParams.fetchParams.range);
 
-        if (queryParams.fetchParams.sinceId) {
-          const since = await this.get(
-            queryParams.fetchParams.sinceId,
-            manager
-          );
-          sinceCreatedAt = since ? since.createdAtMs : undefined;
-        }
+    const fetchParams = queryParams.fetchParams;
 
-        if (queryParams.fetchParams.untilId) {
-          const until = await this.get(
-            queryParams.fetchParams.untilId,
-            manager
-          );
-          untilCreatedAt = until ? until.createdAtMs : undefined;
-        }
+    interface StartAfter {
+      direction: 'asc' | 'desc';
+      rankByScore?: string;
+      scoreValue?: number;
+      createdAtValue?: number;
+    }
 
-        return { sinceCreatedAt, untilCreatedAt };
-      });
+    /** get the pagination page details */
+    const startAfter = await (async (): Promise<StartAfter> => {
+      const pageId = fetchParams.untilId || fetchParams.sinceId;
+
+      if (pageId) {
+        const post = await this.db.run(async (manager) => {
+          return this.get(pageId as string, manager, true);
+        });
+
+        const scoreValue =
+          pageId && fetchParams.rankByScore
+            ? (post.scores as RankingScores)[fetchParams.rankByScore]
+            : undefined;
+
+        return {
+          scoreValue,
+          createdAtValue: post.createdAtMs,
+          rankByScore: fetchParams.rankByScore,
+          direction: fetchParams.untilId ? 'desc' : 'asc',
+        };
+      }
+
+      /** if no until or sinceId provided, first page */
+      return {
+        direction: 'desc',
+        rankByScore: fetchParams.rankByScore,
+      };
     })();
 
-    /** two modes, forward sinceId or backwards untilId  */
     const paginated = await (async (_base: Query) => {
-      if (sinceCreatedAt) {
-        const ordered = _base.orderBy(CREATED_AT_KEY, 'asc');
-        return ordered.startAfter(sinceCreatedAt);
-      } else {
-        const ordered = _base.orderBy(CREATED_AT_KEY, 'desc');
-        return untilCreatedAt ? ordered.startAfter(untilCreatedAt) : ordered;
+      let preordered = _base;
+
+      if (startAfter.rankByScore) {
+        preordered = _base.orderBy(
+          `${SCORE_KEY}.${startAfter.rankByScore}`,
+          startAfter.direction
+        );
       }
+
+      const ordered = preordered.orderBy(CREATED_AT_KEY, startAfter.direction);
+
+      if (startAfter.rankByScore && startAfter.scoreValue) {
+        return ordered.startAfter(
+          startAfter.scoreValue,
+          startAfter.createdAtValue
+        );
+      }
+
+      if (startAfter.createdAtValue) {
+        return ordered.startAfter(startAfter.createdAtValue);
+      }
+
+      return ordered;
     })(query);
 
     const postsIds = await paginated
@@ -212,11 +248,11 @@ export class PostsRepository extends BaseRepository<AppPost, AppPostCreate> {
     const docIds = postsIds.docs.map((doc) => doc.id);
     const appPosts = await this.getFromIds(docIds);
 
-    return appPosts.sort((a, b) => b.createdAtMs - a.createdAtMs);
+    return appPosts;
   }
 
   public async getAllOfQuery(
-    queryParams: PostsQueryDefined,
+    queryParams: PostsQuery,
     cluster: ClusterInstance,
     limit?: number
   ) {

@@ -6,8 +6,7 @@ import {
 } from '../../@shared/types/types.platforms';
 import { getAuthenticatedUser, getServices } from '../../controllers.utils';
 import { logger } from '../../instances/logger';
-import { REPLACE_USER_TASK } from '../../posts/tasks/replace.user.task';
-import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { TASK } from '../../tasks/types.tasks';
 import {
   blueskySignupDataSchema,
   mastodonGetSignupContextSchema,
@@ -118,7 +117,7 @@ export const handleSignupController: RequestHandler = async (
     );
 
     if (result?.replaceLegacy) {
-      await enqueueTask(REPLACE_USER_TASK, result.replaceLegacy, services);
+      await services.tasks.enqueue(TASK.REPLACE_USER, result.replaceLegacy);
     }
 
     if (result?.linkProfile) {

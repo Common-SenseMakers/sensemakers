@@ -98,6 +98,7 @@ export const CREATED_AT_KEY: keyof AppPost = 'createdAtMs';
 export const AUTHOR_USER_KEY: keyof AppPost = 'authorUserId';
 export const AUTHOR_PROFILE_KEY: keyof AppPost = 'authorProfileId';
 export const ORIGIN_KEY: keyof AppPost = 'origin';
+export const SCORE_KEY: keyof AppPost = 'scores';
 
 export const STRUCTURED_SEMANTICS_KEY: keyof AppPost = 'structuredSemantics';
 

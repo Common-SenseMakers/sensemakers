@@ -10,6 +10,7 @@ import { createContext } from 'react';
 import { useAppFetch } from '../api/app.fetch';
 import {
   FetcherConfig,
+  PAGE_SIZE,
   PostFetcherInterface,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
@@ -72,7 +73,7 @@ export const UserPostsContext: React.FC<{
     if (nProfilesPrev.current !== nProfiles) {
       /** force refetch */
       console.log('-------- PROFILE ADDED ------');
-      feed.fetchOlder();
+      feed.fetchDown();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nProfiles]);
@@ -87,7 +88,14 @@ export const UserPostsContext: React.FC<{
     queryParams: PostsQuery;
     status: PostsQueryStatus;
   } => {
-    return { queryParams: {}, status: PostsQueryStatus.ALL };
+    return {
+      queryParams: {
+        fetchParams: {
+          expectedAmount: PAGE_SIZE,
+        },
+      },
+      status: PostsQueryStatus.ALL,
+    };
   }, []);
 
   const onPostsAdded = useCallback((newPosts: AppPostFull[]) => {
@@ -112,8 +120,9 @@ export const UserPostsContext: React.FC<{
       subscribe: true,
       onPostsAdded,
       DEBUG_PREFIX: '[USER POSTS] ',
+      enabled: connectedUser !== undefined,
     };
-  }, [onPostsAdded, queryParams]);
+  }, [onPostsAdded, queryParams, connectedUser]);
 
   const feed = usePostsFetcher(config);
 

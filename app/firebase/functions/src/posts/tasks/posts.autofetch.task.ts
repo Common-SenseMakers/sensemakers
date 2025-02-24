@@ -9,16 +9,17 @@ import {
   FETCH_ACCOUNT_TASKS,
   FETCH_TASK_DISPATCH_RATES,
 } from '../../platforms/platforms.tasks.config';
-import { enqueueTask } from '../../tasksUtils/tasks.support';
+import { TASK } from '../../tasks/types.tasks';
 import { AutofetchNonUserPostsJobMeta } from './types.posts.tasks';
 
 const DEBUG = true;
 
-export const AUTOFETCH_POSTS_TASK = 'autofetchPosts';
-
 const DEBUG_PREFIX = 'AUTOFETCH';
 
-export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
+export const triggerAutofetchPostsForNonUsers = async (
+  services: Services,
+  check: boolean = true
+) => {
   if (DEBUG)
     logger.debug(`triggerAutofetchPostsForNonUsers`, undefined, DEBUG_PREFIX);
   const { users, db, profiles } = services;
@@ -71,7 +72,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
         DEBUG_PREFIX
       );
 
-    if (now - jobLastRun > fetchPlatformMinPeriod) {
+    if (now - jobLastRun > fetchPlatformMinPeriod || !check) {
       if (DEBUG)
         logger.debug(
           `Triggering non-user autofetch for ${platformId}`,
@@ -108,7 +109,7 @@ export const triggerAutofetchPostsForNonUsers = async (services: Services) => {
             { taskName, taskData },
             DEBUG_PREFIX
           );
-        await enqueueTask(taskName, taskData, services);
+        await services.tasks.enqueue(taskName, taskData, undefined, services);
       }
     } else {
       if (DEBUG)
@@ -142,7 +143,14 @@ export const triggerAutofetchPosts = async (services: Services) => {
           undefined,
           DEBUG_PREFIX
         );
-      return (enqueueTask as any)(AUTOFETCH_POSTS_TASK, { userId }, services);
+      return services.tasks.enqueue(
+        TASK.AUTOFETCH_POSTS,
+        {
+          userId,
+        },
+        undefined,
+        services
+      );
     })
   );
 };

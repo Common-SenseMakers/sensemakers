@@ -1,10 +1,15 @@
 import { PLATFORM } from './types.platforms';
-import { AppPostFull } from './types.posts';
+import { AppPostFull, RankingScores } from './types.posts';
 
 export interface HandleSignupResult {
   linkProfile: boolean;
   userId: string;
   replaceLegacy?: { existingUserId: string; newUserId: string };
+}
+
+export interface PeriodRange {
+  start: number;
+  end: number;
 }
 
 /** there are two fetch modes:
@@ -15,6 +20,8 @@ export interface FetchParams {
   sinceId?: string;
   untilId?: string;
   expectedAmount: number;
+  rankByScore?: keyof RankingScores;
+  range?: PeriodRange;
 }
 
 /** ids are in terms of platformPost post_id */
