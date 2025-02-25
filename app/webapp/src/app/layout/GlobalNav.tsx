@@ -6,8 +6,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { POSTHOG_EVENTS } from '../../analytics/posthog.events';
 import { AppGeneralKeys } from '../../i18n/i18n.app.general';
+import { ALL_CLUSTER_NAME } from '../../posts.fetcher/ClusterContext';
 import { ClustersMenu } from '../../posts.fetcher/ClustersMenu';
-import { ALL_CLUSTER_NAME } from '../../posts.fetcher/cluster.context';
 import { AbsoluteRoutes, RouteNames } from '../../route.names';
 import { AppButton, AppCircleButton } from '../../ui-components';
 import { useResponsive } from '../../ui-components/ResponsiveApp';

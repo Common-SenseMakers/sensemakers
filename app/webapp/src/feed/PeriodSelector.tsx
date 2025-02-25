@@ -71,7 +71,8 @@ export const PeriodSelector = (props: {
       gap="4px"
       pad={{ left: '12px' }}
       justify="center"
-      {...props.boxProps}>
+      {...props.boxProps}
+      style={{ flexShrink: 0, ...props.boxProps.style }}>
       <Box
         direction="row"
         align="center"

@@ -4,6 +4,7 @@ import { useEffect, useMemo } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
 import { OverlayContext } from '../overlays/OverlayContext';
+import { useCluster } from '../posts.fetcher/ClusterContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
@@ -30,6 +31,7 @@ export const UserProfileOverlay = (props: {
 }) => {
   const appFetch = useAppFetch();
   const { profileId, userId } = props;
+  const { range } = useCluster();
 
   const publicFeedContext = usePublicFeed();
   const isPublicFeed = publicFeedContext && publicFeedContext.isPublicFeed;
@@ -96,13 +98,14 @@ export const UserProfileOverlay = (props: {
         fetchParams: {
           rankByScore: 'score1',
           expectedAmount: PAGE_SIZE,
+          range,
         },
       },
       DEBUG_PREFIX: 'REF FEED',
       enabled: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [range, profileId, userId]);
 
   const feed = usePostsFetcher(feedConfig);
 

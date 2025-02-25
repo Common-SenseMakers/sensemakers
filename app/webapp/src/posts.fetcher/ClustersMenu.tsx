@@ -11,7 +11,7 @@ import { feedTabs } from '../shared/utils/feed.config';
 import { AppButton, AppHeading, AppSelect } from '../ui-components';
 import { useResponsive } from '../ui-components/ResponsiveApp';
 import { useThemeContext } from '../ui-components/ThemedApp';
-import { ALL_CLUSTER_NAME, useCluster } from './cluster.context';
+import { ALL_CLUSTER_NAME, useCluster } from './ClusterContext';
 
 const ACRONYMS = ['nlp', 'ai', 'ml', 'nlp', 'llm', 'llms'];
 
