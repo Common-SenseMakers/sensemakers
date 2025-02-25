@@ -47,9 +47,7 @@ const ViewportFooter = () => {
         style={{
           position: 'relative',
         }}>
-        <Anchor
-          href={`https://twitter.com/${process.env.PROJECT_TWITTER_ACCOUNT as string}`}
-          target="_blank">
+        <Anchor href={`https://cosmik.network`} target="_blank">
           <AppIcon size={22}></AppIcon>
         </Anchor>
         <Box
