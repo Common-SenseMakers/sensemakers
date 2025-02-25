@@ -15,7 +15,7 @@ import {
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { RefCard } from '../common/RefCard';
-import { PostClickTarget } from '../patterns';
+import { PostClickTarget } from '../types';
 import { AggregatedRefLabels } from './AggregatedRefLabels';
 
 /** renders the labels for one ref */

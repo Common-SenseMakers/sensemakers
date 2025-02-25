@@ -16,7 +16,7 @@ import { THIS_POST_NAME_URI } from '../../../shared/utils/semantics.helper';
 import { AppLabelsEditor } from '../../../ui-components/AppLabelsEditor';
 import { LoadingDiv } from '../../../ui-components/LoadingDiv';
 import { useSemanticsStore } from '../common/use.semantics';
-import { PatternProps, PostClickTarget } from '../patterns';
+import { PatternProps, PostClickTarget } from '../types';
 
 export const KEYWORDS_COLORS = {
   font: '#498283',

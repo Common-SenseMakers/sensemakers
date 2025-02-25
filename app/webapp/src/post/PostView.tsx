@@ -13,7 +13,7 @@ import {
   PATTERN_ID,
   PatternProps,
   PostClickEvent,
-} from '../semantics/patterns/patterns';
+} from '../semantics/patterns/types';
 import { AppButton } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';

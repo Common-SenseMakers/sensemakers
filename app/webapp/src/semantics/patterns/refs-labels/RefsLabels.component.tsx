@@ -18,7 +18,7 @@ import { useThemeContext } from '../../../ui-components/ThemedApp';
 import { splitArray } from '../../../ui-components/utils';
 import { getPostType } from '../../../utils/post.utils';
 import { useSemanticsStore } from '../common/use.semantics';
-import { PatternProps, PostClickTarget } from '../patterns';
+import { PatternProps, PostClickTarget } from '../types';
 import { QuotedPostLabel } from './QuotedPostLabel';
 import { RefWithLabels } from './RefWithLabels';
 import { RefsMap, processSemantics } from './process.semantics';

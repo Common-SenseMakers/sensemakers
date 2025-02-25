@@ -9,7 +9,7 @@ import {
 } from 'react';
 
 import { OverlayNav } from '../overlays/OverlayNav';
-import { PostClickEvent } from '../semantics/patterns/patterns';
+import { PostClickEvent } from '../semantics/patterns/types';
 import { useBack } from '../ui-components/hooks/useBack';
 import { Overlay, OverlayValue } from './Overlay';
 import { eventToOverlay } from './overlay.utils';

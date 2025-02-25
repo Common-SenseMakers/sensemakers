@@ -1,7 +1,4 @@
-import {
-  PostClickEvent,
-  PostClickTarget,
-} from '../semantics/patterns/patterns';
+import { PostClickEvent, PostClickTarget } from '../semantics/patterns/types';
 import { AppPostFull } from '../shared/types/types.posts';
 import { OverlayValue } from './Overlay';
 import { OverlayQueryParams } from './OverlayContext';

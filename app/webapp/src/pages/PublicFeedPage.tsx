@@ -24,7 +24,7 @@ import {
 } from '../posts.fetcher/posts.fetcher.hook';
 import { ClusterProfiles } from '../profiles/ClusterProfiles';
 import { AbsoluteRoutes } from '../route.names';
-import { PostClickEvent } from '../semantics/patterns/patterns';
+import { PostClickEvent } from '../semantics/patterns/types';
 import { PeriodRange } from '../shared/types/types.fetch';
 import { TabQuery, feedTabs } from '../shared/utils/feed.config';
 

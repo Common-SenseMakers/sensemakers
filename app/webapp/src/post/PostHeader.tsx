@@ -6,7 +6,7 @@ import { Autoindexed } from '../app/icons/Autoindexed';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { useOverlay } from '../overlays/OverlayContext';
 import { PlatformPostAnchor } from '../post/PlatformPostAnchor';
-import { PostClickTarget } from '../semantics/patterns/patterns';
+import { PostClickTarget } from '../semantics/patterns/types';
 import { Loading } from '../ui-components/LoadingDiv';
 import { useThemeContext } from '../ui-components/ThemedApp';
 import { getPostDetails } from './platform-specific.details';
