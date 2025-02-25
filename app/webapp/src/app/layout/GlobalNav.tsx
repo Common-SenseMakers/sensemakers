@@ -151,10 +151,10 @@ export const GlobalNav = () => {
       }}
       direction="row"
       align="center"
-      pad={{ vertical: '8px' }}>
+      pad={{ vertical: '8px', horizontal: '8px' }}>
       {!connectedUser ? (
         <AppButton
-          style={{ borderRadius: '30px', padding: '15px 25px' }}
+          style={{ borderRadius: '30px', padding: '15px 20px' }}
           primary
           label="Sign In"
           onClick={() => signIn()}></AppButton>
@@ -197,7 +197,7 @@ export const GlobalNav = () => {
       width={'100%'}
       direction="row"
       justify="between"
-      pad={{ left: '20px', right: '10px' }}>
+      pad={{ left: '12px', right: '10px' }}>
       {userButtons}
       {notFeed ? (
         <Box pad={{ right: '22px' }}>
