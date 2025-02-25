@@ -14,6 +14,7 @@ interface ClusterContextType {
   periodSize: PeriodSize;
   shift: number;
   range: PeriodRange;
+  prettyRange: string;
 }
 
 export const ClusterContextValue = createContext<
@@ -35,6 +36,37 @@ export const ClusterContext: React.FC<{
 
   const [periodSize, setPeriodSize] = useState<PeriodSize>(PeriodSize.Day);
   const [shift, setShift] = useState(0);
+
+  const prettyRange = useMemo(() => {
+    const now = new Date();
+    const date = new Date(now.getTime() - shift * 24 * 60 * 60 * 1000);
+
+    if (shift === 0) {
+      switch (periodSize) {
+        case PeriodSize.Day:
+          return 'today';
+        case PeriodSize.Week:
+          return 'this week';
+        case PeriodSize.Month:
+          return 'this month';
+      }
+    } else {
+      const options: Intl.DateTimeFormatOptions = {
+        month: 'long',
+        day: 'numeric',
+      };
+      switch (periodSize) {
+        case PeriodSize.Day:
+          return `on ${date.toLocaleDateString('en-US', options)}`;
+        case PeriodSize.Week: {
+          const weekEnd = new Date(date.getTime() + 6 * 24 * 60 * 60 * 1000);
+          return `on the week between ${date.toLocaleDateString('en-US', options)} and ${weekEnd.toLocaleDateString('en-US', options)}`;
+        }
+        case PeriodSize.Month:
+          return `on ${date.toLocaleDateString('en-US', { month: 'long' })}`;
+      }
+    }
+  }, [periodSize, shift]);
 
   const changePeriod = (optionSize: PeriodSize, shift: number) => {
     setShift(shift);
@@ -70,7 +102,14 @@ export const ClusterContext: React.FC<{
 
   return (
     <ClusterContextValue.Provider
-      value={{ clustersIds, changePeriod, periodSize, shift, range }}>
+      value={{
+        clustersIds,
+        changePeriod,
+        periodSize,
+        shift,
+        range,
+        prettyRange,
+      }}>
       {children}
     </ClusterContextValue.Provider>
   );

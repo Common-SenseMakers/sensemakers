@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { Box } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useAppFetch } from '../api/app.fetch';
-import { useCluster } from '../posts.fetcher/ClusterContext';
+import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
@@ -18,6 +19,7 @@ import {
   SCIENCE_TOPIC_URI,
   parseRefDisplayMeta,
 } from '../shared/utils/semantics.helper';
+import { AppHeading } from '../ui-components';
 import { LoadingDiv } from '../ui-components/LoadingDiv';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { OverlayContext } from './OverlayContext';
@@ -28,8 +30,9 @@ const DEBUG = false;
 /** extract the postId from the route and pass it to a PostContext */
 export const RefOverlay = (props: { refUrl: string }) => {
   const appFetch = useAppFetch();
+  const { t } = useTranslation();
+
   const { refUrl } = props;
-  const { range } = useCluster();
 
   const { connectedUser } = useAccountContext();
   const [accountProfileId, setAccountProfileId] = useState<string | undefined>(
@@ -74,14 +77,13 @@ export const RefOverlay = (props: { refUrl: string }) => {
         fetchParams: {
           expectedAmount: PAGE_SIZE,
           rankByScore: 'score1',
-          range,
         },
       },
       DEBUG_PREFIX: 'REF FEED',
       enabled: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [range, refUrl]);
+  }, [refUrl]);
 
   const feed = usePostsFetcher(feedConfig);
 
@@ -100,21 +102,26 @@ export const RefOverlay = (props: { refUrl: string }) => {
             border: '1.6px solid var(--Neutral-300, #D1D5DB)',
           }}>
           {refDisplayMeta?.oembed ? (
-            <RefWithLabels
-              ix={1}
-              oembed={refDisplayMeta.oembed}
-              authorLabels={authorLabels || []}
-              aggregatedLabels={nonAuthorLabels || []}
-              showAggregatedLabels={true}
-              showDescription={true}
-              editable={false}
-              ontology={refDisplayMeta?.ontology}
-              removeLabel={() => {
-                return undefined;
-              }}
-              addLabel={() => {
-                return undefined;
-              }}></RefWithLabels>
+            <Box>
+              <AppHeading level="3">
+                {t(AppGeneralKeys.refFeedHeader)}
+              </AppHeading>
+              <RefWithLabels
+                ix={1}
+                oembed={refDisplayMeta.oembed}
+                authorLabels={authorLabels || []}
+                aggregatedLabels={nonAuthorLabels || []}
+                showAggregatedLabels={true}
+                showDescription={true}
+                editable={false}
+                ontology={refDisplayMeta?.ontology}
+                removeLabel={() => {
+                  return undefined;
+                }}
+                addLabel={() => {
+                  return undefined;
+                }}></RefWithLabels>
+            </Box>
           ) : (
             <LoadingDiv height={'120px'} style={{ width: '100%' }}></LoadingDiv>
           )}

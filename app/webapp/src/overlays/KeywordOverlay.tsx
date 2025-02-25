@@ -1,6 +1,8 @@
 import { Box } from 'grommet';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { useCluster } from '../posts.fetcher/ClusterContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
@@ -8,8 +10,9 @@ import {
   PAGE_SIZE,
   usePostsFetcher,
 } from '../posts.fetcher/posts.fetcher.hook';
+import { KEYWORDS_COLORS } from '../semantics/patterns/keywords/Keywords.component';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
-import { AppHeading } from '../ui-components';
+import { AppHeading, AppLabel } from '../ui-components';
 import { OverlayContext } from './OverlayContext';
 import { usePublicFeed } from './PublicFeedContext';
 
@@ -17,8 +20,10 @@ import { usePublicFeed } from './PublicFeedContext';
 export const KeywordOverlay = (props: { keyword: string }) => {
   const { keyword } = props;
   const publicFeedContext = usePublicFeed();
+  const { t } = useTranslation();
+
   const isPublicFeed = publicFeedContext && publicFeedContext.isPublicFeed;
-  const { range } = useCluster();
+  const { prettyRange, range } = useCluster();
 
   const feedConfig = useMemo((): FetcherConfig => {
     return {
@@ -49,7 +54,17 @@ export const KeywordOverlay = (props: { keyword: string }) => {
             flexShrink: 0,
             border: '1.6px solid var(--Neutral-300, #D1D5DB)',
           }}>
-          <AppHeading level="2">{`${keyword}`}</AppHeading>
+          <AppHeading level="3" style={{ marginBottom: '8px' }}>
+            {t(AppGeneralKeys.keywordFeedHeader, {
+              period: prettyRange,
+            })}
+          </AppHeading>
+          <AppLabel
+            large
+            style={{ width: 'fit-content', fontSize: '18px' }}
+            colors={KEYWORDS_COLORS}>
+            {keyword}
+          </AppLabel>
         </Box>
         <PostsFetcherComponent
           showHeader={false}

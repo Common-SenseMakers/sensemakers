@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { Box } from 'grommet';
+import { t } from 'i18next';
 import { useEffect, useMemo } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { AppGeneralKeys } from '../i18n/i18n.app.general';
 import { OverlayContext } from '../overlays/OverlayContext';
 import { useCluster } from '../posts.fetcher/ClusterContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
@@ -20,6 +22,7 @@ import {
 import { AppUserPublicRead } from '../shared/types/types.user';
 import { splitProfileId } from '../shared/utils/profiles.utils';
 import { SCIENCE_TOPIC_URI } from '../shared/utils/semantics.helper';
+import { AppHeading } from '../ui-components';
 import { usePublicFeed } from './PublicFeedContext';
 
 const DEBUG = false;
@@ -31,7 +34,7 @@ export const UserProfileOverlay = (props: {
 }) => {
   const appFetch = useAppFetch();
   const { profileId, userId } = props;
-  const { range } = useCluster();
+  const { range, prettyRange } = useCluster();
 
   const publicFeedContext = usePublicFeed();
   const isPublicFeed = publicFeedContext && publicFeedContext.isPublicFeed;
@@ -118,6 +121,11 @@ export const UserProfileOverlay = (props: {
             flexShrink: 0,
             border: '1.6px solid var(--Neutral-300, #D1D5DB)',
           }}>
+          <AppHeading level="3" style={{ marginBottom: '8px' }}>
+            {t(AppGeneralKeys.profileFeedHeader, {
+              period: prettyRange,
+            })}
+          </AppHeading>
           <Box margin={{ vertical: 'medium' }}>
             {isUser ? (
               <UserProfileHeader user={user}></UserProfileHeader>

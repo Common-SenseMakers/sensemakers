@@ -1,5 +1,6 @@
 import { Box, BoxExtendedProps, Text } from 'grommet';
 import { Close } from 'grommet-icons';
+import { CSSProperties } from 'styled-components';
 
 import { AppButton } from './AppButton';
 
@@ -15,6 +16,7 @@ export const AppLabel = (
     remove?: () => void;
     colors: LabelColors;
     underline?: boolean;
+    large?: boolean;
   }
 ): JSX.Element => {
   const colors = props.colors;
@@ -24,6 +26,22 @@ export const AppLabel = (
       props.remove();
     }
   };
+
+  const fontStyle: CSSProperties = !props.large
+    ? {
+        height: '16px',
+        fontSize: '14px',
+        fontStyle: 'normal',
+        fontWeight: '500',
+        lineHeight: '16px',
+      }
+    : {
+        height: '30px',
+        fontSize: '22px',
+        fontStyle: 'normal',
+        fontWeight: '500',
+        lineHeight: '28px',
+      };
 
   return (
     <Box
@@ -39,18 +57,17 @@ export const AppLabel = (
       }}
       direction="row"
       align="center">
-      <Box direction="row" align="center">
+      <Box
+        direction="row"
+        align="center"
+        pad={props.large ? { horizontal: '8px' } : {}}>
         <Text
           id="text"
           style={{
             color: colors.font,
-            height: '16px',
-            fontSize: '14px',
-            fontStyle: 'normal',
-            fontWeight: '500',
-            lineHeight: '16px',
             userSelect: 'none',
             textDecoration: props.underline ? 'underline' : 'none',
+            ...fontStyle,
           }}
           size="small">
           {props.children}
