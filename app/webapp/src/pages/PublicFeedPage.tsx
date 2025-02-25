@@ -16,7 +16,7 @@ import {
   hasSearchParam,
   searchParamsKeyValueToEvent,
 } from '../overlays/overlay.utils';
-import { ALL_CLUSTER_NAME } from '../posts.fetcher/ClusterContext';
+import { ALL_CLUSTER_NAME, useCluster } from '../posts.fetcher/ClusterContext';
 import {
   FetcherConfig,
   PAGE_SIZE,
@@ -25,21 +25,16 @@ import {
 import { ClusterProfiles } from '../profiles/ClusterProfiles';
 import { AbsoluteRoutes } from '../route.names';
 import { PostClickEvent } from '../semantics/patterns/patterns';
-import { PeriodSize } from '../shared/types/types.posts';
+import { PeriodRange } from '../shared/types/types.fetch';
 import { TabQuery, feedTabs } from '../shared/utils/feed.config';
-import { getPeriodRange } from '../shared/utils/period.helpers';
 
 const DEBUG = false;
 
 const getFeedConfig = (
   tabQuery: TabQuery,
+  range: PeriodRange,
   DEBUG_PREFIX: string
 ): FetcherConfig => {
-  const range =
-    tabQuery.shift !== undefined && tabQuery.periodSize !== undefined
-      ? getPeriodRange(Date.now(), tabQuery.shift, tabQuery.periodSize)
-      : undefined;
-
   return {
     endpoint: '/api/feed/get',
     queryParams: {
@@ -181,8 +176,7 @@ export const PublicFeedPage = () => {
     }
   };
 
-  const [periodSize, setPeriodSize] = useState<PeriodSize>(PeriodSize.Day);
-  const [shift, setShift] = useState(0);
+  const { range, changePeriod } = useCluster();
 
   const feed0Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -190,12 +184,11 @@ export const PublicFeedPage = () => {
         tab: feedTabs[0].index,
         topic: feedTabs[0].topic,
         clusterId: clusterSelected,
-        periodSize,
-        shift,
       },
+      range,
       '[FEED 0] '
     );
-  }, [clusterSelected, periodSize, shift]);
+  }, [clusterSelected, range]);
 
   const feed1Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -203,12 +196,11 @@ export const PublicFeedPage = () => {
         tab: feedTabs[1].index,
         topic: feedTabs[1].topic,
         clusterId: clusterSelected,
-        periodSize,
-        shift,
       },
+      range,
       '[FEED 1] '
     );
-  }, [clusterSelected, periodSize, shift]);
+  }, [clusterSelected, range]);
 
   const feed2Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -216,12 +208,11 @@ export const PublicFeedPage = () => {
         tab: feedTabs[2].index,
         topic: feedTabs[2].topic,
         clusterId: clusterSelected,
-        periodSize,
-        shift,
       },
+      range,
       '[FEED 2] '
     );
-  }, [clusterSelected, periodSize, shift]);
+  }, [clusterSelected, range]);
 
   const feed3Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -229,12 +220,11 @@ export const PublicFeedPage = () => {
         tab: feedTabs[3].index,
         topic: feedTabs[3].topic,
         clusterId: clusterSelected,
-        periodSize,
-        shift,
       },
+      range,
       '[FEED 3] '
     );
-  }, [clusterSelected, periodSize, shift]);
+  }, [clusterSelected, range]);
 
   const feed4Config = useMemo((): FetcherConfig => {
     return getFeedConfig(
@@ -242,12 +232,11 @@ export const PublicFeedPage = () => {
         tab: feedTabs[4].index,
         topic: feedTabs[4].topic,
         clusterId: clusterSelected,
-        periodSize,
-        shift,
       },
+      range,
       '[FEED 4] '
     );
-  }, [clusterSelected, periodSize, shift]);
+  }, [clusterSelected, range]);
 
   const feed0 = usePostsFetcher(feed0Config);
   const feed1 = usePostsFetcher(feed1Config);
@@ -283,19 +272,14 @@ export const PublicFeedPage = () => {
     hideDetails();
   };
 
-  const handlePeriodChange = (optionSize: PeriodSize, shift: number) => {
-    setShift(shift);
-    setPeriodSize(optionSize);
-  };
-
   return (
     <ViewportPage
       fixed
       content={
         <Box>
           <PeriodSelector
-            boxProps={{ style: { margin: '12px 0px' } }}
-            onPeriodSelected={handlePeriodChange}></PeriodSelector>
+            boxProps={{ margin: { top: '16px', bottom: '6px' } }}
+            onPeriodSelected={changePeriod}></PeriodSelector>
 
           <Box style={{ position: 'relative', paddingTop: '16px' }}>
             <PublicFeedContext isPublicFeed>

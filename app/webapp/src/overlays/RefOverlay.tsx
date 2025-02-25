@@ -3,6 +3,7 @@ import { Box } from 'grommet';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { useCluster } from '../posts.fetcher/ClusterContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
@@ -28,6 +29,7 @@ const DEBUG = false;
 export const RefOverlay = (props: { refUrl: string }) => {
   const appFetch = useAppFetch();
   const { refUrl } = props;
+  const { range } = useCluster();
 
   const { connectedUser } = useAccountContext();
   const [accountProfileId, setAccountProfileId] = useState<string | undefined>(
@@ -72,13 +74,14 @@ export const RefOverlay = (props: { refUrl: string }) => {
         fetchParams: {
           expectedAmount: PAGE_SIZE,
           rankByScore: 'score1',
+          range,
         },
       },
       DEBUG_PREFIX: 'REF FEED',
       enabled: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [range, refUrl]);
 
   const feed = usePostsFetcher(feedConfig);
 

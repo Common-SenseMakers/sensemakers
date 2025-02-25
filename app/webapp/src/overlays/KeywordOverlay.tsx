@@ -1,6 +1,7 @@
 import { Box } from 'grommet';
 import { useMemo } from 'react';
 
+import { useCluster } from '../posts.fetcher/ClusterContext';
 import { PostsFetcherComponent } from '../posts.fetcher/PostsFetcherComponent';
 import {
   FetcherConfig,
@@ -17,6 +18,7 @@ export const KeywordOverlay = (props: { keyword: string }) => {
   const { keyword } = props;
   const publicFeedContext = usePublicFeed();
   const isPublicFeed = publicFeedContext && publicFeedContext.isPublicFeed;
+  const { range } = useCluster();
 
   const feedConfig = useMemo((): FetcherConfig => {
     return {
@@ -27,13 +29,14 @@ export const KeywordOverlay = (props: { keyword: string }) => {
         fetchParams: {
           expectedAmount: PAGE_SIZE,
           rankByScore: 'score1',
+          range,
         },
       },
       DEBUG_PREFIX: 'REF FEED',
       enabled: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.keyword]);
+  }, [props.keyword, range]);
 
   const feed = usePostsFetcher(feedConfig);
 

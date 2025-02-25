@@ -1,12 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
-import React, { useContext } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { createContext } from 'react';
 
 import { useAppFetch } from '../api/app.fetch';
+import { PeriodRange } from '../shared/types/types.fetch';
+import { PeriodSize } from '../shared/types/types.posts';
+import { getPeriodRange } from '../shared/utils/period.helpers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ClusterContextType {
   clustersIds?: string[];
+  changePeriod: (optionSize: PeriodSize, shift: number) => void;
+  periodSize: PeriodSize;
+  shift: number;
+  range: PeriodRange;
 }
 
 export const ClusterContextValue = createContext<
@@ -25,6 +32,18 @@ export const ClusterContext: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const appFetch = useAppFetch();
+
+  const [periodSize, setPeriodSize] = useState<PeriodSize>(PeriodSize.Day);
+  const [shift, setShift] = useState(0);
+
+  const changePeriod = (optionSize: PeriodSize, shift: number) => {
+    setShift(shift);
+    setPeriodSize(optionSize);
+  };
+
+  const range = useMemo(() => {
+    return getPeriodRange(Date.now(), shift, periodSize);
+  }, [periodSize, shift]);
 
   const { data: clustersIds } = useQuery({
     queryKey: ['clusters'],
@@ -50,7 +69,8 @@ export const ClusterContext: React.FC<{
   });
 
   return (
-    <ClusterContextValue.Provider value={{ clustersIds }}>
+    <ClusterContextValue.Provider
+      value={{ clustersIds, changePeriod, periodSize, shift, range }}>
       {children}
     </ClusterContextValue.Provider>
   );
