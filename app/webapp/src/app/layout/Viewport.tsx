@@ -150,7 +150,7 @@ export const ViewportPage = (props: {
       ];
 
   const clusterDetails = (
-    <Box style={{ backgroundColor: 'white' }}>
+    <Box style={{ backgroundColor: 'white', flexGrow: 1 }}>
       <Box style={{ flexShrink: 0 }}>{props.suggestions}</Box>
       <Box style={{ flexGrow: 1, overflow: 'auto' }}>{props.profiles}</Box>
     </Box>

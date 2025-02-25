@@ -45,6 +45,7 @@ export const AppButton = (props: IButton & { isLoading?: boolean }) => {
           fontWeight: 500,
           padding: !props.plain ? '6px 12px' : '0px',
           minHeight: !props.plain ? '42px' : 'auto',
+          whiteSpace: 'nowrap',
           ...props.style,
         }}
       />

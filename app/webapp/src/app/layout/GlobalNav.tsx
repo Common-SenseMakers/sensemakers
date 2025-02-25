@@ -151,7 +151,7 @@ export const GlobalNav = () => {
       }}
       direction="row"
       align="center"
-      pad="8px">
+      pad={{ vertical: '8px' }}>
       {!connectedUser ? (
         <AppButton
           style={{ borderRadius: '30px', padding: '15px 25px' }}
