@@ -16,7 +16,7 @@ import {
   hasSearchParam,
   searchParamsKeyValueToEvent,
 } from '../overlays/overlay.utils';
-import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
+import { ALL_CLUSTER_NAME } from '../posts.fetcher/ClusterContext';
 import {
   FetcherConfig,
   PAGE_SIZE,
@@ -292,25 +292,29 @@ export const PublicFeedPage = () => {
     <ViewportPage
       fixed
       content={
-        <Box style={{ position: 'relative', paddingTop: '16px' }}>
+        <Box>
           <PeriodSelector
-            boxProps={{ style: { marginBottom: '12px' } }}
+            boxProps={{ style: { margin: '12px 0px' } }}
             onPeriodSelected={handlePeriodChange}></PeriodSelector>
 
-          <PublicFeedContext isPublicFeed>
-            {overlayInit !== undefined && (
-              <OverlayContext
-                init={overlayInit}
-                triggerReset={resetOverlays}
-                onOverlayNav={(overlay) => onOverlayNav(overlay)}>
-                <MultiTabFeeds
-                  feeds={feeds}
-                  tabs={feedTabs}
-                  feedIx={feedIx !== -1 ? feedIx : 0}
-                  onFeedIxChanged={(ix) => onFeedIxChanged(ix)}></MultiTabFeeds>
-              </OverlayContext>
-            )}
-          </PublicFeedContext>
+          <Box style={{ position: 'relative', paddingTop: '16px' }}>
+            <PublicFeedContext isPublicFeed>
+              {overlayInit !== undefined && (
+                <OverlayContext
+                  init={overlayInit}
+                  triggerReset={resetOverlays}
+                  onOverlayNav={(overlay) => onOverlayNav(overlay)}>
+                  <MultiTabFeeds
+                    feeds={feeds}
+                    tabs={feedTabs}
+                    feedIx={feedIx !== -1 ? feedIx : 0}
+                    onFeedIxChanged={(ix) =>
+                      onFeedIxChanged(ix)
+                    }></MultiTabFeeds>
+                </OverlayContext>
+              )}
+            </PublicFeedContext>
+          </Box>
         </Box>
       }
       nav={<GlobalNav></GlobalNav>}

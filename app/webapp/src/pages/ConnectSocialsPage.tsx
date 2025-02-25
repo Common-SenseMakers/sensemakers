@@ -15,7 +15,7 @@ import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { MAX_BUTTON_WIDTH, ViewportPage } from '../app/layout/Viewport';
 import { IntroKeys } from '../i18n/i18n.intro';
 import { PlatformsKeys } from '../i18n/i18n.platforms';
-import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
+import { ALL_CLUSTER_NAME } from '../posts.fetcher/ClusterContext';
 import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
 import { AppButton, AppHeading } from '../ui-components';

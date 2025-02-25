@@ -1,4 +1,4 @@
-import { ALL_CLUSTER_NAME } from './posts.fetcher/cluster.context';
+import { ALL_CLUSTER_NAME } from './posts.fetcher/ClusterContext';
 
 export const RouteNames = {
   AppHome: '',

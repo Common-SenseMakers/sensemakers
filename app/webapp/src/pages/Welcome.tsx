@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
+import { ALL_CLUSTER_NAME } from '../posts.fetcher/ClusterContext';
 import { AbsoluteRoutes } from '../route.names';
 import { AppParagraph } from '../ui-components/AppParagraph';
 import { BoxCentered } from '../ui-components/BoxCentered';

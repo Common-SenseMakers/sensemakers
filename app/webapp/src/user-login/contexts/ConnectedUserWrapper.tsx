@@ -1,6 +1,6 @@
 import { PropsWithChildren, createContext, useContext } from 'react';
 
-import { ClusterContext } from '../../posts.fetcher/cluster.context';
+import { ClusterContext } from '../../posts.fetcher/ClusterContext';
 import { UserPostsContext } from '../../user-home/UserPostsContext';
 import { AccountContext } from './AccountContext';
 import { DisconnectUserContext } from './DisconnectUserContext';

@@ -3,7 +3,7 @@ import { Box } from 'grommet';
 import { useParams } from 'react-router-dom';
 
 import { useAppFetch } from '../api/app.fetch';
-import { ALL_CLUSTER_NAME } from '../posts.fetcher/cluster.context';
+import { ALL_CLUSTER_NAME } from '../posts.fetcher/ClusterContext';
 import { GetIndexedEntries } from '../shared/types/types.posts';
 import {
   AccountProfile,
