@@ -28,7 +28,7 @@ if (process.env.FB_PROJECT === 'production') {
           ...definePlugin.definitions.process.env,
           NODE_ENV: '"production"',
           FUNCTIONS_BASE:
-            '"https://us-central1-cosmik-2ec25.cloudfunctions.net/api"',
+            '"https://us-central1-cosmik-2ec25.cloudfunctions.net"',
           FB_APIKEY: '"AIzaSyDjzsOnkFkuaulkEFwhAf7u1GsWZu-CZks"',
           FB_AUTHDOMAIN: '"cosmik-2ec25.firebaseapp.com"',
           FB_PROJECTID: '"cosmik-2ec25"',
