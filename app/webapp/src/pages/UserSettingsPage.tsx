@@ -2,17 +2,12 @@ import { Box, Text } from 'grommet';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  BlueskyIcon,
-  MastodonIcon,
-  TwitterIcon,
-} from '../app/common/PlatformsIcons';
+import { BlueskyIcon, MastodonIcon } from '../app/common/PlatformsIcons';
 import { DocIcon } from '../app/icons/DocIcon';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { SupportIcon } from '../app/icons/SupportIcon';
 import { GlobalNav } from '../app/layout/GlobalNav';
 import { ViewportPage } from '../app/layout/Viewport';
-import { PlatformsKeys } from '../i18n/i18n.platforms';
 import { SettingsKeys } from '../i18n/i18n.settings';
 import { AbsoluteRoutes } from '../route.names';
 import { PLATFORM } from '../shared/types/types.platforms';
@@ -24,10 +19,8 @@ import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useDisconnectContext } from '../user-login/contexts/DisconnectUserContext';
 import { useBlueskyContext } from '../user-login/contexts/platforms/BlueskyContext';
 import { useMastodonContext } from '../user-login/contexts/platforms/MastodonContext';
-import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { PlatformSection } from '../user-settings/PlatformsSection';
 import { SettingsSection } from '../user-settings/SettingsSection';
-import { getAppUrl } from '../utils/general';
 
 export const SettingSectionTitle = (props: { value: string }) => {
   const { constants } = useThemeContext();
@@ -53,10 +46,6 @@ export const UserSettingsPage = () => {
 
   const { needConnect: needConnectBluesky } = useBlueskyContext();
 
-  const { connect: connectTwitter, needConnect: needConnectTwitter } =
-    useTwitterContext();
-
-  const twitterProfile = connectedUser?.profiles?.twitter?.profile;
   const mastodonProfile = connectedUser?.profiles?.mastodon?.profile;
   const blueskyProfile = connectedUser?.profiles?.bluesky?.profile;
 
@@ -119,28 +108,6 @@ export const UserSettingsPage = () => {
 
         <PlatformSection
           icon={
-            twitterProfile ? (
-              <PlatformAvatar imageUrl={twitterProfile?.avatar} />
-            ) : (
-              <TwitterIcon inverse size={40} color="black"></TwitterIcon>
-            )
-          }
-          platformName={t(PlatformsKeys.XTwitter)}
-          onButtonClicked={() => {
-            connectTwitter &&
-              connectTwitter(
-                'read',
-                `${getAppUrl()}${AbsoluteRoutes.ConnectTwitter}`
-              ).catch(console.error);
-          }}
-          buttonText={needConnectTwitter ? 'connect' : ''}
-          username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          platformStatus={getPlatformConnectedStatus(
-            PLATFORM.Twitter
-          )}></PlatformSection>
-
-        <PlatformSection
-          icon={
             mastodonProfile ? (
               <PlatformAvatar imageUrl={mastodonProfile?.avatar} />
             ) : (
@@ -184,10 +151,7 @@ export const UserSettingsPage = () => {
           pad={{ horizontal: '20px' }}
           margin={{ top: '54px', bottom: '8px' }}>
           <SettingSectionTitle
-            value={
-              t(SettingsKeys.logoutTitle) +
-              (twitterProfile ? ` @${twitterProfile.username}` : '')
-            }></SettingSectionTitle>
+            value={t(SettingsKeys.logoutTitle)}></SettingSectionTitle>
           <AppButton
             label={t(SettingsKeys.logout)}
             onClick={() => disconnect()}></AppButton>
