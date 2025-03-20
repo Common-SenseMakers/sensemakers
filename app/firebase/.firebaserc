@@ -1,10 +1,6 @@
 {
   "projects": {
-    "dev": "sensenets-dev",
-    "clusters": "sensenets-clusters",
-    "staging": "sensenets-staging",
-    "prod": "sensenets-prod",
-    "dataset": "sensenets-dataset"
+    "prod": "cosmik-2ec25"
   },
   "targets": {},
   "etags": {}

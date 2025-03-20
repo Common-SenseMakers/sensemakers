@@ -1,9 +1,5 @@
 {
   "projects": {
-    "dev": "sensenets-dev",
-    "staging": "sensenets-staging",
-    "prod": "sensenets-prod",
-    "clusters": "sensenets-clusters",
-    "dataset": "sensenets-dataset"
+    "prod": "cosmik-2ec25"
   }
 }

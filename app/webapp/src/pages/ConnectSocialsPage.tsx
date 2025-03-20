@@ -6,11 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { POSTHOG_EVENTS } from '../analytics/posthog.events';
 import { useAppFetch } from '../api/app.fetch';
-import {
-  BlueskyIcon,
-  MastodonIcon,
-  TwitterIcon,
-} from '../app/common/PlatformsIcons';
+import { BlueskyIcon, MastodonIcon } from '../app/common/PlatformsIcons';
 import { PlatformAvatar } from '../app/icons/PlatformAvatar';
 import { MAX_BUTTON_WIDTH, ViewportPage } from '../app/layout/Viewport';
 import { IntroKeys } from '../i18n/i18n.intro';
@@ -24,7 +20,6 @@ import { BoxCentered } from '../ui-components/BoxCentered';
 import { useAccountContext } from '../user-login/contexts/AccountContext';
 import { useTwitterContext } from '../user-login/contexts/platforms/TwitterContext';
 import { PlatformSection } from '../user-settings/PlatformsSection';
-import { getAppUrl } from '../utils/general';
 
 export enum LoginCase {
   signup = 'signup',
@@ -43,7 +38,6 @@ export const ConnectSocialsPage = () => {
 
   const { connect: connectTwitter } = useTwitterContext();
 
-  const twitterProfile = connectedUser?.profiles?.twitter?.profile;
   const mastodonProfile = connectedUser?.profiles?.mastodon?.profile;
   const blueskyProfile = connectedUser?.profiles?.bluesky?.profile;
 
@@ -81,29 +75,6 @@ export const ConnectSocialsPage = () => {
             ? t(IntroKeys.loginSubtitle)
             : t(IntroKeys.signupSubtitle)}
         </AppParagraph>
-
-        <PlatformSection
-          disabled={!connectTwitter}
-          icon={
-            twitterProfile ? (
-              <PlatformAvatar imageUrl={twitterProfile?.avatar} />
-            ) : (
-              <TwitterIcon inverse size={40} color="black"></TwitterIcon>
-            )
-          }
-          platformName={t(PlatformsKeys.XTwitter)}
-          onButtonClicked={() => {
-            if (connectTwitter) {
-              connectTwitter(
-                'read',
-                `${getAppUrl()}${AbsoluteRoutes.ConnectTwitter}`
-              ).catch(console.error);
-            }
-          }}
-          buttonText={twitterProfile ? '' : buttonText}
-          username={twitterProfile ? `@${twitterProfile.username}` : ''}
-          platformStatus={getPlatformConnectedStatus(PLATFORM.Twitter)}
-        />
 
         <PlatformSection
           disabled={!connectTwitter}
