@@ -23,7 +23,7 @@ Your final answer should be structured as a JSON Answer object with a list of Su
 class SubAnswer:
 	ref_number: int # ID number of current reference
 	reasoning_steps: str # your reasoning steps
-	candidate_tags: str # For potential each tag you choose, explain why you chose it.
+	candidate_tags: dict # where for each potential tag you choose, you add to the dictionary the tag as the key and explanation to why you chose it as str value.
 	final_answer: List[str] # a set of final tags, based on the Candidate Tags. The final tags must be included in the Candidate Tags list!
 
 class Answer:
@@ -39,7 +39,7 @@ For example, for a post with 2 references, the output would be structured as fol
   {
     "ref_number": 1,
     "reasoning_steps": "<your reasoning steps...>",
-    "candidate_tags": "[<tag1>, <tag2>]",
+    "candidate_tags": {'tag1':'explanation1', 'tag2'':explanation2'},
     "final_answer": [
       "<tag1>"
     ]
@@ -47,7 +47,7 @@ For example, for a post with 2 references, the output would be structured as fol
   {
     "ref_number": 2,
     "reasoning_steps": "<your reasoning steps...>",
-    "candidate_tags": "[<tag1>, <tag3>, <tag4>]",
+    "candidate_tags": {'tag3':'explanation3', 'tag4'':explanation4'},
     "final_answer": [
       "<tag3>",
       "<tag4>"

@@ -20,7 +20,7 @@ Your final answer should be structured as a JSON Answer object with a list of a 
 ```
 class SubAnswer:
 	reasoning_steps: str # your reasoning steps
-	candidate_tags: str # For potential each tag you choose, explain why you chose it.
+	candidate_tags: dict # where for each potential tag you choose, you add to the dictionary the tag as the key and explanation to why you chose it as str value.
 	final_answer: List[str] # a set of final tags, based on the Candidate Tags. The final tags must be included in the Candidate Tags list!
 
 class Answer:
