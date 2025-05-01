@@ -135,7 +135,7 @@ export class LinksService {
     if (existing && existing.sources && existing.sources[LinkSource.iframely]) {
       const newOembed = {
         ...existing.oembed,
-        type: refMetaOrg?.item_type,
+        ...(refMetaOrg?.item_type && { type: refMetaOrg.item_type }),
       };
       return newOembed;
     }
