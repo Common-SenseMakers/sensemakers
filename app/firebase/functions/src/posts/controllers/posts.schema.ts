@@ -2,6 +2,10 @@ import { array, mixed, number, object, string } from 'yup';
 
 import { PLATFORM } from '../../@shared/types/types.platforms';
 
+export const deletePostSchema = object({
+  postId: string().required(),
+}).noUnknown(true);
+
 export const postIdValidation = object({
   postId: string().required(),
 }).noUnknown(true);

@@ -8,7 +8,7 @@ import { ConnectedUser } from '../../user-login/contexts/AccountContext';
 
 export interface PostFetchContext {
   postId?: string;
-  post: AppPostFull | undefined;
+  post: AppPostFull | undefined | null;
   isLoading: boolean;
   refetch: () => void;
 }
@@ -38,20 +38,20 @@ export const usePostFetch = (
     isLoading,
   } = useQuery({
     queryKey: ['postId', postId, connectedUser],
-    queryFn: () => {
+    queryFn: async () => {
       try {
         if (postId) {
           if (DEBUG) console.log('fetching', { postId });
-          return appFetch<AppPostFull>('/api/posts/get', { postId });
+          return await appFetch<AppPostFull>('/api/posts/get', { postId });
         }
       } catch (e) {
-        console.error(e);
-        throw new Error((e as Error).message);
+        console.warn(e);
+        return null;
       }
     },
   });
 
-  const post = _post || postInit;
+  const post = _post === null ? null : _post || postInit;
 
   const _refetch = useCallback(() => {
     if (DEBUG) console.log(`updated to post${postId} detected - refetching`);
